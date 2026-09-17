@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import Logo from '../components/Logo'
 import { useAuth } from '../context/AuthContext'
 
 function roleHome(user) {
@@ -35,7 +34,6 @@ export default function Login() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12">
-      <Logo to="/" size="lg" className="mb-6 self-center" />
       <h1 className="text-center font-display text-3xl font-bold text-navy">Welcome back</h1>
       <p className="mt-2 text-center text-sm text-muted">Log in to your customer or professional account.</p>
 

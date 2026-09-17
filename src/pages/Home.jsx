@@ -170,7 +170,7 @@ export default function Home() {
                   <h3 className="font-display text-lg font-bold text-navy">{service.title}</h3>
                   <p className="mt-1 text-sm leading-relaxed text-slate">{service.copy}</p>
                   <Link
-                    to={`/services`}
+                    to={`/services/${service.slug}`}
                     className="mt-3 inline-flex text-sm font-bold text-primary hover:text-primary-dark"
                   >
                     Find More

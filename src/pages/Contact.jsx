@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Logo from '../components/Logo'
+import { DUMMY_CONTACT } from '../data/dummy'
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
@@ -44,6 +45,21 @@ export default function Contact() {
       <Logo to={false} size="lg" className="mb-6" />
       <h1 className="font-display text-4xl font-bold text-navy">Contact us</h1>
       <p className="mt-2 text-slate">Questions about quotes, accounts or partnerships? Send a note.</p>
+
+      <div className="surface mt-6 space-y-1 p-5 text-sm text-slate">
+        <p>
+          <span className="font-semibold text-navy">Email:</span>{' '}
+          <a className="text-primary hover:underline" href={`mailto:${DUMMY_CONTACT.email}`}>
+            {DUMMY_CONTACT.email}
+          </a>
+        </p>
+        <p>
+          <span className="font-semibold text-navy">Phone:</span> {DUMMY_CONTACT.phone}
+        </p>
+        <p>
+          <span className="font-semibold text-navy">Address:</span> {DUMMY_CONTACT.address}
+        </p>
+      </div>
 
       <form onSubmit={onSubmit} className="surface mt-8 space-y-4 p-6">
         <div>

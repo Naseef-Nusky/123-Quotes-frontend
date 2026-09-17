@@ -1,4 +1,15 @@
+import {
+  DUMMY_CATEGORIES,
+  DUMMY_PACKAGES,
+  DUMMY_QUESTIONS,
+  filterDummyProfessionals,
+  filterDummyServices,
+  findDummyService,
+  DUMMY_PROFESSIONALS,
+} from '../data/dummy'
+
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
+const USE_DUMMY = import.meta.env.VITE_USE_DUMMY !== 'false'
 
 function getToken() {
   return localStorage.getItem('token')
@@ -28,8 +39,21 @@ async function request(path, options = {}) {
   return data
 }
 
+async function withDummy(liveFn, dummyFn) {
+  try {
+    const data = await liveFn()
+    if (!USE_DUMMY) return data
+    // If API returns empty collections, still show dummy for demos
+    return dummyFn(data) ?? data
+  } catch (err) {
+    if (!USE_DUMMY) throw err
+    console.warn('[dummy fallback]', err.message)
+    return dummyFn(null)
+  }
+}
+
 export const api = {
-  // Auth
+  // Auth (real only — no dummy login)
   login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   registerCustomer: (body) =>
     request('/auth/register/customer', { method: 'POST', body: JSON.stringify(body) }),
@@ -43,17 +67,54 @@ export const api = {
     request('/auth/reset-password', { method: 'POST', body: JSON.stringify(body) }),
 
   // Services
-  getCategories: () => request('/services/categories'),
-  getServices: (params = {}) => {
-    const q = new URLSearchParams(params).toString()
-    return request(`/services${q ? `?${q}` : ''}`)
-  },
-  getService: (idOrSlug) => request(`/services/${idOrSlug}`),
+  getCategories: () =>
+    withDummy(
+      () => request('/services/categories'),
+      (live) => {
+        if (live?.categories?.length) return live
+        return { categories: DUMMY_CATEGORIES, _dummy: true }
+      },
+    ),
 
-  // Questions
-  getQuestionnaire: (serviceId) => request(`/questions/service/${serviceId}`),
+  getServices: (params = {}) =>
+    withDummy(
+      () => {
+        const q = new URLSearchParams(params).toString()
+        return request(`/services${q ? `?${q}` : ''}`)
+      },
+      (live) => {
+        if (live?.services?.length) return live
+        return { services: filterDummyServices(params.category), _dummy: true }
+      },
+    ),
 
-  // Requests (customer)
+  getService: (idOrSlug) =>
+    withDummy(
+      () => request(`/services/${idOrSlug}`),
+      (live) => {
+        if (live?.service) return live
+        const service = findDummyService(idOrSlug)
+        if (!service) throw new Error('Service not found')
+        return {
+          service: {
+            ...service,
+            questions: DUMMY_QUESTIONS[service.id] || [],
+          },
+          _dummy: true,
+        }
+      },
+    ),
+
+  getQuestionnaire: (serviceId) =>
+    withDummy(
+      () => request(`/questions/service/${serviceId}`),
+      (live) => {
+        if (live?.questions?.length) return live
+        return { questions: DUMMY_QUESTIONS[serviceId] || [], _dummy: true }
+      },
+    ),
+
+  // Requests (customer) — live only
   createRequest: (body) => request('/requests', { method: 'POST', body: JSON.stringify(body) }),
   saveAnswers: (id, answers) =>
     request(`/requests/${id}/answers`, { method: 'PUT', body: JSON.stringify({ answers }) }),
@@ -63,12 +124,38 @@ export const api = {
   getRequest: (id) => request(`/requests/${id}`),
 
   // Professionals public + self
-  getPackages: () => request('/professionals/packages'),
-  getDirectory: (params = {}) => {
-    const q = new URLSearchParams(params).toString()
-    return request(`/professionals/directory${q ? `?${q}` : ''}`)
-  },
-  getProfessional: (id) => request(`/professionals/directory/${id}`),
+  getPackages: () =>
+    withDummy(
+      () => request('/professionals/packages'),
+      (live) => {
+        if (live?.packages?.length) return live
+        return { packages: DUMMY_PACKAGES, _dummy: true }
+      },
+    ),
+
+  getDirectory: (params = {}) =>
+    withDummy(
+      () => {
+        const q = new URLSearchParams(params).toString()
+        return request(`/professionals/directory${q ? `?${q}` : ''}`)
+      },
+      (live) => {
+        if (live?.professionals?.length) return live
+        return { professionals: filterDummyProfessionals(params), _dummy: true }
+      },
+    ),
+
+  getProfessional: (id) =>
+    withDummy(
+      () => request(`/professionals/directory/${id}`),
+      (live) => {
+        if (live?.professional) return live
+        const professional = DUMMY_PROFESSIONALS.find((p) => p.id === id)
+        if (!professional) throw new Error('Professional not found')
+        return { professional, _dummy: true }
+      },
+    ),
+
   getMyProfile: () => request('/professionals/me'),
   updateMyProfile: (body) =>
     request('/professionals/me', { method: 'PUT', body: JSON.stringify(body) }),
