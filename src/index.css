@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", serif;
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --color-ink: #1a2332;
+  --color-slate: #4a5568;
+  --color-mist: #e8eef4;
+  --color-sea: #1e6f8c;
+  --color-sea-dark: #155a72;
+  --color-sand: #f7f3ee;
+  --color-coral: #c45c48;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-sand);
+  min-height: 100vh;
+}
