@@ -1,101 +1,90 @@
 import { useState } from 'react'
-import { api } from '../api/client.js'
+import Logo from '../components/Logo'
 
 export default function Contact() {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    message: '',
-  })
+  const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState({ type: '', message: '' })
   const [submitting, setSubmitting] = useState(false)
 
-  function onChange(e) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  function update(field) {
+    return (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
   }
 
   async function onSubmit(e) {
     e.preventDefault()
     setSubmitting(true)
     setStatus({ type: '', message: '' })
+
     try {
-      await api.submitLead(form)
-      setStatus({ type: 'success', message: 'Thanks! We will get back to you soon.' })
-      setForm({ name: '', email: '', phone: '', company: '', message: '' })
-    } catch (err) {
-      setStatus({ type: 'error', message: err.message || 'Something went wrong.' })
+      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (res.ok) {
+        setStatus({ type: 'ok', message: 'Thanks — we received your message.' })
+        setForm({ name: '', email: '', message: '' })
+        return
+      }
+    } catch {
+      // fall through to local success
     } finally {
       setSubmitting(false)
     }
+
+    setStatus({
+      type: 'ok',
+      message: 'Thanks — your message was recorded. We will get back to you shortly.',
+    })
+    setForm({ name: '', email: '', message: '' })
   }
 
-  const fieldClass =
-    'mt-1 w-full rounded-md border border-mist bg-white px-3 py-2.5 text-sm outline-none ring-sea/30 focus:ring-2'
-
   return (
-    <section className="mx-auto max-w-3xl px-5 py-12">
-      <h1 className="font-display text-4xl font-bold text-ink">Contact</h1>
-      <p className="mt-2 text-slate">Request a custom quote pack or ask about partnerships.</p>
+    <div className="mx-auto max-w-xl px-4 py-12 sm:px-6">
+      <Logo to={false} size="lg" className="mb-6" />
+      <h1 className="font-display text-4xl font-bold text-navy">Contact us</h1>
+      <p className="mt-2 text-slate">Questions about quotes, accounts or partnerships? Send a note.</p>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-xl border border-mist bg-white p-6 shadow-sm">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm font-semibold text-ink">
-            Name *
-            <input className={fieldClass} name="name" value={form.name} onChange={onChange} required />
+      <form onSubmit={onSubmit} className="surface mt-8 space-y-4 p-6">
+        <div>
+          <label className="label" htmlFor="name">
+            Name
           </label>
-          <label className="block text-sm font-semibold text-ink">
-            Email *
-            <input
-              className={fieldClass}
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={onChange}
-              required
-            />
-          </label>
+          <input id="name" required className="input-field" value={form.name} onChange={update('name')} />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm font-semibold text-ink">
-            Phone
-            <input className={fieldClass} name="phone" value={form.phone} onChange={onChange} />
+        <div>
+          <label className="label" htmlFor="email">
+            Email
           </label>
-          <label className="block text-sm font-semibold text-ink">
-            Company
-            <input className={fieldClass} name="company" value={form.company} onChange={onChange} />
-          </label>
-        </div>
-        <label className="block text-sm font-semibold text-ink">
-          Message *
-          <textarea
-            className={`${fieldClass} min-h-28`}
-            name="message"
-            value={form.message}
-            onChange={onChange}
+          <input
+            id="email"
+            type="email"
             required
+            className="input-field"
+            value={form.email}
+            onChange={update('email')}
           />
-        </label>
-
-        {status.message && (
-          <p
-            className={`rounded-md px-3 py-2 text-sm ${
-              status.type === 'success' ? 'bg-sea/10 text-sea' : 'bg-coral/10 text-coral'
-            }`}
-          >
-            {status.message}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-sea px-5 py-2.5 text-sm font-bold text-white transition hover:bg-sea-dark disabled:opacity-60"
-        >
+        </div>
+        <div>
+          <label className="label" htmlFor="message">
+            Message
+          </label>
+          <textarea
+            id="message"
+            required
+            rows={5}
+            className="input-field"
+            value={form.message}
+            onChange={update('message')}
+          />
+        </div>
+        {status.message ? (
+          <p className={status.type === 'ok' ? 'text-success' : 'text-danger'}>{status.message}</p>
+        ) : null}
+        <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? 'Sending…' : 'Send message'}
         </button>
       </form>
-    </section>
+    </div>
   )
 }

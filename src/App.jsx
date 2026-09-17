@@ -1,59 +1,95 @@
-import { Routes, Route, Link, NavLink } from 'react-router-dom'
-import Home from './pages/Home.jsx'
-import Quotes from './pages/Quotes.jsx'
-import Contact from './pages/Contact.jsx'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
+import { CustomerShell, ProfessionalShell } from './components/PortalShell'
+import { useAuth } from './context/AuthContext'
 
-function Nav() {
-  const linkClass = ({ isActive }) =>
-    `text-sm font-semibold tracking-wide transition-colors ${
-      isActive ? 'text-sea' : 'text-slate hover:text-ink'
-    }`
+import Home from './pages/Home'
+import Services from './pages/Services'
+import ServiceDetail from './pages/ServiceDetail'
+import HowItWorks from './pages/HowItWorks'
+import Pricing from './pages/Pricing'
+import Professionals from './pages/Professionals'
+import ProfessionalProfile from './pages/ProfessionalProfile'
+import Contact from './pages/Contact'
+import Terms from './pages/Terms'
+import Privacy from './pages/Privacy'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import VerifyEmail from './pages/VerifyEmail'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
-  return (
-    <header className="sticky top-0 z-20 border-b border-mist/80 bg-sand/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link to="/" className="font-display text-2xl font-bold tracking-tight text-ink">
-          123 Quotes
-        </Link>
-        <nav className="flex items-center gap-6">
-          <NavLink to="/" end className={linkClass}>
-            Home
-          </NavLink>
-          <NavLink to="/quotes" className={linkClass}>
-            Quotes
-          </NavLink>
-          <NavLink to="/contact" className={linkClass}>
-            Contact
-          </NavLink>
-        </nav>
-      </div>
-    </header>
-  )
-}
+import CustomerDashboard from './pages/customer/Dashboard'
+import NewRequest from './pages/customer/NewRequest'
+import RequestDetail from './pages/customer/RequestDetail'
 
-function Footer() {
-  return (
-    <footer className="mt-auto border-t border-mist bg-ink text-mist">
-      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-display text-lg">123 Quotes</p>
-        <p className="text-sm opacity-70">Inspiration, curated for every day.</p>
-      </div>
-    </footer>
-  )
+import ProDashboard from './pages/professional/Dashboard'
+import ProLeads from './pages/professional/Leads'
+import BuyTokens from './pages/professional/BuyTokens'
+import TokenHistory from './pages/professional/TokenHistory'
+import ProProfile from './pages/professional/Profile'
+
+function RoleRedirect() {
+  const { user, loading } = useAuth()
+  if (loading) return <p className="p-8 text-center text-muted">Loading…</p>
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role === 'PROFESSIONAL') return <Navigate to="/pro" replace />
+  if (user.role === 'CUSTOMER') return <Navigate to="/app" replace />
+  return <Navigate to="/" replace />
 }
 
 export default function App() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Nav />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/quotes" element={<Quotes />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="services" element={<Services />} />
+        <Route path="services/:slug" element={<ServiceDetail />} />
+        <Route path="how-it-works" element={<HowItWorks />} />
+        <Route path="pricing" element={<Pricing />} />
+        <Route path="professionals" element={<Professionals />} />
+        <Route path="professionals/:id" element={<ProfessionalProfile />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="terms" element={<Terms />} />
+        <Route path="privacy" element={<Privacy />} />
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        <Route path="verify-email" element={<VerifyEmail />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="dashboard" element={<RoleRedirect />} />
+      </Route>
+
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute roles={['CUSTOMER']}>
+            <CustomerShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<CustomerDashboard />} />
+        <Route path="requests/new" element={<NewRequest />} />
+        <Route path="requests/:id" element={<RequestDetail />} />
+      </Route>
+
+      <Route
+        path="/pro"
+        element={
+          <ProtectedRoute roles={['PROFESSIONAL']}>
+            <ProfessionalShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<ProDashboard />} />
+        <Route path="leads" element={<ProLeads />} />
+        <Route path="tokens" element={<BuyTokens />} />
+        <Route path="history" element={<TokenHistory />} />
+        <Route path="profile" element={<ProProfile />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
