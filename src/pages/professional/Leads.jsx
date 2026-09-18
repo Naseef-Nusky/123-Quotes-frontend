@@ -1,130 +1,127 @@
-import { useCallback, useEffect, useState } from 'react'
-import { api } from '../../api/client'
-import StatusBadge from '../../components/StatusBadge'
-import { useAuth } from '../../context/AuthContext'
-import { formatDate } from '../../utils/questionnaire'
+import { useMemo, useState } from 'react'
+import { DUMMY_LEADS } from '../../data/dummy'
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4 text-primary" fill="currentColor">
+      <path d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z" />
+    </svg>
+  )
+}
+
+function BoltIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4 text-primary" fill="currentColor">
+      <path d="M13 2L3 14h7l-1 8 11-14h-7l1-6z" />
+    </svg>
+  )
+}
 
 export default function ProLeads() {
-  const { refreshMe } = useAuth()
-  const [leads, setLeads] = useState([])
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [unlocking, setUnlocking] = useState(null)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const data = await api.myLeads()
-      setLeads(data.leads || [])
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  async function unlock(leadId) {
-    setUnlocking(leadId)
-    setMessage('')
-    setError('')
-    try {
-      const data = await api.unlockLead(leadId)
-      setMessage(data.message || 'Lead unlocked')
-      await refreshMe()
-      await load()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setUnlocking(null)
-    }
-  }
+  const leads = useMemo(() => DUMMY_LEADS, [])
+  const [selectedId, setSelectedId] = useState(leads[0]?.id)
+  const selected = leads.find((l) => l.id === selectedId) || leads[0]
 
   return (
-    <div>
-      <p className="mb-6 text-slate">Review matched jobs. Contact details unlock when you spend tokens.</p>
-      {loading ? <p className="text-muted">Loading leads…</p> : null}
-      {error ? <p className="mb-4 text-danger">{error}</p> : null}
-      {message ? <p className="mb-4 text-success">{message}</p> : null}
+    <section className="mx-auto flex min-h-[70vh] max-w-6xl flex-col lg:flex-row">
+      {/* Left list */}
+      <aside className="max-h-[70vh] w-full overflow-y-auto border-b border-line lg:max-h-none lg:w-[380px] lg:border-b-0 lg:border-r">
+        {leads.map((lead) => (
+          <button
+            key={lead.id}
+            type="button"
+            onClick={() => setSelectedId(lead.id)}
+            className={`w-full border-b border-line px-4 py-4 text-left transition hover:bg-canvas ${
+              selected?.id === lead.id ? 'bg-primary/5' : 'bg-white'
+            }`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-semibold text-navy">{lead.maskedName}</p>
+              <span className="rounded-full bg-slate-700 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                {lead.ago}
+              </span>
+            </div>
+            <p className="mt-2 font-bold text-navy">{lead.service}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-slate">{lead.snippet}</p>
+            <div className="mt-3 flex items-center gap-4 text-sm text-slate">
+              <span className="inline-flex items-center gap-1">
+                <PinIcon /> {lead.postcode}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <BoltIcon /> {lead.interest}
+              </span>
+            </div>
+          </button>
+        ))}
+      </aside>
 
-      <div className="space-y-4">
-        {leads.map((item) => {
-          const lead = item.lead
-          return (
-            <article key={item.matchId} className="surface p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-xl font-bold text-navy">{lead.service?.name}</h2>
-                  <p className="text-sm text-muted">
-                    {lead.postcode}
-                    {lead.city ? ` · ${lead.city}` : ''} · {formatDate(lead.createdAt)}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={item.matchStatus} />
-                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-primary">
-                    {lead.tokenCost} tokens
+      {/* Right detail */}
+      <div className="flex-1 px-4 py-6 sm:px-8">
+        {selected ? (
+          <>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl font-bold text-navy">{selected.maskedName}</h1>
+                  <span className="rounded-full bg-slate-700 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                    {selected.ago}
                   </span>
                 </div>
+                <p className="mt-2 text-xl font-bold text-navy">{selected.service}</p>
               </div>
+            </div>
 
-              {lead.summary ? <p className="mt-3 text-sm text-slate">{lead.summary}</p> : null}
+            <div className="mt-5 space-y-2 text-sm text-slate">
+              <p className="inline-flex items-center gap-2">
+                <span aria-hidden>📞</span> {selected.phoneMasked}
+              </p>
+              <p className="inline-flex items-center gap-2">
+                <span aria-hidden>✉️</span> {selected.emailMasked}
+              </p>
+            </div>
 
-              {(lead.answers || []).length ? (
-                <ul className="mt-3 space-y-1 text-sm text-muted">
-                  {lead.answers.slice(0, 4).map((a, i) => (
-                    <li key={i}>
-                      <span className="font-semibold text-navy">{a.question}:</span> {a.value}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button type="button" className="btn-primary !rounded-md">
+                Reach out to {selected.maskedName}
+              </button>
+              <button
+                type="button"
+                className="rounded-md bg-warning px-5 py-3 text-sm font-bold text-white transition hover:brightness-95"
+              >
+                Decline
+              </button>
+            </div>
 
-              <div className="mt-4 rounded-xl bg-canvas p-4">
-                {lead.contactLocked ? (
-                  <>
-                    <p className="text-sm font-semibold text-navy">Contact locked</p>
-                    <p className="mt-1 text-sm text-muted">
-                      Customer: {lead.customer?.firstName || '—'} · {lead.customer?.postcode || lead.postcode}
-                    </p>
-                    <button
-                      type="button"
-                      className="btn-primary mt-3 !py-2 !text-sm"
-                      disabled={unlocking === lead.id}
-                      onClick={() => unlock(lead.id)}
-                    >
-                      {unlocking === lead.id ? 'Unlocking…' : `Unlock for ${lead.tokenCost} tokens`}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-semibold text-success">Contact unlocked</p>
-                    <p className="mt-1 text-sm text-navy">
-                      {lead.customer?.firstName} {lead.customer?.lastName}
-                    </p>
-                    <p className="text-sm text-slate">{lead.customer?.email}</p>
-                    <p className="text-sm text-slate">{lead.customer?.phone}</p>
-                    <p className="text-sm text-muted">
-                      {[lead.customer?.address, lead.customer?.city, lead.customer?.postcode]
-                        .filter(Boolean)
-                        .join(', ')}
-                    </p>
-                  </>
-                )}
+            <div className="mt-6 rounded-lg border border-line px-4 py-3">
+              <div className="mb-2 flex gap-1">
+                {Array.from({ length: selected.maxRespond }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-6 w-2 rounded-sm ${i < selected.responded ? 'bg-primary' : 'bg-rose-100'}`}
+                  />
+                ))}
               </div>
-            </article>
-          )
-        })}
+              <p className="text-sm text-slate">
+                {selected.responded}/{selected.maxRespond} Professionals have responded.
+              </p>
+            </div>
+
+            <div className="mt-8">
+              <h2 className="border-b border-line pb-2 text-lg font-bold text-navy">Details Provided</h2>
+              <ul className="mt-4 space-y-3">
+                {selected.details.map((d) => (
+                  <li key={d.q} className="text-sm">
+                    <span className="text-slate">• {d.q}</span>
+                    {d.a ? <span className="ml-1 font-bold text-navy">{d.a}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ) : (
+          <p className="text-slate">No leads available.</p>
+        )}
       </div>
-
-      {!loading && !leads.length ? (
-        <div className="surface p-8 text-center text-muted">No leads matched to you yet.</div>
-      ) : null}
-    </div>
+    </section>
   )
 }

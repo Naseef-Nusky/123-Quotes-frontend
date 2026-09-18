@@ -5,6 +5,7 @@ import { CustomerShell, ProfessionalShell } from './components/PortalShell'
 import { useAuth } from './context/AuthContext'
 
 import Home from './pages/Home'
+import BusinessSignup from './pages/BusinessSignup'
 import Services from './pages/Services'
 import ServiceDetail from './pages/ServiceDetail'
 import HowItWorks from './pages/HowItWorks'
@@ -26,6 +27,12 @@ import RequestDetail from './pages/customer/RequestDetail'
 
 import ProDashboard from './pages/professional/Dashboard'
 import ProLeads from './pages/professional/Leads'
+import AvailablePros from './pages/professional/AvailablePros'
+import ProPublicProfile from './pages/professional/ProPublicProfile'
+import RequestSent from './pages/professional/RequestSent'
+import MyRequest from './pages/professional/MyRequest'
+import ClientRequests from './pages/professional/ClientRequests'
+import Settings from './pages/professional/Settings'
 import BuyTokens from './pages/professional/BuyTokens'
 import TokenHistory from './pages/professional/TokenHistory'
 import ProProfile from './pages/professional/Profile'
@@ -44,6 +51,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
+        <Route path="business/signup" element={<BusinessSignup />} />
         <Route path="services" element={<Services />} />
         <Route path="services/:slug" element={<ServiceDetail />} />
         <Route path="how-it-works" element={<HowItWorks />} />
@@ -83,7 +91,13 @@ export default function App() {
         }
       >
         <Route index element={<ProDashboard />} />
+        <Route path="available-pros" element={<AvailablePros />} />
+        <Route path="available-pros/:id" element={<ProPublicProfile />} />
+        <Route path="request-sent" element={<RequestSent />} />
+        <Route path="my-request" element={<MyRequest />} />
         <Route path="leads" element={<ProLeads />} />
+        <Route path="client-requests" element={<ClientRequests />} />
+        <Route path="settings" element={<Settings />} />
         <Route path="tokens" element={<BuyTokens />} />
         <Route path="history" element={<TokenHistory />} />
         <Route path="profile" element={<ProProfile />} />

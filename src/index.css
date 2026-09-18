@@ -11,9 +11,10 @@
   --color-surface: #ffffff;
   --color-canvas: #f8fafc;
   --color-line: #e2e8f0;
-  --color-success: #059669;
-  --color-warning: #d97706;
+  --color-success: #16a34a;
+  --color-warning: #f97316;
   --color-danger: #dc2626;
+  --color-panel: #eef2ff;
 }
 
 html {
@@ -28,10 +29,7 @@ body {
   min-height: 100vh;
   font-family: var(--font-sans);
   color: var(--color-navy);
-  background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(37, 99, 235, 0.12), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 95% 5%, rgba(29, 78, 216, 0.08), transparent 50%),
-    var(--color-canvas);
+  background: #ffffff;
 }
 
 h1,
@@ -157,4 +155,11 @@ h4,
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 1rem;
+}
+
+.wizard-card {
+  background: linear-gradient(180deg, #eef4ff 0%, #e8eefc 100%);
+  border: 1px solid #dbe4f5;
+  border-radius: 1rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
 }

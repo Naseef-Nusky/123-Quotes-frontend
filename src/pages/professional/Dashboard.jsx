@@ -1,92 +1,42 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { DUMMY_LEADS } from '../../data/dummy'
 import { api } from '../../api/client'
-import { useAuth } from '../../context/AuthContext'
 
 export default function ProDashboard() {
-  const { user, refreshMe } = useAuth()
-  const [leads, setLeads] = useState([])
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [count, setCount] = useState(DUMMY_LEADS.length)
 
   useEffect(() => {
-    refreshMe()
-    let alive = true
-    ;(async () => {
-      try {
-        const data = await api.myLeads()
-        if (alive) setLeads(data.leads || [])
-      } catch (e) {
-        if (alive) setError(e.message)
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })()
-    return () => {
-      alive = false
-    }
-  }, [refreshMe])
-
-  const available = leads.filter((l) => l.lead?.contactLocked).length
-  const unlocked = leads.filter((l) => !l.lead?.contactLocked).length
-  const balance = user?.professional?.tokenBalance ?? 0
+    api
+      .myLeads()
+      .then((d) => setCount((d.leads || []).length || DUMMY_LEADS.length))
+      .catch(() => setCount(DUMMY_LEADS.length))
+  }, [])
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="surface p-5">
-          <p className="text-sm font-semibold text-muted">Token balance</p>
-          <p className="mt-2 font-display text-3xl font-extrabold text-navy">{balance}</p>
-          <Link to="/pro/tokens" className="mt-3 inline-block text-sm font-bold text-primary">
-            Buy tokens →
-          </Link>
-        </div>
-        <div className="surface p-5">
-          <p className="text-sm font-semibold text-muted">Available leads</p>
-          <p className="mt-2 font-display text-3xl font-extrabold text-navy">{available}</p>
-          <Link to="/pro/leads" className="mt-3 inline-block text-sm font-bold text-primary">
-            View leads →
-          </Link>
-        </div>
-        <div className="surface p-5">
-          <p className="text-sm font-semibold text-muted">Unlocked</p>
-          <p className="mt-2 font-display text-3xl font-extrabold text-navy">{unlocked}</p>
-          <Link to="/pro/profile" className="mt-3 inline-block text-sm font-bold text-primary">
-            Edit profile →
-          </Link>
-        </div>
+    <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-navy sm:text-4xl">Find The Best Opportunities For Your Business.</h1>
+        <p className="mt-3 text-lg text-slate">View Local Opportunities To You !</p>
       </div>
 
-      {loading ? <p className="text-muted">Loading dashboard…</p> : null}
-      {error ? <p className="text-danger">{error}</p> : null}
-
-      <div className="surface p-6">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-xl font-bold text-navy">Recent leads</h2>
-          <Link to="/pro/leads" className="text-sm font-bold text-primary">
-            See all
-          </Link>
-        </div>
-        <ul className="mt-4 divide-y divide-line">
-          {leads.slice(0, 5).map((item) => (
-            <li key={item.matchId} className="flex flex-wrap items-center justify-between gap-2 py-3">
-              <div>
-                <p className="font-semibold text-navy">{item.lead?.service?.name}</p>
-                <p className="text-sm text-muted">
-                  {item.lead?.postcode}
-                  {item.lead?.city ? ` · ${item.lead.city}` : ''} · {item.lead?.tokenCost} tokens
-                </p>
-              </div>
-              <span className="text-xs font-bold text-primary">
-                {item.lead?.contactLocked ? 'Locked' : 'Unlocked'}
-              </span>
-            </li>
-          ))}
-        </ul>
-        {!loading && !leads.length ? (
-          <p className="mt-2 text-sm text-muted">No matched leads yet. Keep your services and areas up to date.</p>
-        ) : null}
+      <div className="mt-12 grid gap-4 sm:grid-cols-3">
+        <Link to="/pro/leads" className="surface p-6 transition hover:border-primary/40 hover:shadow-md">
+          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Leads</p>
+          <p className="mt-2 text-3xl font-bold text-navy">{count}</p>
+          <p className="mt-1 text-sm text-muted">Available opportunities nearby</p>
+        </Link>
+        <Link to="/pro/available-pros" className="surface p-6 transition hover:border-primary/40 hover:shadow-md">
+          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Available Pros.</p>
+          <p className="mt-2 text-3xl font-bold text-navy">Browse</p>
+          <p className="mt-1 text-sm text-muted">See professionals in the directory</p>
+        </Link>
+        <Link to="/pro/settings" className="surface p-6 transition hover:border-primary/40 hover:shadow-md">
+          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Settings</p>
+          <p className="mt-2 text-3xl font-bold text-navy">Account</p>
+          <p className="mt-1 text-sm text-muted">Profile, tokens & payments</p>
+        </Link>
       </div>
-    </div>
+    </section>
   )
 }
