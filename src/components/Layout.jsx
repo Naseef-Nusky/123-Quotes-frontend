@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Menu, X, LogOut, LogIn, LayoutGrid, Mail, MapPin } from 'lucide-react'
 import Logo from './Logo'
 import { useAuth } from '../context/AuthContext'
 
@@ -16,7 +17,7 @@ const businessLinks = [
 ]
 
 export default function Layout({ variant = 'public', children }) {
-  const { user, isAuthenticated, logout, isCustomer, isProfessional } = useAuth()
+  const { isAuthenticated, logout, isCustomer, isProfessional } = useAuth()
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const isBusiness = variant === 'business'
@@ -47,13 +48,19 @@ export default function Layout({ variant = 'public', children }) {
             ))}
 
             {isBusiness ? (
-              <button type="button" onClick={handleLogout} className={linkClass({ isActive: false })}>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}
+              >
+                <LogOut className="size-4" strokeWidth={2} />
                 Logout
               </button>
             ) : isAuthenticated ? (
               <>
                 {isProfessional ? (
-                  <Link to="/pro" className={linkClass({ isActive: false })}>
+                  <Link to="/pro" className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}>
+                    <LayoutGrid className="size-4" strokeWidth={2} />
                     Portal
                   </Link>
                 ) : null}
@@ -62,13 +69,19 @@ export default function Layout({ variant = 'public', children }) {
                     My requests
                   </Link>
                 ) : null}
-                <button type="button" onClick={handleLogout} className={linkClass({ isActive: false })}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}
+                >
+                  <LogOut className="size-4" strokeWidth={2} />
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className={linkClass({ isActive: false })}>
+                <Link to="/login" className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}>
+                  <LogIn className="size-4" strokeWidth={2} />
                   Login
                 </Link>
                 <Link
@@ -83,11 +96,11 @@ export default function Layout({ variant = 'public', children }) {
 
           <button
             type="button"
-            className="inline-flex rounded-lg border border-line p-2 lg:hidden"
-            aria-label="Toggle menu"
+            className="inline-flex items-center justify-center rounded-lg border border-line p-2 text-navy lg:hidden"
+            aria-label={open ? 'Close menu' : 'Open menu'}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="block h-0.5 w-5 bg-navy shadow-[0_6px_0_#0f172a,0_-6px_0_#0f172a]" />
+            {open ? <X className="size-5" strokeWidth={2} /> : <Menu className="size-5" strokeWidth={2} />}
           </button>
         </div>
 
@@ -101,16 +114,31 @@ export default function Layout({ variant = 'public', children }) {
               ))}
               <hr className="border-line" />
               {isBusiness ? (
-                <button type="button" onClick={handleLogout} className="text-left text-sm font-medium text-slate">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-2 text-left text-sm font-medium text-slate"
+                >
+                  <LogOut className="size-4" strokeWidth={2} />
                   Logout
                 </button>
               ) : isAuthenticated ? (
-                <button type="button" onClick={handleLogout} className="text-left text-sm font-medium text-slate">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-2 text-left text-sm font-medium text-slate"
+                >
+                  <LogOut className="size-4" strokeWidth={2} />
                   Logout
                 </button>
               ) : (
                 <>
-                  <Link to="/login" onClick={() => setOpen(false)} className="text-sm font-medium text-slate">
+                  <Link
+                    to="/login"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-slate"
+                  >
+                    <LogIn className="size-4" strokeWidth={2} />
                     Login
                   </Link>
                   <Link
@@ -131,12 +159,14 @@ export default function Layout({ variant = 'public', children }) {
 
       <footer className="mt-auto bg-[#2b2b2b] text-white">
         <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6">
-          <p className="text-sm text-white/90">
-            Email:{' '}
+          <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-white/90">
+            <Mail className="size-3.5 shrink-0 text-primary" strokeWidth={2} />
             <a href="mailto:info@123quotes.co.uk" className="hover:text-primary">
               info@123quotes.co.uk
-            </a>{' '}
-            | 1st Floor, 239 Kensington High St, London W8 6SN
+            </a>
+            <span className="opacity-50">|</span>
+            <MapPin className="size-3.5 shrink-0 text-primary" strokeWidth={2} />
+            <span>1st Floor, 239 Kensington High St, London W8 6SN</span>
           </p>
           <p className="mt-4 text-sm text-white/80">
             <Link to="/terms" className="hover:text-primary">

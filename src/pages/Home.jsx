@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { DUMMY_SERVICES } from '../data/dummy'
+import { Quote } from 'lucide-react'
+import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
 
 export default function Home() {
   const navigate = useNavigate()
   const [content, setContent] = useState(defaultHomeContent)
   const [service, setService] = useState(defaultHomeContent.hero.searchPlaceholder)
+  const [services, setServices] = useState([])
 
   useEffect(() => {
     fetchHomeContent().then((data) => {
       setContent(data)
       setService(data.hero?.searchPlaceholder || 'Web Development')
     })
+    api.getServices().then((d) => setServices(d.services || [])).catch(() => setServices([]))
   }, [])
 
   function onStart(e) {
@@ -42,7 +45,7 @@ export default function Home() {
               required
             />
             <datalist id="service-options">
-              {DUMMY_SERVICES.map((s) => (
+              {services.map((s) => (
                 <option key={s.id} value={s.name} />
               ))}
             </datalist>
@@ -80,8 +83,8 @@ export default function Home() {
           <div className="mt-10 space-y-6">
             {(content.hire.steps || []).map((step) => (
               <div key={step.id} className="flex gap-3">
-                <span className="text-2xl font-bold text-primary" aria-hidden>
-                  “
+                <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Quote className="size-4" strokeWidth={2} />
                 </span>
                 <div>
                   <h3 className="text-lg font-bold text-navy">{step.title}</h3>

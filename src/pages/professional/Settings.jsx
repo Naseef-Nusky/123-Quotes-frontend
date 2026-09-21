@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import { DUMMY_PACKAGES } from '../../data/dummy'
 import { formatMoney } from '../../utils/questionnaire'
+import { Building2 } from 'lucide-react'
 
 export default function Settings() {
   const [profile, setProfile] = useState({
@@ -85,9 +86,7 @@ export default function Settings() {
       <div className="grid gap-10 lg:grid-cols-2">
         <form onSubmit={saveProfile} className="space-y-4">
           <div className="flex size-28 items-center justify-center rounded-full bg-primary text-white">
-            <svg viewBox="0 0 24 24" className="size-12" fill="currentColor">
-              <path d="M4 20V9l4-2v13H4zm6 0V6l4-2v16h-4zm6 0V8l4 2v10h-4z" />
-            </svg>
+            <Building2 className="size-12" strokeWidth={1.75} />
           </div>
 
           <div>

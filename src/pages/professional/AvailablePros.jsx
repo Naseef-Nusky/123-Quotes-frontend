@@ -1,29 +1,43 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { DUMMY_PROFESSIONALS } from '../../data/dummy'
-
-function BuildingIcon() {
-  return (
-    <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-      <svg viewBox="0 0 24 24" className="size-7" fill="currentColor">
-        <path d="M4 20V9l4-2v13H4zm6 0V6l4-2v16h-4zm6 0V8l4 2v10h-4z" />
-      </svg>
-    </div>
-  )
-}
+import { Building2 } from 'lucide-react'
+import { api } from '../../api/client'
 
 export default function AvailablePros() {
-  const pros = DUMMY_PROFESSIONALS.filter((p) =>
-    ['Virtualtours', 'Creations Arena', 'Other', 'Pixel Forge Studios'].includes(p.companyName),
-  )
+  const [pros, setPros] = useState([])
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    api
+      .getDirectory()
+      .then((d) => {
+        if (!cancelled) setPros(d.professionals || [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || 'Failed to load professionals')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <h1 className="text-2xl font-bold text-navy">Available Pros.</h1>
+      {loading ? <p className="mt-4 text-sm text-muted">Loading…</p> : null}
+      {error ? <p className="mt-4 text-sm text-rose-600">{error}</p> : null}
       <div className="mt-6 divide-y divide-line border-y border-line">
         {pros.map((pro) => (
           <article key={pro.id} className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-4">
-              <BuildingIcon />
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                <Building2 className="size-7" strokeWidth={1.75} />
+              </div>
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <h2 className="text-lg font-bold text-navy">{pro.companyName}</h2>
@@ -40,6 +54,9 @@ export default function AvailablePros() {
             </button>
           </article>
         ))}
+        {!loading && !pros.length ? (
+          <p className="py-8 text-center text-sm text-muted">No professionals in the directory yet.</p>
+        ) : null}
       </div>
     </section>
   )

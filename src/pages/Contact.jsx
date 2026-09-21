@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Mail, Phone, MapPin } from 'lucide-react'
 import Logo from '../components/Logo'
 import { DUMMY_CONTACT } from '../data/dummy'
 
@@ -46,18 +47,27 @@ export default function Contact() {
       <h1 className="font-display text-4xl font-bold text-navy">Contact us</h1>
       <p className="mt-2 text-slate">Questions about quotes, accounts or partnerships? Send a note.</p>
 
-      <div className="surface mt-6 space-y-1 p-5 text-sm text-slate">
-        <p>
-          <span className="font-semibold text-navy">Email:</span>{' '}
-          <a className="text-primary hover:underline" href={`mailto:${DUMMY_CONTACT.email}`}>
-            {DUMMY_CONTACT.email}
-          </a>
+      <div className="surface mt-6 space-y-3 p-5 text-sm text-slate">
+        <p className="flex items-start gap-2.5">
+          <Mail className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
+          <span>
+            <span className="font-semibold text-navy">Email:</span>{' '}
+            <a className="text-primary hover:underline" href={`mailto:${DUMMY_CONTACT.email}`}>
+              {DUMMY_CONTACT.email}
+            </a>
+          </span>
         </p>
-        <p>
-          <span className="font-semibold text-navy">Phone:</span> {DUMMY_CONTACT.phone}
+        <p className="flex items-start gap-2.5">
+          <Phone className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
+          <span>
+            <span className="font-semibold text-navy">Phone:</span> {DUMMY_CONTACT.phone}
+          </span>
         </p>
-        <p>
-          <span className="font-semibold text-navy">Address:</span> {DUMMY_CONTACT.address}
+        <p className="flex items-start gap-2.5">
+          <MapPin className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
+          <span>
+            <span className="font-semibold text-navy">Address:</span> {DUMMY_CONTACT.address}
+          </span>
         </p>
       </div>
 
