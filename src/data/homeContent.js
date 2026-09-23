@@ -1,9 +1,11 @@
 export const defaultHomeContent = {
   hero: {
-    title: 'Find The Best Opportunities For Your Business.',
-    subtitle: 'View Local Opportunities To You !',
+    title: 'The Contemporary Method Of Locating The Professional Service You Need',
+    subtitle: '',
+    needPlaceholder: 'Tell us what you need?',
+    postcodePlaceholder: 'Postcode',
+    buttonText: 'SEARCH',
     searchPlaceholder: 'Web Development',
-    buttonText: 'Get started',
   },
   popularTitle: 'Popular Services',
   popularServices: [
@@ -41,16 +43,17 @@ export const defaultHomeContent = {
     },
   ],
   hire: {
-    title: 'Hire a Professional',
-    subtitle: 'Search, compare, and book in minutes.',
+    title: 'Hire A Professional',
+    subtitle: 'Search, Compare, And Book In Minutes.',
     body: 'Hunting for a local or virtual service professional has never been easier. 123Quotes helps you narrow your results with helpful search functions, provides a lengthy list of reviewed and verified providers, and allows you to enquire, receive free quotes, and book a service in a few simple steps!',
+    image: '/images/hire-professional.png',
     cta: 'Start your search today.',
     steps: [
       {
         id: 'hs-1',
         title: 'Start Your Service Search',
         description:
-          "Working on a landscaping project, building an app, or improving health and wellness? No matter your task or goals, 123Quotes has the professional services you're searching for and the tools to help you find them fast.",
+          "Working on a landscaping project, building an app, or improving health and wellness? No matter your task or goals, 123Quotes has the professional services you're searching for and the tools to help you find them fast. Let us know your needs, such as budget, schedule, location, and any specific preferences or requirements, so we can find your perfect match.",
       },
       {
         id: 'hs-2',
@@ -74,21 +77,24 @@ export const defaultHomeContent = {
     cards: [
       {
         id: 'jc-1',
-        title: 'Message and Manage',
+        title: 'Message And Manage',
         description:
           'Get in contact with customers quick and easy! Offer quotes and discuss all information required! Message customers and manage your customers! Negotiate deals & discuss terms etc.',
+        image: '/images/join-message.png',
       },
       {
         id: 'jc-2',
         title: 'Showcase Your Skills',
         description:
           'Make yourself searchable and build a solid online business presence with a profile that shows off your best projects and expertise.',
+        image: '/images/join-showcase.png',
       },
       {
         id: 'jc-3',
         title: 'Business Booming',
         description:
           "Whether starting a new side hustle or expanding your existing client list, 123Quotes makes it simple to gain more momentum. With helpful business tools, customer support, speedy notifications, and much more, we're ready to help boost your business.",
+        image: '/images/join-booming.png',
       },
     ],
   },
@@ -97,22 +103,34 @@ export const defaultHomeContent = {
 export async function fetchHomeContent() {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/content/home`)
-    if (!res.ok) return defaultHomeContent
+    if (!res.ok) throw new Error('Failed to load home content')
     const data = await res.json()
     if (data?.content && typeof data.content === 'object') {
       return {
         ...defaultHomeContent,
         ...data.content,
         hero: { ...defaultHomeContent.hero, ...(data.content.hero || {}) },
-        hire: { ...defaultHomeContent.hire, ...(data.content.hire || {}) },
-        join: { ...defaultHomeContent.join, ...(data.content.join || {}) },
+        hire: {
+          ...defaultHomeContent.hire,
+          ...(data.content.hire || {}),
+          steps: data.content.hire?.steps?.length
+            ? data.content.hire.steps
+            : defaultHomeContent.hire.steps,
+        },
+        join: {
+          ...defaultHomeContent.join,
+          ...(data.content.join || {}),
+          cards: data.content.join?.cards?.length
+            ? data.content.join.cards
+            : defaultHomeContent.join.cards,
+        },
         popularServices: data.content.popularServices?.length
           ? data.content.popularServices
           : defaultHomeContent.popularServices,
       }
     }
-  } catch {
-    // use defaults
+  } catch (err) {
+    console.warn('[home content]', err.message)
   }
   return defaultHomeContent
 }

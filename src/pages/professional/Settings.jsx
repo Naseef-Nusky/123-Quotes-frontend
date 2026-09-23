@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
-import { DUMMY_PACKAGES } from '../../data/dummy'
 import { formatMoney } from '../../utils/questionnaire'
 import { Building2 } from 'lucide-react'
 
@@ -13,9 +12,10 @@ export default function Settings() {
     companyName: '',
     website: '',
   })
-  const [packages, setPackages] = useState(DUMMY_PACKAGES)
+  const [packages, setPackages] = useState([])
   const [selectedPkg, setSelectedPkg] = useState('')
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -32,19 +32,16 @@ export default function Settings() {
           website: p.website || '',
         })
       })
-      .catch(() => {})
+      .catch((err) => setError(err.message || 'Failed to load profile'))
 
     api
       .getPackages()
       .then((d) => {
-        const list = d.packages?.length ? d.packages : DUMMY_PACKAGES
+        const list = d.packages || []
         setPackages(list)
         setSelectedPkg(list[0]?.id || '')
       })
-      .catch(() => {
-        setPackages(DUMMY_PACKAGES)
-        setSelectedPkg(DUMMY_PACKAGES[0]?.id || '')
-      })
+      .catch((err) => setError(err.message || 'Failed to load packages'))
   }, [])
 
   function update(field) {
@@ -55,6 +52,7 @@ export default function Settings() {
     e.preventDefault()
     setSaving(true)
     setMessage('')
+    setError('')
     try {
       await api.updateMyProfile({
         contactName: profile.name,
@@ -64,8 +62,8 @@ export default function Settings() {
         website: profile.website,
       })
       setMessage('Profile saved.')
-    } catch {
-      setMessage('Saved locally for demo (API unavailable).')
+    } catch (err) {
+      setError(err.message || 'Save failed')
     } finally {
       setSaving(false)
     }
@@ -73,11 +71,16 @@ export default function Settings() {
 
   async function payTokens() {
     setMessage('')
+    setError('')
+    if (!selectedPkg) {
+      setError('Select a package first.')
+      return
+    }
     try {
       await api.buyTokens(selectedPkg)
       setMessage('Token purchase successful.')
-    } catch {
-      setMessage('Demo purchase recorded (API unavailable).')
+    } catch (err) {
+      setError(err.message || 'Purchase failed')
     }
   }
 
@@ -144,10 +147,16 @@ export default function Settings() {
               </option>
             ))}
           </select>
-          <button type="button" onClick={payTokens} className="mt-4 rounded-md bg-success px-5 py-2.5 text-sm font-bold text-white">
-            Pay
+          <button
+            type="button"
+            onClick={payTokens}
+            className="mt-4 rounded-md bg-success px-5 py-2.5 text-sm font-bold text-white"
+          >
+            Pay with Square
           </button>
-          <p className="mt-10 text-center text-sm text-muted">No Transactions.</p>
+          <p className="mt-2 text-xs text-muted">Payments are processed securely via Square only.</p>
+          {!packages.length ? <p className="mt-4 text-sm text-muted">No packages available.</p> : null}
+          {error ? <p className="mt-4 text-center text-sm text-danger">{error}</p> : null}
           {message ? <p className="mt-4 text-center text-sm text-primary">{message}</p> : null}
         </div>
       </div>

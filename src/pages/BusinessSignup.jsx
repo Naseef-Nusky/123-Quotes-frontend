@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { api } from '../api/client'
 
 const STEPS = ['details', 'location', 'done']
 
@@ -15,10 +16,14 @@ export default function BusinessSignup() {
     email: '',
     phone: '',
     website: '',
+    password: '',
+    confirmPassword: '',
     locationType: 'radius',
     radius: '50',
     postcode: '',
   })
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const stepIndex = STEPS.indexOf(step)
 
@@ -33,15 +38,41 @@ export default function BusinessSignup() {
 
   function submitDetails(e) {
     e.preventDefault()
-    sessionStorage.setItem('businessSignup', JSON.stringify({ ...form, service }))
+    setError('')
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
     go('location')
   }
 
-  function submitLocation(e) {
+  async function submitLocation(e) {
     e.preventDefault()
-    const saved = JSON.parse(sessionStorage.getItem('businessSignup') || '{}')
-    sessionStorage.setItem('businessSignup', JSON.stringify({ ...saved, ...form, service }))
-    go('done')
+    setError('')
+    setSubmitting(true)
+    try {
+      await api.registerProfessional({
+        email: form.email.trim(),
+        password: form.password,
+        contactName: form.name.trim(),
+        companyName: (form.companyName || form.name).trim(),
+        phone: form.phone.trim(),
+        website: form.website.trim() || undefined,
+        postcode: form.locationType === 'nationwide' ? 'UK' : form.postcode.trim(),
+        serviceName: service,
+        radiusMiles: form.locationType === 'radius' ? Number(form.radius) : null,
+        nationwide: form.locationType === 'nationwide',
+      })
+      go('done')
+    } catch (err) {
+      setError(err.message || 'Registration failed')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const serviceLabel = useMemo(() => service, [service])
@@ -49,9 +80,18 @@ export default function BusinessSignup() {
   if (step === 'done') {
     return (
       <section className="flex min-h-[65vh] items-center justify-center px-4 py-16">
-        <p className="max-w-2xl text-center text-xl font-medium text-navy sm:text-2xl">
-          Thank You For Submitting Your Details, Your Application Is Currently Under Review.
-        </p>
+        <div className="max-w-2xl text-center">
+          <p className="text-xl font-medium text-navy sm:text-2xl">
+            Thank You For Submitting Your Details, Your Application Is Currently Under Review.
+          </p>
+          <p className="mt-4 text-sm text-slate">
+            An admin will approve your professional account. You can then{' '}
+            <Link to="/login" className="font-semibold text-primary">
+              log in
+            </Link>
+            .
+          </p>
+        </div>
       </section>
     )
   }
@@ -112,9 +152,14 @@ export default function BusinessSignup() {
             </label>
           </div>
 
-          <div className="mt-10 flex justify-end">
-            <button type="submit" className="btn-primary !rounded-md">
-              Next
+          {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
+
+          <div className="mt-10 flex justify-end gap-3">
+            <button type="button" className="btn-secondary !rounded-md" onClick={() => go('details')}>
+              Back
+            </button>
+            <button type="submit" className="btn-primary !rounded-md" disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit application'}
             </button>
           </div>
         </form>
@@ -160,7 +205,31 @@ export default function BusinessSignup() {
             <label className="label">Website (optional)</label>
             <input className="input-field" value={form.website} onChange={update('website')} />
           </div>
+          <div>
+            <label className="label">Password</label>
+            <input
+              type="password"
+              className="input-field"
+              required
+              minLength={6}
+              value={form.password}
+              onChange={update('password')}
+            />
+          </div>
+          <div>
+            <label className="label">Confirm password</label>
+            <input
+              type="password"
+              className="input-field"
+              required
+              minLength={6}
+              value={form.confirmPassword}
+              onChange={update('confirmPassword')}
+            />
+          </div>
         </div>
+
+        {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
         <div className="mt-8 flex items-center justify-between gap-3">
           <p className="text-xs text-muted">
@@ -170,7 +239,7 @@ export default function BusinessSignup() {
             </Link>
           </p>
           <button type="submit" className="btn-primary !rounded-md !bg-success hover:!brightness-95">
-            See new leads
+            Next
           </button>
         </div>
       </form>

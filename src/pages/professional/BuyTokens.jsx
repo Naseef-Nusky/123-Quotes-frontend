@@ -41,7 +41,7 @@ export default function BuyTokens() {
 
   return (
     <div>
-      <p className="mb-2 text-slate">Sandbox checkout — no card required for MVP purchases.</p>
+      <p className="mb-2 text-slate">Checkout is handled by Square — the only payment method on 123 Quotes.</p>
       <Link to="/pro/history" className="text-sm font-bold text-primary">
         View token history →
       </Link>

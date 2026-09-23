@@ -10,11 +10,19 @@ export default function Professionals() {
   const [params, setParams] = useSearchParams()
   const service = params.get('service') || ''
   const city = params.get('city') || ''
+  const postcode = params.get('postcode') || ''
+  const q = params.get('q') || ''
   const [cityInput, setCityInput] = useState(city)
+  const [postcodeInput, setPostcodeInput] = useState(postcode)
 
   useEffect(() => {
     api.getServices().then((d) => setServices(d.services || [])).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    setCityInput(city)
+    setPostcodeInput(postcode)
+  }, [city, postcode])
 
   useEffect(() => {
     let alive = true
@@ -25,8 +33,19 @@ export default function Professionals() {
         const query = {}
         if (service) query.service = service
         if (city) query.city = city
+        if (postcode) query.postcode = postcode
         const data = await api.getDirectory(query)
-        if (alive) setPros(data.professionals || [])
+        let list = data.professionals || []
+        if (q.trim()) {
+          const term = q.trim().toLowerCase()
+          list = list.filter(
+            (p) =>
+              p.companyName?.toLowerCase().includes(term) ||
+              p.bio?.toLowerCase().includes(term) ||
+              (p.services || []).some((ps) => ps.service?.name?.toLowerCase().includes(term)),
+          )
+        }
+        if (alive) setPros(list)
       } catch (e) {
         if (alive) setError(e.message)
       } finally {
@@ -36,22 +55,24 @@ export default function Professionals() {
     return () => {
       alive = false
     }
-  }, [service, city])
+  }, [service, city, postcode, q])
 
   function applyFilters(e) {
     e.preventDefault()
     const next = {}
     if (service) next.service = service
     if (cityInput.trim()) next.city = cityInput.trim()
+    if (postcodeInput.trim()) next.postcode = postcodeInput.trim()
+    if (q) next.q = q
     setParams(next)
   }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <h1 className="font-display text-4xl font-bold text-navy">Professional directory</h1>
-      <p className="mt-2 max-w-2xl text-slate">Browse available professionals by service and city.</p>
+      <p className="mt-2 max-w-2xl text-slate">Browse available professionals by service, city and postcode.</p>
 
-      <form onSubmit={applyFilters} className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <form onSubmit={applyFilters} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <select
           className="input-field sm:max-w-xs"
           value={service}
@@ -59,6 +80,8 @@ export default function Professionals() {
             const next = {}
             if (e.target.value) next.service = e.target.value
             if (city) next.city = city
+            if (postcode) next.postcode = postcode
+            if (q) next.q = q
             setParams(next)
           }}
         >
@@ -75,10 +98,22 @@ export default function Professionals() {
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
         />
+        <input
+          className="input-field sm:max-w-[160px]"
+          placeholder="Postcode"
+          value={postcodeInput}
+          onChange={(e) => setPostcodeInput(e.target.value)}
+        />
         <button type="submit" className="btn-primary">
           Search
         </button>
       </form>
+
+      {q ? (
+        <p className="mt-4 text-sm text-muted">
+          Showing results related to <span className="font-semibold text-navy">“{q}”</span>
+        </p>
+      ) : null}
 
       {loading ? <p className="mt-8 text-muted">Loading directory…</p> : null}
       {error ? <p className="mt-8 text-danger">{error}</p> : null}

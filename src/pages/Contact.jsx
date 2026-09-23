@@ -1,12 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Mail, Phone, MapPin } from 'lucide-react'
 import Logo from '../components/Logo'
-import { DUMMY_CONTACT } from '../data/dummy'
+import { api } from '../api/client'
 
 export default function Contact() {
+  const [contact, setContact] = useState({
+    email: '',
+    phone: '',
+    address: '',
+  })
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState({ type: '', message: '' })
   const [submitting, setSubmitting] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api
+      .getContact()
+      .then((d) => setContact(d.contact || {}))
+      .catch(() => setStatus({ type: 'err', message: 'Could not load contact details from the server.' }))
+      .finally(() => setLoading(false))
+  }, [])
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
@@ -16,29 +30,15 @@ export default function Contact() {
     e.preventDefault()
     setSubmitting(true)
     setStatus({ type: '', message: '' })
-
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      if (res.ok) {
-        setStatus({ type: 'ok', message: 'Thanks — we received your message.' })
-        setForm({ name: '', email: '', message: '' })
-        return
-      }
-    } catch {
-      // fall through to local success
+      const data = await api.submitContact(form)
+      setStatus({ type: 'ok', message: data.message || 'Thanks — we received your message.' })
+      setForm({ name: '', email: '', message: '' })
+    } catch (err) {
+      setStatus({ type: 'err', message: err.message || 'Failed to send message' })
     } finally {
       setSubmitting(false)
     }
-
-    setStatus({
-      type: 'ok',
-      message: 'Thanks — your message was recorded. We will get back to you shortly.',
-    })
-    setForm({ name: '', email: '', message: '' })
   }
 
   return (
@@ -48,25 +48,30 @@ export default function Contact() {
       <p className="mt-2 text-slate">Questions about quotes, accounts or partnerships? Send a note.</p>
 
       <div className="surface mt-6 space-y-3 p-5 text-sm text-slate">
+        {loading ? <p className="text-muted">Loading contact details…</p> : null}
         <p className="flex items-start gap-2.5">
           <Mail className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
           <span>
             <span className="font-semibold text-navy">Email:</span>{' '}
-            <a className="text-primary hover:underline" href={`mailto:${DUMMY_CONTACT.email}`}>
-              {DUMMY_CONTACT.email}
-            </a>
+            {contact.email ? (
+              <a className="text-primary hover:underline" href={`mailto:${contact.email}`}>
+                {contact.email}
+              </a>
+            ) : (
+              '—'
+            )}
           </span>
         </p>
         <p className="flex items-start gap-2.5">
           <Phone className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
           <span>
-            <span className="font-semibold text-navy">Phone:</span> {DUMMY_CONTACT.phone}
+            <span className="font-semibold text-navy">Phone:</span> {contact.phone || '—'}
           </span>
         </p>
         <p className="flex items-start gap-2.5">
           <MapPin className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
           <span>
-            <span className="font-semibold text-navy">Address:</span> {DUMMY_CONTACT.address}
+            <span className="font-semibold text-navy">Address:</span> {contact.address || '—'}
           </span>
         </p>
       </div>
