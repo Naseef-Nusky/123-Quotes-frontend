@@ -1,76 +1,82 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Building2 } from 'lucide-react'
 import { api } from '../../api/client'
-import StatusBadge from '../../components/StatusBadge'
-import { formatDate } from '../../utils/questionnaire'
 
 export default function CustomerDashboard() {
-  const [requests, setRequests] = useState([])
+  const [pros, setPros] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let alive = true
-    ;(async () => {
-      try {
-        const data = await api.myRequests()
-        if (alive) setRequests(data.requests || [])
-      } catch (e) {
-        if (alive) setError(e.message)
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })()
+    let cancelled = false
+    api
+      .getDirectory()
+      .then((d) => {
+        if (!cancelled) setPros(d.professionals || [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || 'Failed to load professionals')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
     return () => {
-      alive = false
+      cancelled = true
     }
   }, [])
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-slate">Track quote requests and matched professionals.</p>
-        <Link to="/app/requests/new" className="btn-primary !py-2.5 !text-sm">
-          New request
-        </Link>
-      </div>
+    <div className="bg-[#f5f5f5]">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        {loading ? <p className="text-sm text-muted">Loading…</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
 
-      {loading ? <p className="text-muted">Loading requests…</p> : null}
-      {error ? <p className="text-danger">{error}</p> : null}
+        <div className="space-y-4">
+          {pros.map((pro) => {
+            const serviceSlug = pro.services?.[0]?.service?.slug
+            return (
+              <article
+                key={pro.id}
+                className="flex flex-col gap-4 border border-line bg-white px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5"
+              >
+                <div className="flex min-w-0 flex-1 items-start gap-4">
+                  <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                    <Building2 className="size-7" strokeWidth={1.75} />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-bold text-navy">{pro.companyName}</h2>
+                    <p className="mt-1 text-sm text-slate">{pro.bio || 'No Additional Details'}</p>
+                    <Link
+                      to={`/professionals/${pro.id}`}
+                      className="mt-2 inline-flex text-sm font-semibold text-primary"
+                    >
+                      View Profile &gt;
+                    </Link>
+                  </div>
+                </div>
 
-      <div className="space-y-3">
-        {requests.map((r) => (
-          <Link
-            key={r.id}
-            to={`/app/requests/${r.id}`}
-            className="surface flex flex-col gap-2 p-5 transition hover:border-primary/40 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <p className="font-display text-lg font-bold text-navy">{r.service?.name || r.title || 'Request'}</p>
-              <p className="text-sm text-muted">
-                {r.postcode}
-                {r.city ? ` · ${r.city}` : ''} · {formatDate(r.createdAt)}
-              </p>
-              {r.lead?.matches?.length ? (
-                <p className="mt-1 text-sm font-semibold text-primary">
-                  {r.lead.matches.length} matched pro{r.lead.matches.length === 1 ? '' : 's'}
-                </p>
-              ) : null}
-            </div>
-            <StatusBadge status={r.status} />
-          </Link>
-        ))}
-      </div>
+                <p className="shrink-0 text-sm text-slate sm:px-4">No reviews</p>
 
-      {!loading && !requests.length && !error ? (
-        <div className="surface p-8 text-center">
-          <p className="font-display text-xl font-bold text-navy">No requests yet</p>
-          <p className="mt-2 text-sm text-muted">Start with a service and we will match professionals nearby.</p>
-          <Link to="/app/requests/new" className="btn-primary mt-6 inline-flex">
-            Create your first request
-          </Link>
+                <Link
+                  to={
+                    serviceSlug
+                      ? `/request?service=${encodeURIComponent(serviceSlug)}`
+                      : '/request'
+                  }
+                  className="inline-flex shrink-0 items-center justify-center rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#0a3a7a]/25 transition hover:brightness-105"
+                >
+                  Request Quotation
+                </Link>
+              </article>
+            )
+          })}
         </div>
-      ) : null}
+
+        {!loading && !pros.length && !error ? (
+          <p className="py-10 text-center text-sm text-muted">No professionals available yet.</p>
+        ) : null}
+      </div>
     </div>
   )
 }

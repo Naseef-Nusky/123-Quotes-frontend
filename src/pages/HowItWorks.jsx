@@ -83,7 +83,7 @@ export default function HowItWorks() {
               )
             })}
           </ol>
-          <Link to="/register?role=customer" className="btn-primary mt-8">
+          <Link to="/request" className="btn-primary mt-8">
             Get Quotes
           </Link>
         </section>
@@ -106,7 +106,7 @@ export default function HowItWorks() {
               )
             })}
           </ol>
-          <Link to="/register?role=professional" className="btn-secondary mt-8">
+          <Link to="/business/signup" className="btn-secondary mt-8">
             Join as a professional
           </Link>
         </section>

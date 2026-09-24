@@ -30,8 +30,6 @@ async function request(path, options = {}) {
 
 export const api = {
   login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
-  registerCustomer: (body) =>
-    request('/auth/register/customer', { method: 'POST', body: JSON.stringify(body) }),
   registerProfessional: (body) =>
     request('/auth/register/professional', { method: 'POST', body: JSON.stringify(body) }),
   me: () => request('/auth/me'),
@@ -49,7 +47,15 @@ export const api = {
   getService: (idOrSlug) => request(`/services/${idOrSlug}`),
   getQuestionnaire: (serviceId) => request(`/questions/service/${serviceId}`),
 
+  suggestPostcodes: (q, limit = 40) =>
+    request(`/postcodes/suggest?q=${encodeURIComponent(q)}&limit=${limit}`),
+  listPostcodes: () => request('/postcodes/list'),
+  validatePostcode: (postcode) =>
+    request(`/postcodes/validate?postcode=${encodeURIComponent(postcode)}`),
+
   createRequest: (body) => request('/requests', { method: 'POST', body: JSON.stringify(body) }),
+  submitGuestRequest: (body) =>
+    request('/requests/guest', { method: 'POST', body: JSON.stringify(body) }),
   saveAnswers: (id, answers) =>
     request(`/requests/${id}/answers`, { method: 'PUT', body: JSON.stringify({ answers }) }),
   submitRequest: (id, body = {}) =>

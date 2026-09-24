@@ -57,7 +57,7 @@ export default function Pricing() {
             </p>
             <p className="mt-1 text-sm font-semibold text-primary">{pkg.tokens} tokens</p>
             <Link
-              to={isProfessional ? '/pro/tokens' : '/register?role=professional'}
+              to={isProfessional ? '/pro/tokens' : '/business/signup'}
               className="btn-primary mt-8"
             >
               {isProfessional ? 'Buy in portal' : 'Join to purchase'}

@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
-import { useAuth } from '../context/AuthContext'
 
 export default function ServiceDetail() {
   const { slug } = useParams()
-  const { isAuthenticated, isCustomer } = useAuth()
   const [service, setService] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -32,11 +30,7 @@ export default function ServiceDetail() {
   if (error) return <p className="mx-auto max-w-3xl px-4 py-16 text-danger">{error}</p>
   if (!service) return null
 
-  const ctaTo = isCustomer
-    ? `/app/requests/new?service=${service.id}`
-    : isAuthenticated
-      ? '/app'
-      : `/login?next=/app/requests/new?service=${service.id}`
+  const ctaTo = `/request?service=${encodeURIComponent(service.slug || service.id)}`
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">

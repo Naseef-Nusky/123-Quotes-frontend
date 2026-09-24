@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapPin, User, Zap } from 'lucide-react'
+import { User } from 'lucide-react'
 import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
+import PostcodeInput from '../components/PostcodeInput'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -38,7 +39,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative isolate flex min-h-[78vh] items-center justify-center overflow-hidden px-4 py-20 sm:min-h-[85vh] sm:px-6 lg:py-28">
+      <section className="relative isolate flex min-h-[52vh] items-center justify-center overflow-hidden px-4 py-14 sm:min-h-[58vh] sm:px-6 lg:py-16">
         <div
           className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/images/hero-city.png')" }}
@@ -60,48 +61,43 @@ export default function Home() {
         />
 
         <div className="relative z-10 mx-auto w-full max-w-5xl text-center animate-fade-up">
-          <h1 className="mx-auto max-w-4xl text-[1.65rem] font-semibold leading-tight tracking-tight text-white sm:text-4xl md:text-[2.65rem] md:leading-[1.2]">
+          <h1 className="mx-auto max-w-4xl text-[2.1rem] font-semibold leading-tight tracking-tight text-white sm:text-5xl md:text-[3.35rem] md:leading-[1.12]">
             {heroTitle}
           </h1>
 
           <form
             onSubmit={onSearch}
-            className="mx-auto mt-10 w-full max-w-4xl animate-fade-up-delay bg-black/45 px-4 py-5 backdrop-blur-[2px] sm:mt-14 sm:px-6 sm:py-6"
+            className="mx-auto mt-8 w-full max-w-3xl animate-fade-up-delay rounded-2xl border border-white/15 bg-white/12 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-md sm:mt-10 sm:p-3.5"
           >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-5">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-2.5">
               <label className="relative min-w-0 flex-1 text-left">
                 <span className="sr-only">Tell us what you need</span>
+                <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-slate-400">
+                  <User className="size-4" strokeWidth={1.8} />
+                </span>
                 <input
                   list="service-options"
                   value={need}
                   onChange={(e) => setNeed(e.target.value)}
                   placeholder={content.hero?.needPlaceholder || 'Tell us what you need?'}
-                  className="w-full border-0 border-b border-white/70 bg-transparent py-2.5 pr-10 text-sm text-white outline-none placeholder:text-white/70 focus:border-white"
+                  className="w-full rounded-xl border border-white/25 bg-white py-3 pl-10 pr-3.5 text-sm text-navy outline-none placeholder:text-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/25"
                   required
-                />
-                <User
-                  className="pointer-events-none absolute right-0 top-1/2 size-4 -translate-y-1/2 text-white/90"
-                  strokeWidth={1.8}
                 />
               </label>
 
-              <label className="relative w-full text-left lg:max-w-[220px]">
+              <label className="relative w-full text-left sm:max-w-[210px]">
                 <span className="sr-only">Postcode</span>
-                <input
+                <PostcodeInput
                   value={postcode}
-                  onChange={(e) => setPostcode(e.target.value)}
-                  placeholder={content.hero?.postcodePlaceholder || 'Postcode'}
-                  className="w-full border-0 border-b border-white/70 bg-transparent py-2.5 pr-10 text-sm text-white outline-none placeholder:text-white/70 focus:border-white"
-                />
-                <MapPin
-                  className="pointer-events-none absolute right-0 top-1/2 size-4 -translate-y-1/2 text-white/90"
-                  strokeWidth={1.8}
+                  onChange={setPostcode}
+                  placeholder="Postcode"
+                  className="flex w-full items-center gap-2 rounded-xl border border-white/25 bg-white px-3.5 py-3 text-sm text-navy outline-none transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25"
                 />
               </label>
 
               <button
                 type="submit"
-                className="shrink-0 bg-[#2fd3d0] px-8 py-3 text-sm font-extrabold tracking-wide text-black transition hover:brightness-95 sm:px-10"
+                className="shrink-0 rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-8 py-3 text-sm font-extrabold tracking-wide text-white shadow-md shadow-[#0a3a7a]/30 transition hover:brightness-105 sm:px-9"
               >
                 {(content.hero?.buttonText || 'SEARCH').toUpperCase()}
               </button>
@@ -119,85 +115,134 @@ export default function Home() {
       <section className="border-t border-line bg-canvas">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <h2 className="text-center text-3xl font-bold text-navy">{content.popularTitle || 'Popular Services'}</h2>
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
             {(content.popularServices || []).map((item) => (
-              <article key={item.id} className="rounded-xl border border-line bg-white p-5 shadow-sm">
-                <h3 className="text-lg font-bold text-navy">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate">{item.description}</p>
-                <Link to={item.link || '/services'} className="mt-3 inline-flex text-sm font-bold text-primary">
-                  {item.buttonText || 'Find More'}
-                </Link>
+              <article
+                key={item.id}
+                className="group overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(10,47,92,0.14)]"
+              >
+                {item.image ? (
+                  <div className="relative aspect-[16/9] overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt=""
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/35 via-transparent to-transparent" />
+                  </div>
+                ) : null}
+                <div className="p-5 sm:p-6">
+                  <h3 className="text-lg font-bold text-navy sm:text-xl">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate">{item.description}</p>
+                  <Link
+                    to={item.link || '/services'}
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary transition group-hover:gap-2.5"
+                  >
+                    {item.buttonText || 'Find More'}
+                    <span aria-hidden>→</span>
+                  </Link>
+                </div>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+      <section className="relative overflow-hidden border-t border-line bg-white">
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-[radial-gradient(ellipse_at_bottom,_rgba(10,47,92,0.06),_transparent_70%)]"
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-navy sm:text-4xl">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">How it works</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-navy sm:text-4xl">
               {content.hire.title}
             </h2>
-            <p className="mt-3 text-lg font-semibold text-navy sm:text-xl">{content.hire.subtitle}</p>
+            <p className="mt-3 text-lg font-semibold text-navy/90 sm:text-xl">{content.hire.subtitle}</p>
             <p className="mt-5 text-sm leading-relaxed text-slate sm:text-base">{content.hire.body}</p>
           </div>
 
-          <div className="mt-12 grid items-start gap-10 lg:mt-14 lg:grid-cols-2 lg:gap-12">
-            <div className="overflow-hidden rounded-sm">
+          <div className="mt-12 grid items-center gap-8 lg:mt-14 lg:grid-cols-2 lg:gap-12">
+            <div className="overflow-hidden rounded-2xl border border-line/80 shadow-[0_12px_36px_rgba(10,47,92,0.12)]">
               <img
                 src={content.hire.image || '/images/hire-professional.png'}
                 alt="123 Quotes meeting space"
-                className="h-full w-full object-cover"
+                className="aspect-[4/3] h-full w-full object-cover sm:aspect-[5/4]"
               />
             </div>
 
-            <div className="space-y-8">
-              {(content.hire.steps || []).map((step) => (
-                <div key={step.id} className="flex gap-3 sm:gap-4">
-                  <Zap className="mt-1 size-5 shrink-0 text-[#3b82f6]" fill="currentColor" strokeWidth={1.5} />
-                  <div>
+            <div className="space-y-4">
+              {(content.hire.steps || []).map((step, index) => (
+                <div
+                  key={step.id}
+                  className="flex gap-4 rounded-2xl border border-line/80 bg-canvas/80 p-4 shadow-[0_4px_16px_rgba(10,47,92,0.04)] transition hover:border-primary/25 hover:bg-white hover:shadow-[0_8px_24px_rgba(10,47,92,0.08)] sm:p-5"
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] text-sm font-extrabold text-white shadow-md shadow-[#0a3a7a]/25">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
                     <h3 className="text-base font-bold text-navy sm:text-lg">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate">{step.description}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate">{step.description}</p>
                   </div>
                 </div>
               ))}
-              <p className="pl-8 italic text-slate sm:pl-9">
-                <Link to="/services" className="font-medium text-slate hover:text-primary">
+              <div className="pt-2">
+                <Link
+                  to="/services"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-primary transition hover:gap-3"
+                >
                   {content.hire.cta}
+                  <span aria-hidden>→</span>
                 </Link>
-              </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line bg-[#f7f7f7]">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+      <section className="relative overflow-hidden border-t border-line bg-gradient-to-b from-[#eef6fc] via-white to-[#f4f8fc]">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.14),_transparent_65%)]"
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-navy sm:text-4xl">{content.join.title}</h2>
-            <p className="mt-3 text-lg font-semibold text-navy sm:text-xl">{content.join.subtitle}</p>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">For professionals</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-navy sm:text-4xl">{content.join.title}</h2>
+            <p className="mt-3 text-lg font-semibold text-navy/90 sm:text-xl">{content.join.subtitle}</p>
             <p className="mt-4 text-sm leading-relaxed text-slate sm:text-base">{content.join.body}</p>
           </div>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
             {(content.join.cards || []).map((card) => (
-              <article key={card.id} className="text-left">
+              <article
+                key={card.id}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(10,47,92,0.14)]"
+              >
                 {card.image ? (
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="mb-5 aspect-[16/10] w-full object-cover"
-                  />
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/30 via-transparent to-transparent" />
+                  </div>
                 ) : null}
-                <h3 className="text-lg font-bold text-navy">{card.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate">{card.description}</p>
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <h3 className="text-lg font-bold text-navy">{card.title}</h3>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate">{card.description}</p>
+                </div>
               </article>
             ))}
           </div>
 
           <div className="mt-12 text-center">
-            <Link to="/business/signup" className="btn-primary !rounded-md">
+            <Link
+              to="/business/signup"
+              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-8 py-3.5 text-sm font-extrabold tracking-wide text-white shadow-md shadow-[#0a3a7a]/28 transition hover:brightness-105"
+            >
               {content.join.buttonText}
             </Link>
           </div>

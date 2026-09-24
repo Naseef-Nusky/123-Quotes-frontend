@@ -1,10 +1,17 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Menu, X, LogOut, LogIn, LayoutGrid, Mail, MapPin } from 'lucide-react'
+import { Menu, X, LogIn, LayoutGrid, Mail, MapPin } from 'lucide-react'
 import Logo from './Logo'
 import { useAuth } from '../context/AuthContext'
 
 const publicLinks = [{ to: '/', label: 'Home', end: true }]
+
+const customerLinks = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/app', label: 'Dashborad', end: true },
+  { to: '/app/requests', label: 'My Requests', end: true },
+  { to: '/app/requested-services', label: 'My Requested Services' },
+]
 
 const businessLinks = [
   { to: '/pro', label: 'Home', end: true },
@@ -21,6 +28,7 @@ export default function Layout({ variant = 'public', children }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const isBusiness = variant === 'business'
+  const isCustomerPortal = variant === 'customer'
 
   function handleLogout() {
     logout()
@@ -32,28 +40,28 @@ export default function Layout({ variant = 'public', children }) {
       isActive ? 'text-primary' : 'text-slate hover:text-navy'
     }`
 
-  const navItems = isBusiness ? businessLinks : publicLinks
+  const navItems = isBusiness ? businessLinks : isCustomerPortal ? customerLinks : publicLinks
+  const logoTo = isBusiness ? '/pro' : isCustomerPortal ? '/app' : '/'
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="sticky top-0 z-30 border-b border-line bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Logo size="md" to={isBusiness ? '/pro' : '/'} />
+          <Logo size="lg" to={logoTo} />
 
           <nav className="hidden items-center gap-5 lg:flex xl:gap-6">
             {navItems.map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end} className={linkClass}>
+              <NavLink key={`${l.to}-${l.label}`} to={l.to} end={l.end} className={linkClass}>
                 {l.label}
               </NavLink>
             ))}
 
-            {isBusiness ? (
+            {isBusiness || isCustomerPortal ? (
               <button
                 type="button"
                 onClick={handleLogout}
                 className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}
               >
-                <LogOut className="size-4" strokeWidth={2} />
                 Logout
               </button>
             ) : isAuthenticated ? (
@@ -66,7 +74,7 @@ export default function Layout({ variant = 'public', children }) {
                 ) : null}
                 {isCustomer ? (
                   <Link to="/app" className={linkClass({ isActive: false })}>
-                    My requests
+                    Dashborad
                   </Link>
                 ) : null}
                 <button
@@ -74,7 +82,6 @@ export default function Layout({ variant = 'public', children }) {
                   onClick={handleLogout}
                   className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}
                 >
-                  <LogOut className="size-4" strokeWidth={2} />
                   Logout
                 </button>
               </>
@@ -86,7 +93,7 @@ export default function Layout({ variant = 'public', children }) {
                 </Link>
                 <Link
                   to="/business/signup"
-                  className="rounded-md bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
+                  className="rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105"
                 >
                   Business Signup
                 </Link>
@@ -108,18 +115,23 @@ export default function Layout({ variant = 'public', children }) {
           <div className="border-t border-line bg-white px-4 py-4 lg:hidden">
             <nav className="flex flex-col gap-3">
               {navItems.map((l) => (
-                <NavLink key={l.to} to={l.to} end={l.end} className={linkClass} onClick={() => setOpen(false)}>
+                <NavLink
+                  key={`${l.to}-${l.label}`}
+                  to={l.to}
+                  end={l.end}
+                  className={linkClass}
+                  onClick={() => setOpen(false)}
+                >
                   {l.label}
                 </NavLink>
               ))}
               <hr className="border-line" />
-              {isBusiness ? (
+              {isBusiness || isCustomerPortal ? (
                 <button
                   type="button"
                   onClick={handleLogout}
                   className="inline-flex items-center gap-2 text-left text-sm font-medium text-slate"
                 >
-                  <LogOut className="size-4" strokeWidth={2} />
                   Logout
                 </button>
               ) : isAuthenticated ? (
@@ -128,7 +140,6 @@ export default function Layout({ variant = 'public', children }) {
                   onClick={handleLogout}
                   className="inline-flex items-center gap-2 text-left text-sm font-medium text-slate"
                 >
-                  <LogOut className="size-4" strokeWidth={2} />
                   Logout
                 </button>
               ) : (
@@ -144,7 +155,7 @@ export default function Layout({ variant = 'public', children }) {
                   <Link
                     to="/business/signup"
                     onClick={() => setOpen(false)}
-                    className="inline-block rounded-md bg-navy px-4 py-2 text-center text-sm font-semibold text-white"
+                    className="inline-block rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-2 text-center text-sm font-semibold text-white"
                   >
                     Business Signup
                   </Link>
@@ -157,7 +168,7 @@ export default function Layout({ variant = 'public', children }) {
 
       <main className="flex-1">{children ?? <Outlet />}</main>
 
-      <footer className="mt-auto bg-[#2b2b2b] text-white">
+      <footer className="mt-auto bg-[#0a2f5c] text-white">
         <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6">
           <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-white/90">
             <Mail className="size-3.5 shrink-0 text-primary" strokeWidth={2} />

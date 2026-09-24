@@ -14,32 +14,40 @@ export const defaultHomeContent = {
       title: 'Web Development',
       description:
         'Here at 123Quotes, you can find the best web developers. Start your search, receive free quotes right away!',
-      link: '/services/web-development',
+      link: '/web-developer',
       buttonText: 'Find More',
+      image:
+        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
     },
     {
       id: 'ps-2',
       title: 'Photographers',
       description:
         '123Quotes provides quotes from top photographers! Please enquire today to receive free quotes straight away!',
-      link: '/services/photographers',
+      link: '/wedding-photographers',
       buttonText: 'Find More',
+      image:
+        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80',
     },
     {
       id: 'ps-3',
       title: 'Private Investigators',
       description:
         'A private investigator near you isn’t far from reach. Find local private investigators here at 123Quotes! Enquire to receive free quotes!',
-      link: '/services/private-investigators',
+      link: '/private-investigators',
       buttonText: 'Find More',
+      image:
+        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80',
     },
     {
       id: 'ps-4',
       title: 'Cleaning services',
       description:
         'On 123Quotes, you can receive free quotes from great cleaners near you! All you have to do is enquire today to get instant quotes!',
-      link: '/services/cleaning-services',
+      link: '/house-cleaning',
       buttonText: 'Find More',
+      image:
+        'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80',
     },
   ],
   hire: {
@@ -106,6 +114,9 @@ export async function fetchHomeContent() {
     if (!res.ok) throw new Error('Failed to load home content')
     const data = await res.json()
     if (data?.content && typeof data.content === 'object') {
+      const popularFromApi = data.content.popularServices?.length
+        ? data.content.popularServices
+        : null
       return {
         ...defaultHomeContent,
         ...data.content,
@@ -124,9 +135,20 @@ export async function fetchHomeContent() {
             ? data.content.join.cards
             : defaultHomeContent.join.cards,
         },
-        popularServices: data.content.popularServices?.length
-          ? data.content.popularServices
-          : defaultHomeContent.popularServices,
+        // Prefer local popular landing pages so Find More always works
+        popularServices: defaultHomeContent.popularServices.map((local, i) => {
+          const apiItem = popularFromApi?.[i]
+          if (!apiItem) return local
+          return {
+            ...local,
+            ...apiItem,
+            link: local.link,
+            image: local.image,
+            title: apiItem.title || local.title,
+            description: apiItem.description || local.description,
+            buttonText: apiItem.buttonText || local.buttonText,
+          }
+        }),
       }
     }
   } catch (err) {

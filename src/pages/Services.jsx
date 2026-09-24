@@ -70,13 +70,13 @@ export default function Services() {
         {services.map((s) => (
           <Link
             key={s.id}
-            to={`/services/${s.slug}`}
+            to={`/request?service=${encodeURIComponent(s.slug)}`}
             className="surface p-5 transition hover:border-primary/40 hover:shadow-md"
           >
             <p className="text-xs font-bold uppercase tracking-wider text-primary">{s.category?.name}</p>
             <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name}</h2>
             <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description}</p>
-            <p className="mt-4 text-sm font-bold text-primary">View details →</p>
+            <p className="mt-4 text-sm font-bold text-primary">Get quotes →</p>
           </Link>
         ))}
       </div>

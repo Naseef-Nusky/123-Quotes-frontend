@@ -99,7 +99,7 @@ export default function Settings() {
 
           <div className="flex items-center justify-between border-b border-line pb-2">
             <h2 className="text-lg font-bold text-navy">About</h2>
-            <button type="button" className="rounded-md bg-success px-3 py-1.5 text-xs font-bold text-white">
+            <button type="button" className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-white">
               Upload Image
             </button>
           </div>
@@ -150,7 +150,7 @@ export default function Settings() {
           <button
             type="button"
             onClick={payTokens}
-            className="mt-4 rounded-md bg-success px-5 py-2.5 text-sm font-bold text-white"
+            className="mt-4 rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-5 py-2.5 text-sm font-bold text-white"
           >
             Pay with Square
           </button>

@@ -16,12 +16,15 @@ import Contact from './pages/Contact'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Login from './pages/Login'
-import Register from './pages/Register'
 import VerifyEmail from './pages/VerifyEmail'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import SetPassword from './pages/SetPassword'
+import PopularServicePage from './pages/PopularServicePage'
 
 import CustomerDashboard from './pages/customer/Dashboard'
+import MyRequests from './pages/customer/MyRequests'
+import MyRequestedServices from './pages/customer/MyRequestedServices'
 import NewRequest from './pages/customer/NewRequest'
 import RequestDetail from './pages/customer/RequestDetail'
 
@@ -49,11 +52,23 @@ function RoleRedirect() {
 export default function App() {
   return (
     <Routes>
+      <Route path="/set-password" element={<SetPassword />} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="business/signup" element={<BusinessSignup />} />
         <Route path="services" element={<Services />} />
+        <Route path="services/web-development" element={<Navigate to="/web-developer" replace />} />
+        <Route path="services/photographers" element={<Navigate to="/wedding-photographers" replace />} />
+        <Route path="services/event-photography" element={<Navigate to="/wedding-photographers" replace />} />
+        <Route path="services/private-investigators" element={<Navigate to="/private-investigators" replace />} />
+        <Route path="services/cleaning-services" element={<Navigate to="/house-cleaning" replace />} />
+        <Route path="services/end-of-tenancy-cleaning" element={<Navigate to="/house-cleaning" replace />} />
         <Route path="services/:slug" element={<ServiceDetail />} />
+        <Route path="wedding-photographers" element={<PopularServicePage slug="wedding-photographers" />} />
+        <Route path="house-cleaning" element={<PopularServicePage slug="house-cleaning" />} />
+        <Route path="private-investigators" element={<PopularServicePage slug="private-investigators" />} />
+        <Route path="web-developer" element={<PopularServicePage slug="web-developer" />} />
+        <Route path="request" element={<NewRequest />} />
         <Route path="how-it-works" element={<HowItWorks />} />
         <Route path="pricing" element={<Pricing />} />
         <Route path="professionals" element={<Professionals />} />
@@ -62,7 +77,6 @@ export default function App() {
         <Route path="terms" element={<Terms />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
@@ -78,6 +92,8 @@ export default function App() {
         }
       >
         <Route index element={<CustomerDashboard />} />
+        <Route path="requests" element={<MyRequests />} />
+        <Route path="requested-services" element={<MyRequestedServices />} />
         <Route path="requests/new" element={<NewRequest />} />
         <Route path="requests/:id" element={<RequestDetail />} />
       </Route>

@@ -57,10 +57,6 @@ export function AuthProvider({ children }) {
     clear()
   }, [clear])
 
-  const registerCustomer = useCallback(async (body) => {
-    return api.registerCustomer(body)
-  }, [])
-
   const registerProfessional = useCallback(async (body) => {
     return api.registerProfessional(body)
   }, [])
@@ -75,20 +71,10 @@ export function AuthProvider({ children }) {
       isProfessional: user?.role === 'PROFESSIONAL',
       login,
       logout,
-      registerCustomer,
       registerProfessional,
       refreshMe,
     }),
-    [
-      user,
-      token,
-      loading,
-      login,
-      logout,
-      registerCustomer,
-      registerProfessional,
-      refreshMe,
-    ],
+    [user, token, loading, login, logout, registerProfessional, refreshMe],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

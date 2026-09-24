@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
+import PostcodeInput from '../components/PostcodeInput'
 
 const STEPS = ['details', 'location', 'done']
 
@@ -129,14 +130,15 @@ export default function BusinessSignup() {
                 ))}
               </select>
               <span>from</span>
-              <input
-                className="input-field !max-w-[160px] !py-2"
-                placeholder="Postcode"
-                value={form.postcode}
-                onChange={update('postcode')}
-                disabled={form.locationType !== 'radius'}
-                required={form.locationType === 'radius'}
-              />
+              <div className="min-w-[160px] flex-1">
+                <PostcodeInput
+                  value={form.postcode}
+                  onChange={(v) => setForm((f) => ({ ...f, postcode: v }))}
+                  placeholder="Postcode"
+                  disabled={form.locationType !== 'radius'}
+                  className="input-field !py-2 uppercase"
+                />
+              </div>
             </label>
 
             <label className="flex items-center gap-3 text-sm font-semibold text-navy">
@@ -238,7 +240,7 @@ export default function BusinessSignup() {
               Login
             </Link>
           </p>
-          <button type="submit" className="btn-primary !rounded-md !bg-success hover:!brightness-95">
+          <button type="submit" className="btn-primary !rounded-md" disabled={submitting}>
             Next
           </button>
         </div>
