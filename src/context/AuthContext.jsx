@@ -53,6 +53,15 @@ export function AuthProvider({ children }) {
     [persist],
   )
 
+  const loginWithLink = useCallback(
+    async (token) => {
+      const data = await api.loginWithLink({ token })
+      persist(data.token, data.user)
+      return data.user
+    },
+    [persist],
+  )
+
   const logout = useCallback(() => {
     clear()
   }, [clear])
@@ -70,11 +79,12 @@ export function AuthProvider({ children }) {
       isCustomer: user?.role === 'CUSTOMER',
       isProfessional: user?.role === 'PROFESSIONAL',
       login,
+      loginWithLink,
       logout,
       registerProfessional,
       refreshMe,
     }),
-    [user, token, loading, login, logout, registerProfessional, refreshMe],
+    [user, token, loading, login, loginWithLink, logout, registerProfessional, refreshMe],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

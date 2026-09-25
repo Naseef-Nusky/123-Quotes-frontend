@@ -30,6 +30,10 @@ async function request(path, options = {}) {
 
 export const api = {
   login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+  requestLoginLink: (body) =>
+    request('/auth/login-link', { method: 'POST', body: JSON.stringify(body) }),
+  loginWithLink: (body) =>
+    request('/auth/login-link/verify', { method: 'POST', body: JSON.stringify(body) }),
   registerProfessional: (body) =>
     request('/auth/register/professional', { method: 'POST', body: JSON.stringify(body) }),
   me: () => request('/auth/me'),
