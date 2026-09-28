@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
@@ -11,6 +11,8 @@ export default function SetPassword() {
   const [token, setToken] = useState(params.get('token') || '')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -62,71 +64,84 @@ export default function SetPassword() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-gradient-to-b from-[#0a3a7a] to-[#0a2f5c] px-4 py-10">
-      <div className="w-full max-w-lg overflow-hidden rounded-md bg-white shadow-2xl">
-        <div className="relative border-b border-slate-200 px-6 py-4 text-center">
-          <h1 className="text-lg font-semibold text-slate-700">Set Password</h1>
-          <button
-            type="button"
-            onClick={goLogin}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
-            aria-label="Close"
-          >
-            <X className="size-5" strokeWidth={2} />
-          </button>
-        </div>
+    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-12">
+      <h1 className="text-center font-display text-3xl font-bold text-navy">Set password</h1>
+      <p className="mt-2 text-center text-sm text-muted">Create a password to access your account.</p>
 
-        <form id="set-password-form" onSubmit={onSubmit} className="px-6 py-6">
-          <label className="mb-5 block text-left text-sm font-bold text-slate-700">
-            Password
+      <form onSubmit={onSubmit} className="surface mt-8 space-y-4 p-6">
+        {!token ? (
+          <p className="text-sm text-amber-600">
+            Open this page from the link in your email to set your password.
+          </p>
+        ) : null}
+
+        <div>
+          <label className="label" htmlFor="set-password">
+            New password
+          </label>
+          <div className="relative">
             <input
-              type="password"
+              id="set-password"
+              type={showPassword ? 'text' : 'password'}
               required
               minLength={6}
+              className="input-field pr-11"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 text-sm font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              autoComplete="new-password"
             />
-          </label>
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-navy"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="size-4" strokeWidth={2} /> : <Eye className="size-4" strokeWidth={2} />}
+            </button>
+          </div>
+        </div>
 
-          <label className="block text-left text-sm font-bold text-slate-700">
-            Re-type Password
+        <div>
+          <label className="label" htmlFor="set-confirm">
+            Confirm password
+          </label>
+          <div className="relative">
             <input
-              type="password"
+              id="set-confirm"
+              type={showConfirm ? 'text' : 'password'}
               required
               minLength={6}
+              className="input-field pr-11"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 text-sm font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              autoComplete="new-password"
             />
-          </label>
-
-          {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
-          {!token ? (
-            <p className="mt-3 text-sm text-amber-600">
-              Open this page from the link in your email to set your password.
-            </p>
-          ) : null}
-        </form>
-
-        <div className="grid grid-cols-2 gap-3 border-t border-slate-200 px-6 py-4">
-          <button
-            type="button"
-            onClick={goLogin}
-            className="rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-3 text-sm font-bold text-white transition hover:brightness-105"
-          >
-            Skip for Now
-          </button>
-          <button
-            type="submit"
-            form="set-password-form"
-            disabled={loading}
-            className="rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-3 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-60"
-          >
-            {loading ? 'Saving…' : 'Set Password'}
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowConfirm((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-navy"
+              aria-label={showConfirm ? 'Hide password' : 'Show password'}
+            >
+              {showConfirm ? <EyeOff className="size-4" strokeWidth={2} /> : <Eye className="size-4" strokeWidth={2} />}
+            </button>
+          </div>
         </div>
-      </div>
+
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
+
+        <button type="submit" className="btn-primary w-full" disabled={loading || !token}>
+          {loading ? 'Saving…' : 'Set password'}
+        </button>
+
+        <div className="flex items-center justify-between gap-3 text-sm">
+          <button type="button" onClick={goLogin} className="font-semibold text-slate hover:text-navy">
+            Skip for now
+          </button>
+          <Link to="/login" className="font-semibold text-primary">
+            Back to login
+          </Link>
+        </div>
+      </form>
     </div>
   )
 }

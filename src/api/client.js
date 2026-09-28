@@ -66,6 +66,7 @@ export const api = {
     request(`/requests/${id}/submit`, { method: 'POST', body: JSON.stringify(body) }),
   myRequests: () => request('/requests/mine'),
   getRequest: (id) => request(`/requests/${id}`),
+  deleteRequest: (id) => request(`/requests/${id}`, { method: 'DELETE' }),
 
   getPackages: () => request('/professionals/packages'),
   getDirectory: (params = {}) => {

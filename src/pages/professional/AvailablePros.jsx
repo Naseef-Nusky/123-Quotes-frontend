@@ -27,7 +27,7 @@ export default function AvailablePros() {
   }, [])
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+    <section className="w-full px-4 py-10 text-left sm:px-6">
       <h1 className="text-2xl font-bold text-navy">Available Pros.</h1>
       {loading ? <p className="mt-4 text-sm text-muted">Loading…</p> : null}
       {error ? <p className="mt-4 text-sm text-rose-600">{error}</p> : null}
@@ -55,7 +55,7 @@ export default function AvailablePros() {
           </article>
         ))}
         {!loading && !pros.length ? (
-          <p className="py-8 text-center text-sm text-muted">No professionals in the directory yet.</p>
+          <p className="py-8 text-left text-sm text-muted">No professionals in the directory yet.</p>
         ) : null}
       </div>
     </section>

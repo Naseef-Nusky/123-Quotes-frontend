@@ -1,18 +1,11 @@
 import { Outlet } from 'react-router-dom'
-import Layout from './Layout'
+import CustomerPortalLayout from './CustomerPortalLayout'
+import ProPortalLayout from './ProPortalLayout'
 
 export function CustomerShell() {
-  return (
-    <Layout variant="customer">
-      <Outlet />
-    </Layout>
-  )
+  return <CustomerPortalLayout />
 }
 
 export function ProfessionalShell() {
-  return (
-    <Layout variant="business">
-      <Outlet />
-    </Layout>
-  )
+  return <ProPortalLayout />
 }

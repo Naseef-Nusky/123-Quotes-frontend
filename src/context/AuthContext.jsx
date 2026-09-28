@@ -45,8 +45,8 @@ export function AuthProvider({ children }) {
   }, [refreshMe])
 
   const login = useCallback(
-    async (email, password) => {
-      const data = await api.login({ email, password })
+    async (email, password, role = 'CUSTOMER') => {
+      const data = await api.login({ email, password, role })
       persist(data.token, data.user)
       return data.user
     },

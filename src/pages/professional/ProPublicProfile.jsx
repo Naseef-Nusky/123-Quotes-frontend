@@ -35,7 +35,7 @@ export default function ProPublicProfile() {
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <section className="w-full px-4 py-10 text-left sm:px-6">
         <p className="text-sm text-muted">Loading profile…</p>
       </section>
     )
@@ -43,7 +43,7 @@ export default function ProPublicProfile() {
 
   if (error || !pro) {
     return (
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <section className="w-full px-4 py-10 text-left sm:px-6">
         <p className="text-sm text-rose-600">{error || 'Professional not found'}</p>
         <Link to="/pro/available-pros" className="mt-4 inline-flex text-sm font-semibold text-primary">
           ← Back to Available Pros.
@@ -53,10 +53,10 @@ export default function ProPublicProfile() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <section className="w-full px-4 py-10 text-left sm:px-6">
       <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
-        <aside className="text-center lg:text-left">
-          <div className="mx-auto flex size-28 items-center justify-center rounded-xl bg-slate-100 lg:mx-0">
+        <aside className="text-left">
+          <div className="flex size-28 items-center justify-center rounded-xl bg-slate-100">
             <div className="flex size-20 items-center justify-center rounded-full bg-primary text-white">
               <Building2 className="size-10" strokeWidth={1.75} />
             </div>
@@ -67,11 +67,11 @@ export default function ProPublicProfile() {
             {serviceName}
           </span>
           <div className="mt-5 space-y-2 text-sm text-slate">
-            <p className="inline-flex items-center justify-center gap-2 lg:justify-start">
+            <p className="inline-flex items-center justify-start gap-2">
               <Phone className="size-4 text-primary" strokeWidth={2} />
               {pro.phone || '—'}
             </p>
-            <p className="inline-flex items-center justify-center gap-2 lg:justify-start">
+            <p className="inline-flex items-center justify-start gap-2">
               <Mail className="size-4 text-primary" strokeWidth={2} />
               {pro.email || '—'}
             </p>

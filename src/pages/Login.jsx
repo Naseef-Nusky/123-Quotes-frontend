@@ -10,8 +10,12 @@ function roleHome(user) {
   return '/'
 }
 
-export default function Login() {
-  const { login, loginWithLink } = useAuth()
+/**
+ * @param {{ audience?: 'customer' | 'business' }} props
+ */
+export default function Login({ audience = 'customer' }) {
+  const isBusiness = audience === 'business'
+  const { login, loginWithLink, logout } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const [mode, setMode] = useState('password') // password | link
@@ -23,6 +27,17 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [verifyingLink, setVerifyingLink] = useState(Boolean(params.get('token')))
 
+  function assertAudience(user) {
+    if (isBusiness && user.role !== 'PROFESSIONAL') {
+      logout()
+      throw new Error('This page is for businesses. Please use Login instead.')
+    }
+    if (!isBusiness && user.role === 'PROFESSIONAL') {
+      logout()
+      throw new Error('This page is for customers. Please use Business Login instead.')
+    }
+  }
+
   useEffect(() => {
     const token = params.get('token')
     if (!token) return
@@ -33,6 +48,7 @@ export default function Login() {
       setError('')
       try {
         const user = await loginWithLink(token)
+        assertAudience(user)
         if (cancelled) return
         const next = params.get('next')
         navigate(next || roleHome(user), { replace: true })
@@ -48,7 +64,8 @@ export default function Login() {
     return () => {
       cancelled = true
     }
-  }, [params, loginWithLink, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, loginWithLink, navigate, isBusiness])
 
   async function onPasswordSubmit(e) {
     e.preventDefault()
@@ -56,7 +73,8 @@ export default function Login() {
     setError('')
     setMessage('')
     try {
-      const user = await login(email, password)
+      const user = await login(email, password, isBusiness ? 'PROFESSIONAL' : 'CUSTOMER')
+      assertAudience(user)
       const next = params.get('next')
       navigate(next || roleHome(user), { replace: true })
     } catch (err) {
@@ -72,7 +90,10 @@ export default function Login() {
     setError('')
     setMessage('')
     try {
-      const data = await api.requestLoginLink({ email })
+      const data = await api.requestLoginLink({
+        email,
+        role: isBusiness ? 'PROFESSIONAL' : 'CUSTOMER',
+      })
       setMessage(data.message || 'If that email exists, a login link was sent')
     } catch (err) {
       setError(err.message)
@@ -93,8 +114,14 @@ export default function Login() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12">
-      <h1 className="text-center font-display text-3xl font-bold text-navy">Welcome back</h1>
-      <p className="mt-2 text-center text-sm text-muted">Log in to your customer or professional account.</p>
+      <h1 className="text-center font-display text-3xl font-bold text-navy">
+        {isBusiness ? 'Business Login' : 'Login'}
+      </h1>
+      <p className="mt-2 text-center text-sm text-muted">
+        {isBusiness
+          ? 'Sign in to your business account to manage leads and tokens.'
+          : 'Sign in to manage your quotes and requests.'}
+      </p>
 
       <div className="mt-8 grid grid-cols-2 gap-1 rounded-xl bg-canvas p-1">
         <button
@@ -172,12 +199,21 @@ export default function Login() {
             {loading ? 'Signing in…' : 'Log in'}
           </button>
           <div className="flex justify-between text-sm">
-            <Link to="/forgot-password" className="font-semibold text-primary">
+            <Link
+              to={isBusiness ? '/forgot-password?role=PROFESSIONAL' : '/forgot-password'}
+              className="font-semibold text-primary"
+            >
               Forgot password?
             </Link>
-            <Link to="/request" className="font-semibold text-navy">
-              Get a quote
-            </Link>
+            {isBusiness ? (
+              <Link to="/login" className="font-semibold text-navy">
+                Login
+              </Link>
+            ) : (
+              <Link to="/request" className="font-semibold text-navy">
+                Get a quote
+              </Link>
+            )}
           </div>
         </form>
       ) : (
@@ -203,11 +239,37 @@ export default function Login() {
           <button type="submit" className="btn-primary w-full" disabled={loading}>
             {loading ? 'Sending…' : 'Send login link'}
           </button>
-          <Link to="/request" className="block text-center text-sm font-semibold text-navy">
-            Get a quote
-          </Link>
+          {isBusiness ? (
+            <Link to="/login" className="block text-center text-sm font-semibold text-navy">
+              Login
+            </Link>
+          ) : (
+            <Link to="/request" className="block text-center text-sm font-semibold text-navy">
+              Get a quote
+            </Link>
+          )}
         </form>
+      )}
+
+      {isBusiness ? (
+        <div className="mt-6 rounded-xl border border-line bg-canvas/60 px-5 py-4 text-center">
+          <p className="text-sm text-slate">New business owner?</p>
+          <Link
+            to="/business/signup"
+            className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105"
+          >
+            Sign up
+          </Link>
+        </div>
+      ) : (
+        <p className="mt-6 text-center text-sm text-muted">
+          Are you a business?{' '}
+          <Link to="/business/login" className="font-semibold text-primary">
+            Business Login
+          </Link>
+        </p>
       )}
     </div>
   )
 }
+

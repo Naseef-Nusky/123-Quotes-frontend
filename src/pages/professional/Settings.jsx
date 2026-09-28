@@ -85,9 +85,9 @@ export default function Settings() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <section className="w-full px-4 py-10 text-left sm:px-6">
       <div className="grid gap-10 lg:grid-cols-2">
-        <form onSubmit={saveProfile} className="space-y-4">
+        <form onSubmit={saveProfile} className="space-y-4 text-left">
           <div className="flex size-28 items-center justify-center rounded-full bg-primary text-white">
             <Building2 className="size-12" strokeWidth={1.75} />
           </div>
@@ -156,8 +156,8 @@ export default function Settings() {
           </button>
           <p className="mt-2 text-xs text-muted">Payments are processed securely via Square only.</p>
           {!packages.length ? <p className="mt-4 text-sm text-muted">No packages available.</p> : null}
-          {error ? <p className="mt-4 text-center text-sm text-danger">{error}</p> : null}
-          {message ? <p className="mt-4 text-center text-sm text-primary">{message}</p> : null}
+          {error ? <p className="mt-4 text-left text-sm text-danger">{error}</p> : null}
+          {message ? <p className="mt-4 text-left text-sm text-primary">{message}</p> : null}
         </div>
       </div>
     </section>

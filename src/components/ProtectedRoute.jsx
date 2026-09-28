@@ -14,7 +14,8 @@ export default function ProtectedRoute({ children, roles }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />
+    const loginTo = roles?.includes('PROFESSIONAL') ? '/business/login' : '/login'
+    return <Navigate to={loginTo} replace state={{ from: location.pathname }} />
   }
 
   if (roles?.length && !roles.includes(user.role)) {

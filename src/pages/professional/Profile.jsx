@@ -83,7 +83,7 @@ export default function ProProfile() {
   if (loading) return <p className="text-muted">Loading profile…</p>
 
   return (
-    <form onSubmit={onSave} className="mx-auto max-w-2xl space-y-6">
+    <form onSubmit={onSave} className="w-full space-y-6">
       <div className="surface space-y-4 p-6">
         <h2 className="font-display text-xl font-bold text-navy">Company details</h2>
         {[

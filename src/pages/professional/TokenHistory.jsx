@@ -48,7 +48,7 @@ export default function TokenHistory() {
           </tbody>
         </table>
         {!loading && !txns.length ? (
-          <p className="p-6 text-center text-muted">No token transactions yet.</p>
+          <p className="p-6 text-left text-muted">No token transactions yet.</p>
         ) : null}
       </div>
     </div>

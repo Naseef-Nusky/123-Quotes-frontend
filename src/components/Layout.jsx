@@ -1,47 +1,35 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Menu, X, LogIn, LayoutGrid, Mail, MapPin } from 'lucide-react'
 import Logo from './Logo'
+import UserAvatarMenu from './UserAvatarMenu'
 import { useAuth } from '../context/AuthContext'
 
-const publicLinks = [{ to: '/', label: 'Home', end: true }]
+const publicLinks = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/services', label: 'Services' },
+]
 
 const customerLinks = [
   { to: '/', label: 'Home', end: true },
+  { to: '/services', label: 'Services' },
   { to: '/app', label: 'Dashborad', end: true },
   { to: '/app/requests', label: 'My Requests', end: true },
   { to: '/app/requested-services', label: 'My Requested Services' },
 ]
 
-const businessLinks = [
-  { to: '/pro', label: 'Home', end: true },
-  { to: '/pro/available-pros', label: 'Available Pros.' },
-  { to: '/pro/request-sent', label: 'Request Sent' },
-  { to: '/pro/my-request', label: 'My Request' },
-  { to: '/pro/leads', label: 'Leads' },
-  { to: '/pro/client-requests', label: 'Client Requests' },
-  { to: '/pro/settings', label: 'Settings' },
-]
-
 export default function Layout({ variant = 'public', children }) {
-  const { isAuthenticated, logout, isCustomer, isProfessional } = useAuth()
+  const { isAuthenticated, isCustomer, isProfessional } = useAuth()
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
-  const isBusiness = variant === 'business'
   const isCustomerPortal = variant === 'customer'
-
-  function handleLogout() {
-    logout()
-    navigate('/')
-  }
 
   const linkClass = ({ isActive }) =>
     `whitespace-nowrap text-sm font-medium transition-colors ${
       isActive ? 'text-primary' : 'text-slate hover:text-navy'
     }`
 
-  const navItems = isBusiness ? businessLinks : isCustomerPortal ? customerLinks : publicLinks
-  const logoTo = isBusiness ? '/pro' : isCustomerPortal ? '/app' : '/'
+  const navItems = isCustomerPortal ? customerLinks : publicLinks
+  const logoTo = isCustomerPortal ? '/app' : '/'
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -49,42 +37,30 @@ export default function Layout({ variant = 'public', children }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Logo size="lg" to={logoTo} />
 
-          <nav className="hidden items-center gap-5 lg:flex xl:gap-6">
-            {navItems.map((l) => (
-              <NavLink key={`${l.to}-${l.label}`} to={l.to} end={l.end} className={linkClass}>
-                {l.label}
-              </NavLink>
-            ))}
+          <div className="hidden items-center gap-5 lg:flex xl:gap-6">
+            <nav className="flex items-center gap-5 xl:gap-6">
+              {navItems.map((l) => (
+                <NavLink key={`${l.to}-${l.label}`} to={l.to} end={l.end} className={linkClass}>
+                  {l.label}
+                </NavLink>
+              ))}
+            </nav>
 
-            {isBusiness || isCustomerPortal ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}
-              >
-                Logout
-              </button>
-            ) : isAuthenticated ? (
-              <>
-                {isProfessional ? (
+            {isCustomerPortal || isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                {!isCustomerPortal && isProfessional ? (
                   <Link to="/pro" className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}>
                     <LayoutGrid className="size-4" strokeWidth={2} />
                     Portal
                   </Link>
                 ) : null}
-                {isCustomer ? (
+                {!isCustomerPortal && isCustomer ? (
                   <Link to="/app" className={linkClass({ isActive: false })}>
                     Dashborad
                   </Link>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}
-                >
-                  Logout
-                </button>
-              </>
+                <UserAvatarMenu settingsTo={isProfessional ? '/pro/settings' : '/app'} />
+              </div>
             ) : (
               <>
                 <Link to="/login" className={`${linkClass({ isActive: false })} inline-flex items-center gap-1.5`}>
@@ -92,23 +68,28 @@ export default function Layout({ variant = 'public', children }) {
                   Login
                 </Link>
                 <Link
-                  to="/business/signup"
+                  to="/business/login"
                   className="rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105"
                 >
-                  Business Signup
+                  Business Login
                 </Link>
               </>
             )}
-          </nav>
+          </div>
 
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-lg border border-line p-2 text-navy lg:hidden"
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X className="size-5" strokeWidth={2} /> : <Menu className="size-5" strokeWidth={2} />}
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+            {isCustomerPortal || isAuthenticated ? (
+              <UserAvatarMenu settingsTo={isProfessional ? '/pro/settings' : '/app'} />
+            ) : null}
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-lg border border-line p-2 text-navy"
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              onClick={() => setOpen((v) => !v)}
+            >
+              {open ? <X className="size-5" strokeWidth={2} /> : <Menu className="size-5" strokeWidth={2} />}
+            </button>
+          </div>
         </div>
 
         {open ? (
@@ -125,25 +106,9 @@ export default function Layout({ variant = 'public', children }) {
                   {l.label}
                 </NavLink>
               ))}
-              <hr className="border-line" />
-              {isBusiness || isCustomerPortal ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-2 text-left text-sm font-medium text-slate"
-                >
-                  Logout
-                </button>
-              ) : isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-2 text-left text-sm font-medium text-slate"
-                >
-                  Logout
-                </button>
-              ) : (
+              {!isCustomerPortal && !isAuthenticated ? (
                 <>
+                  <hr className="border-line" />
                   <Link
                     to="/login"
                     onClick={() => setOpen(false)}
@@ -153,14 +118,14 @@ export default function Layout({ variant = 'public', children }) {
                     Login
                   </Link>
                   <Link
-                    to="/business/signup"
+                    to="/business/login"
                     onClick={() => setOpen(false)}
                     className="inline-block rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-4 py-2 text-center text-sm font-semibold text-white"
                   >
-                    Business Signup
+                    Business Login
                   </Link>
                 </>
-              )}
+              ) : null}
             </nav>
           </div>
         ) : null}

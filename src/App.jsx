@@ -52,10 +52,11 @@ function RoleRedirect() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/set-password" element={<SetPassword />} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
+        <Route path="set-password" element={<SetPassword />} />
         <Route path="business/signup" element={<BusinessSignup />} />
+        <Route path="business/login" element={<Login audience="business" />} />
         <Route path="services" element={<Services />} />
         <Route path="services/web-development" element={<Navigate to="/web-developer" replace />} />
         <Route path="services/photographers" element={<Navigate to="/wedding-photographers" replace />} />
@@ -76,7 +77,7 @@ export default function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="terms" element={<Terms />} />
         <Route path="privacy" element={<Privacy />} />
-        <Route path="login" element={<Login />} />
+        <Route path="login" element={<Login audience="customer" />} />
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
@@ -92,10 +93,10 @@ export default function App() {
         }
       >
         <Route index element={<CustomerDashboard />} />
-        <Route path="requests" element={<MyRequests />} />
-        <Route path="requested-services" element={<MyRequestedServices />} />
         <Route path="requests/new" element={<NewRequest />} />
         <Route path="requests/:id" element={<RequestDetail />} />
+        <Route path="requests" element={<MyRequests />} />
+        <Route path="requested-services" element={<MyRequestedServices />} />
       </Route>
 
       <Route

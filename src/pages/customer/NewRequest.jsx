@@ -33,30 +33,46 @@ function splitName(full) {
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') }
 }
 
-function PageBackdrop({ services }) {
+function PageBackdrop({ services, onSelect }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6" aria-hidden>
-      <h1 className="font-display text-4xl font-bold text-navy">Services</h1>
+    <div className="w-full px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
+      <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">Services</h1>
       <p className="mt-2 max-w-2xl text-slate">Choose a service to start a quote request.</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {(services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]).map((s) => (
-          <div key={s.id} className="surface p-5">
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">
-              {s.category?.name || 'Service'}
-            </p>
-            <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name || '…'}</h2>
-            <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description || ' '}</p>
-          </div>
-        ))}
+        {(services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]).map((s) => {
+          const cardClass =
+            'surface p-5 text-left transition hover:border-primary/40 hover:shadow-md'
+          if (onSelect && s.name) {
+            return (
+              <button key={s.id} type="button" onClick={() => onSelect(s.id)} className={cardClass}>
+                <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                  {s.category?.name || 'Service'}
+                </p>
+                <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name}</h2>
+                <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description || ' '}</p>
+                <p className="mt-4 text-sm font-bold text-primary">Get quotes →</p>
+              </button>
+            )
+          }
+          return (
+            <div key={s.id} className={cardClass}>
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                {s.category?.name || 'Service'}
+              </p>
+              <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name || '…'}</h2>
+              <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description || ' '}</p>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
-function withBackdrop(services, modal) {
+function withBackdrop(services, modal, onSelect) {
   return (
     <>
-      <PageBackdrop services={services} />
+      <PageBackdrop services={services} onSelect={onSelect} />
       {modal}
     </>
   )
@@ -108,7 +124,7 @@ export default function NewRequest() {
         const match =
           list.find((s) => s.id === raw) || list.find((s) => s.slug === raw) || null
         if (match) setServiceId(match.id)
-        else if (list[0] && !raw) setServiceId(list[0].id)
+        // Do not auto-select — show all services until the user picks one
       } catch (e) {
         if (alive) setError(e.message)
       } finally {
@@ -324,29 +340,18 @@ export default function NewRequest() {
       </WizardShell>
     )
   } else if (!serviceId) {
-    modal = (
-      <WizardShell
-        title="Select a service"
-        onClose={close}
-        footer={<WizardFooter hideBack continueLabel="Browse services" onContinue={close} />}
-      >
-        <div className="space-y-2">
-          {services.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setServiceId(s.id)}
-              className="flex w-full items-start gap-3 rounded-xl border border-slate-200/80 bg-white/60 px-4 py-3 text-left hover:bg-white/90"
-            >
-              <span>
-                <span className="block font-semibold text-slate-800">{s.name}</span>
-                <span className="text-sm text-slate-500">{s.shortDesc}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-        {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
-      </WizardShell>
+    // Full service picker (no modal) — all active services
+    return (
+      <div>
+        {loading ? (
+          <p className="px-4 py-8 text-sm text-muted sm:px-6">Loading services…</p>
+        ) : null}
+        {error ? <p className="px-4 py-2 text-sm text-danger sm:px-6">{error}</p> : null}
+        <PageBackdrop services={services} onSelect={setServiceId} />
+        {!loading && !services.length && !error ? (
+          <p className="px-4 pb-10 text-sm text-muted sm:px-6">No services available yet.</p>
+        ) : null}
+      </div>
     )
   } else if (commonIndex < 0 && !visible.length) {
     modal = (
@@ -549,5 +554,5 @@ export default function NewRequest() {
     )
   }
 
-  return withBackdrop(services, modal)
+  return withBackdrop(services, modal, null)
 }

@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Logo from '../components/Logo'
 import { api } from '../api/client'
 
 export default function ForgotPassword() {
+  const [params] = useSearchParams()
+  const role = params.get('role') === 'PROFESSIONAL' ? 'PROFESSIONAL' : 'CUSTOMER'
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -15,7 +17,7 @@ export default function ForgotPassword() {
     setError('')
     setMessage('')
     try {
-      const data = await api.forgotPassword({ email })
+      const data = await api.forgotPassword({ email, role })
       setMessage(data.message || 'If that email exists, a reset link was sent')
     } catch (err) {
       setError(err.message)
@@ -24,21 +26,32 @@ export default function ForgotPassword() {
     }
   }
 
+  const backTo = role === 'PROFESSIONAL' ? '/business/login' : '/login'
+
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-12">
       <Logo to="/" size="lg" className="mb-6 self-center" />
       <h1 className="text-center font-display text-3xl font-bold text-navy">Forgot password</h1>
+      <p className="mt-2 text-center text-sm text-muted">
+        {role === 'PROFESSIONAL' ? 'Reset your Business Login password.' : 'Reset your Login password.'}
+      </p>
       <form onSubmit={onSubmit} className="surface mt-8 space-y-4 p-6">
         <div>
           <label className="label">Email</label>
-          <input type="email" required className="input-field" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            type="email"
+            required
+            className="input-field"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         {error ? <p className="text-sm text-danger">{error}</p> : null}
         {message ? <p className="text-sm text-success">{message}</p> : null}
         <button type="submit" className="btn-primary w-full" disabled={loading}>
           {loading ? 'Sending…' : 'Send reset link'}
         </button>
-        <Link to="/login" className="block text-center text-sm font-semibold text-primary">
+        <Link to={backTo} className="block text-center text-sm font-semibold text-primary">
           Back to login
         </Link>
       </form>
