@@ -8,11 +8,13 @@ import { useAuth } from '../context/AuthContext'
 const publicLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/services', label: 'Services' },
+  { to: '/categories', label: 'Categories' },
 ]
 
 const customerLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/services', label: 'Services' },
+  { to: '/categories', label: 'Categories' },
   { to: '/app', label: 'Dashborad', end: true },
   { to: '/app/requests', label: 'My Requests', end: true },
   { to: '/app/requested-services', label: 'My Requested Services' },

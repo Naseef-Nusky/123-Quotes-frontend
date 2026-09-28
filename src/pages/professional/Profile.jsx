@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
+import PhoneInput from '../../components/PhoneInput'
+import {
+  DEFAULT_COUNTRY_CODE,
+  dialForCountry,
+  formatIntlPhone,
+  parseIntlPhone,
+} from '../../data/countryDialCodes'
 import { useAuth } from '../../context/AuthContext'
 
 export default function ProProfile() {
@@ -8,7 +15,7 @@ export default function ProProfile() {
   const [services, setServices] = useState([])
   const [selectedServices, setSelectedServices] = useState([])
   const [areasText, setAreasText] = useState('')
-  const [form, setForm] = useState({})
+  const [form, setForm] = useState({ countryCode: DEFAULT_COUNTRY_CODE })
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
@@ -23,10 +30,12 @@ export default function ProProfile() {
         setProfile(prof.profile)
         setServices(svc.services || [])
         setSelectedServices((prof.profile.services || []).map((s) => s.serviceId || s.service?.id))
+        const parsed = parseIntlPhone(prof.profile.phone || '')
         setForm({
           companyName: prof.profile.companyName || '',
           contactName: prof.profile.contactName || '',
-          phone: prof.profile.phone || '',
+          phone: parsed.localNumber,
+          countryCode: parsed.countryCode || DEFAULT_COUNTRY_CODE,
           website: prof.profile.website || '',
           bio: prof.profile.bio || '',
           postcode: prof.profile.postcode || '',
@@ -56,7 +65,13 @@ export default function ProProfile() {
     setError('')
     setMessage('')
     try {
-      await api.updateMyProfile(form)
+      const { countryCode: _countryCode, ...profileFields } = form
+      await api.updateMyProfile({
+        ...profileFields,
+        phone: form.phone
+          ? formatIntlPhone(dialForCountry(form.countryCode), form.phone)
+          : '',
+      })
       await api.setMyServices(selectedServices)
       const areas = areasText
         .split('\n')
@@ -89,7 +104,6 @@ export default function ProProfile() {
         {[
           ['companyName', 'Company name'],
           ['contactName', 'Contact name'],
-          ['phone', 'Phone'],
           ['website', 'Website'],
           ['postcode', 'Postcode'],
           ['city', 'City'],
@@ -104,6 +118,15 @@ export default function ProProfile() {
             />
           </div>
         ))}
+        <div>
+          <label className="label">Phone</label>
+          <PhoneInput
+            dialCode={form.countryCode || DEFAULT_COUNTRY_CODE}
+            onDialCodeChange={(code) => setForm({ ...form, countryCode: code })}
+            value={form.phone || ''}
+            onChange={(v) => setForm({ ...form, phone: v })}
+          />
+        </div>
         <div>
           <label className="label">Bio</label>
           <textarea

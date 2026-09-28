@@ -6,6 +6,8 @@ import { useAuth } from './context/AuthContext'
 
 import Home from './pages/Home'
 import BusinessSignup from './pages/BusinessSignup'
+import Categories from './pages/Categories'
+import CategoryDetail from './pages/CategoryDetail'
 import Services from './pages/Services'
 import ServiceDetail from './pages/ServiceDetail'
 import HowItWorks from './pages/HowItWorks'
@@ -57,6 +59,8 @@ export default function App() {
         <Route path="set-password" element={<SetPassword />} />
         <Route path="business/signup" element={<BusinessSignup />} />
         <Route path="business/login" element={<Login audience="business" />} />
+        <Route path="categories" element={<Categories />} />
+        <Route path="categories/:slug" element={<CategoryDetail />} />
         <Route path="services" element={<Services />} />
         <Route path="services/web-development" element={<Navigate to="/web-developer" replace />} />
         <Route path="services/photographers" element={<Navigate to="/wedding-photographers" replace />} />

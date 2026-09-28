@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
+import PhoneInput from '../../components/PhoneInput'
+import {
+  DEFAULT_COUNTRY_CODE,
+  dialForCountry,
+  formatIntlPhone,
+  parseIntlPhone,
+} from '../../data/countryDialCodes'
 import { formatMoney } from '../../utils/questionnaire'
 import { Building2 } from 'lucide-react'
 
@@ -8,6 +15,7 @@ export default function Settings() {
     name: '',
     email: '',
     contactNo: '',
+    countryCode: DEFAULT_COUNTRY_CODE,
     description: '',
     companyName: '',
     website: '',
@@ -23,10 +31,12 @@ export default function Settings() {
       .getMyProfile()
       .then((d) => {
         const p = d.profile
+        const parsed = parseIntlPhone(p.phone || '')
         setProfile({
           name: p.contactName || '',
           email: '',
-          contactNo: p.phone || '',
+          contactNo: parsed.localNumber,
+          countryCode: parsed.countryCode || DEFAULT_COUNTRY_CODE,
           description: p.bio || '',
           companyName: p.companyName || '',
           website: p.website || '',
@@ -56,7 +66,9 @@ export default function Settings() {
     try {
       await api.updateMyProfile({
         contactName: profile.name,
-        phone: profile.contactNo,
+        phone: profile.contactNo
+          ? formatIntlPhone(dialForCountry(profile.countryCode), profile.contactNo)
+          : '',
         bio: profile.description,
         companyName: profile.companyName,
         website: profile.website,
@@ -114,7 +126,12 @@ export default function Settings() {
           </div>
           <div>
             <label className="label">Contact No</label>
-            <input className="input-field" value={profile.contactNo} onChange={update('contactNo')} />
+            <PhoneInput
+              dialCode={profile.countryCode || DEFAULT_COUNTRY_CODE}
+              onDialCodeChange={(code) => setProfile((p) => ({ ...p, countryCode: code }))}
+              value={profile.contactNo}
+              onChange={(v) => setProfile((p) => ({ ...p, contactNo: v }))}
+            />
           </div>
           <div>
             <label className="label">Description</label>

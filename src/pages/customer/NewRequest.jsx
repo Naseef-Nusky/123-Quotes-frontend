@@ -18,9 +18,10 @@ import {
   validateRequired,
 } from '../../utils/questionnaire'
 import {
-  COUNTRY_DIAL_CODES,
   DEFAULT_COUNTRY_CODE,
+  dialForCountry,
   formatIntlPhone,
+  parseIntlPhone,
 } from '../../data/countryDialCodes'
 
 function splitName(full) {
@@ -35,7 +36,7 @@ function splitName(full) {
 
 function PageBackdrop({ services, onSelect }) {
   return (
-    <div className="w-full px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
       <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">Services</h1>
       <p className="mt-2 max-w-2xl text-slate">Choose a service to start a quote request.</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,12 +98,11 @@ export default function NewRequest() {
   const [fullName, setFullName] = useState(
     [user?.customer?.firstName, user?.customer?.lastName].filter(Boolean).join(' ') || '',
   )
-  const [phone, setPhone] = useState(
-    String(user?.customer?.phone || '')
-      .replace(/^\+?44/, '')
-      .replace(/\D/g, ''),
+  const initialPhone = parseIntlPhone(user?.customer?.phone || '')
+  const [phone, setPhone] = useState(initialPhone.localNumber)
+  const [countryCode, setCountryCode] = useState(
+    initialPhone.countryCode || DEFAULT_COUNTRY_CODE,
   )
-  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE)
   const [details, setDetails] = useState('')
   const [files, setFiles] = useState([null, null, null])
 
@@ -284,8 +284,7 @@ export default function NewRequest() {
         return
       }
 
-      const dial =
-        COUNTRY_DIAL_CODES.find((c) => c.code === countryCode)?.dial || '44'
+      const dial = dialForCountry(countryCode)
       const data = await api.submitGuestRequest({
         firstName,
         lastName,
