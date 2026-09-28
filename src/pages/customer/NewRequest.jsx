@@ -191,7 +191,9 @@ export default function NewRequest() {
     if (currentQuestion.isRequired) {
       const missing = validateRequired([currentQuestion], answers)
       if (missing.length) {
-        setError('Please select an option to continue')
+        const isText =
+          currentQuestion.type === 'TEXT' || currentQuestion.type === 'TEXTAREA'
+        setError(isText ? 'Please enter an answer to continue' : 'Please select an option to continue')
         return
       }
     }
@@ -374,8 +376,8 @@ export default function NewRequest() {
     )
   } else if (commonIndex < 0 && currentQuestion) {
     const q = currentQuestion
-    const useRadioList = q.type === 'SINGLE_CHOICE' || q.type === 'DROPDOWN'
     const title = q.label?.trim().endsWith('?') ? q.label : `${q.label}?`
+    const isSingleChoice = q.type === 'SINGLE_CHOICE'
     modal = (
       <WizardShell
         title={title}
@@ -389,7 +391,7 @@ export default function NewRequest() {
           />
         }
       >
-        {useRadioList ? (
+        {isSingleChoice ? (
           <RadioOptionList
             name={`q-${q.id}`}
             options={(q.options || []).map((o) => ({ value: o.value, label: o.label }))}
@@ -401,6 +403,7 @@ export default function NewRequest() {
             question={q}
             value={answers[q.id]}
             onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
+            hideLabel
           />
         )}
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}

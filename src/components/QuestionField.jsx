@@ -1,19 +1,33 @@
-export default function QuestionField({ question, value, onChange }) {
+export default function QuestionField({ question, value, onChange, hideLabel = false }) {
   const id = `q-${question.id}`
+  const requiredMark = question.isRequired ? <span className="text-danger"> *</span> : null
+
+  function Label() {
+    if (hideLabel) return null
+    return (
+      <label className="label" htmlFor={id}>
+        {question.label}
+        {requiredMark}
+      </label>
+    )
+  }
+
+  function Help() {
+    if (!question.helpText) return null
+    return <p className={`mb-2 text-sm text-muted ${hideLabel ? '' : ''}`}>{question.helpText}</p>
+  }
 
   if (question.type === 'TEXT') {
     return (
       <div>
-        <label className="label" htmlFor={id}>
-          {question.label}
-          {question.isRequired ? <span className="text-danger"> *</span> : null}
-        </label>
-        {question.helpText ? <p className="mb-2 text-sm text-muted">{question.helpText}</p> : null}
+        <Label />
+        <Help />
         <input
           id={id}
           className="input-field"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={hideLabel ? 'Type your answer…' : undefined}
         />
       </div>
     )
@@ -22,17 +36,15 @@ export default function QuestionField({ question, value, onChange }) {
   if (question.type === 'TEXTAREA') {
     return (
       <div>
-        <label className="label" htmlFor={id}>
-          {question.label}
-          {question.isRequired ? <span className="text-danger"> *</span> : null}
-        </label>
-        {question.helpText ? <p className="mb-2 text-sm text-muted">{question.helpText}</p> : null}
+        <Label />
+        <Help />
         <textarea
           id={id}
           rows={4}
           className="input-field resize-y"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={hideLabel ? 'Type your answer…' : undefined}
         />
       </div>
     )
@@ -41,11 +53,8 @@ export default function QuestionField({ question, value, onChange }) {
   if (question.type === 'DROPDOWN') {
     return (
       <div>
-        <label className="label" htmlFor={id}>
-          {question.label}
-          {question.isRequired ? <span className="text-danger"> *</span> : null}
-        </label>
-        {question.helpText ? <p className="mb-2 text-sm text-muted">{question.helpText}</p> : null}
+        <Label />
+        <Help />
         <select
           id={id}
           className="input-field"
@@ -54,7 +63,7 @@ export default function QuestionField({ question, value, onChange }) {
         >
           <option value="">Select…</option>
           {(question.options || []).map((opt) => (
-            <option key={opt.id} value={opt.value}>
+            <option key={opt.id || opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
@@ -64,22 +73,29 @@ export default function QuestionField({ question, value, onChange }) {
   }
 
   if (question.type === 'MULTIPLE_CHOICE') {
-    const selected = Array.isArray(value) ? value : []
+    const selected = Array.isArray(value)
+      ? value.map(String)
+      : String(value || '')
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean)
     return (
       <fieldset>
-        <legend className="label">
-          {question.label}
-          {question.isRequired ? <span className="text-danger"> *</span> : null}
-        </legend>
-        {question.helpText ? <p className="mb-2 text-sm text-muted">{question.helpText}</p> : null}
+        {!hideLabel ? (
+          <legend className="label">
+            {question.label}
+            {requiredMark}
+          </legend>
+        ) : null}
+        <Help />
         <div className="flex flex-col gap-2">
           {(question.options || []).map((opt) => {
             const checked = selected.includes(opt.value)
             return (
               <label
-                key={opt.id}
+                key={opt.id || opt.value}
                 className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
-                  checked ? 'border-primary bg-blue-50' : 'border-line bg-white hover:border-blue-200'
+                  checked ? 'border-primary bg-primary/10' : 'border-line bg-white hover:border-primary/30'
                 }`}
               >
                 <input
@@ -93,7 +109,7 @@ export default function QuestionField({ question, value, onChange }) {
                     onChange(next)
                   }}
                 />
-                <span className="text-sm font-medium">{opt.label}</span>
+                <span className="text-sm font-medium text-navy">{opt.label}</span>
               </label>
             )
           })}
@@ -105,19 +121,21 @@ export default function QuestionField({ question, value, onChange }) {
   // SINGLE_CHOICE default
   return (
     <fieldset>
-      <legend className="label">
-        {question.label}
-        {question.isRequired ? <span className="text-danger"> *</span> : null}
-      </legend>
-      {question.helpText ? <p className="mb-2 text-sm text-muted">{question.helpText}</p> : null}
+      {!hideLabel ? (
+        <legend className="label">
+          {question.label}
+          {requiredMark}
+        </legend>
+      ) : null}
+      <Help />
       <div className="grid gap-2 sm:grid-cols-2">
         {(question.options || []).map((opt) => {
           const checked = value === opt.value
           return (
             <label
-              key={opt.id}
+              key={opt.id || opt.value}
               className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
-                checked ? 'border-primary bg-blue-50' : 'border-line bg-white hover:border-blue-200'
+                checked ? 'border-primary bg-primary/10' : 'border-line bg-white hover:border-primary/30'
               }`}
             >
               <input
@@ -127,7 +145,7 @@ export default function QuestionField({ question, value, onChange }) {
                 checked={checked}
                 onChange={() => onChange(opt.value)}
               />
-              <span className="text-sm font-medium">{opt.label}</span>
+              <span className="text-sm font-medium text-navy">{opt.label}</span>
             </label>
           )
         })}
