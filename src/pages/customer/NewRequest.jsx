@@ -35,37 +35,57 @@ function splitName(full) {
 }
 
 function PageBackdrop({ services, onSelect }) {
+  const list = services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
+    <div className="w-full px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
       <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">Services</h1>
       <p className="mt-2 max-w-2xl text-slate">Choose a service to start a quote request.</p>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {(services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]).map((s) => {
-          const cardClass =
-            'surface p-5 text-left transition hover:border-primary/40 hover:shadow-md'
-          if (onSelect && s.name) {
-            return (
-              <button key={s.id} type="button" onClick={() => onSelect(s.id)} className={cardClass}>
+
+      <ul className="mt-8 w-full divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
+        {list.map((s) => {
+          const content = (
+            <>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold uppercase tracking-wider text-primary">
                   {s.category?.name || 'Service'}
                 </p>
-                <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name}</h2>
-                <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description || ' '}</p>
-                <p className="mt-4 text-sm font-bold text-primary">Get quotes →</p>
-              </button>
+                <h2 className="mt-1 font-display text-lg font-bold text-navy sm:text-xl">
+                  {s.name || '…'}
+                </h2>
+                {s.shortDesc || s.description ? (
+                  <p className="mt-1 line-clamp-2 text-sm text-muted">
+                    {s.shortDesc || s.description}
+                  </p>
+                ) : null}
+              </div>
+              {s.name ? (
+                <span className="shrink-0 text-sm font-bold text-primary">Get quotes →</span>
+              ) : null}
+            </>
+          )
+
+          if (onSelect && s.name) {
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(s.id)}
+                  className="flex w-full items-center gap-4 px-4 py-4 text-left transition hover:bg-[#eef7fc] sm:px-5"
+                >
+                  {content}
+                </button>
+              </li>
             )
           }
+
           return (
-            <div key={s.id} className={cardClass}>
-              <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                {s.category?.name || 'Service'}
-              </p>
-              <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name || '…'}</h2>
-              <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description || ' '}</p>
-            </div>
+            <li key={s.id} className="flex items-center gap-4 px-4 py-4 sm:px-5">
+              {content}
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
 }
