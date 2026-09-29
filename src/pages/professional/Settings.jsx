@@ -32,7 +32,6 @@ export default function Settings() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState('')
 
   useEffect(() => {
     api
@@ -100,13 +99,9 @@ export default function Settings() {
   }
 
   async function deleteAccount() {
-    if (confirmDelete.trim().toUpperCase() !== 'DELETE') {
-      setError('Type DELETE to confirm account deletion.')
-      return
-    }
     if (
       !window.confirm(
-        'This permanently deletes your business profile. You will also be removed from the admin panel. Continue?',
+        'Are you sure you want to delete your account? This permanently removes your business profile and cannot be undone.',
       )
     ) {
       return
@@ -216,26 +211,15 @@ export default function Settings() {
           <div className="rounded-2xl border border-danger/25 bg-danger/5 p-6">
             <h2 className="text-lg font-bold text-danger">Delete account</h2>
             <p className="mt-2 text-sm text-slate">
-              Permanently delete your business / professional profile. This also removes your
-              account from the admin panel (professionals list and related business registration
-              details). This cannot be undone.
+              Permanently delete your business profile. This cannot be undone.
             </p>
-            <label className="mt-4 block">
-              <span className="label">Type DELETE to confirm</span>
-              <input
-                className="input-field mt-1"
-                value={confirmDelete}
-                onChange={(e) => setConfirmDelete(e.target.value)}
-                placeholder="DELETE"
-              />
-            </label>
             <button
               type="button"
               className="mt-4 rounded-md bg-danger px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
               disabled={deleting}
               onClick={deleteAccount}
             >
-              {deleting ? 'Deleting…' : 'Delete my account'}
+              {deleting ? 'Deleting…' : 'Delete account'}
             </button>
           </div>
         </div>
