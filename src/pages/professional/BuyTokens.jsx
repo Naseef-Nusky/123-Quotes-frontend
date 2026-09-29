@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
+import SquareCheckoutModal from '../../components/SquareCheckoutModal'
 import { formatMoney } from '../../utils/questionnaire'
 import { useAuth } from '../../context/AuthContext'
 
@@ -10,7 +11,7 @@ export default function BuyTokens() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
-  const [buying, setBuying] = useState(null)
+  const [checkoutPkg, setCheckoutPkg] = useState(null)
 
   useEffect(() => {
     api
@@ -19,25 +20,6 @@ export default function BuyTokens() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
-
-  async function purchase(packageId) {
-    setBuying(packageId)
-    setError('')
-    setMessage('')
-    try {
-      const data = await api.buyTokens(packageId)
-      setMessage(
-        data.tokensAdded
-          ? `Added ${data.tokensAdded} tokens successfully.`
-          : data.message || 'Purchase completed.',
-      )
-      await refreshMe()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setBuying(null)
-    }
-  }
 
   return (
     <div>
@@ -55,19 +37,30 @@ export default function BuyTokens() {
           <div key={pkg.id} className="surface flex flex-col p-6">
             <h2 className="font-display text-2xl font-bold text-navy">{pkg.name}</h2>
             <p className="mt-2 text-sm text-muted">{pkg.description}</p>
-            <p className="mt-6 font-display text-3xl font-extrabold">{formatMoney(pkg.priceCents, pkg.currency)}</p>
+            <p className="mt-6 font-display text-3xl font-extrabold">
+              {formatMoney(pkg.priceCents, pkg.currency)}
+            </p>
             <p className="text-sm font-semibold text-primary">{pkg.tokens} tokens</p>
-            <button
-              type="button"
-              className="btn-primary mt-6"
-              disabled={buying === pkg.id}
-              onClick={() => purchase(pkg.id)}
-            >
-              {buying === pkg.id ? 'Purchasing…' : 'Buy package'}
+            <button type="button" className="btn-primary mt-6" onClick={() => setCheckoutPkg(pkg)}>
+              Buy with Square
             </button>
           </div>
         ))}
       </div>
+
+      <SquareCheckoutModal
+        open={Boolean(checkoutPkg)}
+        pkg={checkoutPkg}
+        onClose={() => setCheckoutPkg(null)}
+        onSuccess={async (data) => {
+          setMessage(
+            data.tokensAdded
+              ? `Added ${data.tokensAdded} tokens${data.mocked ? ' (mock)' : ''} successfully.`
+              : data.message || 'Purchase completed.',
+          )
+          await refreshMe()
+        }}
+      />
     </div>
   )
 }

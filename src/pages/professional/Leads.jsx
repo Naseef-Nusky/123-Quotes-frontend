@@ -11,6 +11,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { api } from '../../api/client'
+import SquareCheckoutModal from '../../components/SquareCheckoutModal'
 import { useAuth } from '../../context/AuthContext'
 
 function timeAgo(date) {
@@ -72,7 +73,7 @@ export default function ProLeads() {
   const [busyId, setBusyId] = useState(null)
   const [showRecharge, setShowRecharge] = useState(false)
   const [packages, setPackages] = useState([])
-  const [buyingId, setBuyingId] = useState(null)
+  const [checkoutPkg, setCheckoutPkg] = useState(null)
   const [rechargeError, setRechargeError] = useState('')
   const [declining, setDeclining] = useState(false)
 
@@ -183,34 +184,25 @@ export default function ProLeads() {
     }
   }
 
-  async function purchasePackage(pkg) {
-    setBuyingId(pkg.id)
-    setRechargeError('')
-    try {
-      await api.buyTokens(pkg.id)
-      await refreshMe?.()
-      setShowRecharge(false)
-      // Retry unlock after top-up if a locked lead is still selected
-      if (selected?.contactLocked) {
-        setBusyId(selected.id)
-        try {
-          await api.unlockLead(selected.id)
-          await refreshLeads()
-          await refreshMe?.()
-        } catch (err) {
-          if (isInsufficientTokensError(err)) {
-            openRecharge()
-          } else {
-            setError(err.message || 'Unlock failed')
-          }
-        } finally {
-          setBusyId(null)
+  async function afterPurchaseSuccess() {
+    await refreshMe?.()
+    setShowRecharge(false)
+    setCheckoutPkg(null)
+    if (selected?.contactLocked) {
+      setBusyId(selected.id)
+      try {
+        await api.unlockLead(selected.id)
+        await refreshLeads()
+        await refreshMe?.()
+      } catch (err) {
+        if (isInsufficientTokensError(err)) {
+          openRecharge()
+        } else {
+          setError(err.message || 'Unlock failed')
         }
+      } finally {
+        setBusyId(null)
       }
-    } catch (err) {
-      setRechargeError(err.message || 'Purchase failed')
-    } finally {
-      setBuyingId(null)
     }
   }
 
@@ -465,17 +457,27 @@ export default function ProLeads() {
                 <button
                   key={pkg.id}
                   type="button"
-                  disabled={buyingId === pkg.id || String(pkg.id).startsWith('fallback-')}
-                  onClick={() => purchasePackage(pkg)}
+                  disabled={String(pkg.id).startsWith('fallback-')}
+                  onClick={() => {
+                    setRechargeError('')
+                    setCheckoutPkg(pkg)
+                  }}
                   className="rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-3 py-3 text-sm font-bold text-white shadow-md shadow-navy/20 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {buyingId === pkg.id ? 'Buying…' : `${pkg.tokens} Points`}
+                  {`${pkg.tokens} Points`}
                 </button>
               ))}
             </div>
           </div>
         </div>
       ) : null}
+
+      <SquareCheckoutModal
+        open={Boolean(checkoutPkg)}
+        pkg={checkoutPkg}
+        onClose={() => setCheckoutPkg(null)}
+        onSuccess={afterPurchaseSuccess}
+      />
     </section>
   )
 }

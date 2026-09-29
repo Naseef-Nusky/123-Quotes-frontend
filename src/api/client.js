@@ -69,6 +69,7 @@ export const api = {
   deleteRequest: (id) => request(`/requests/${id}`, { method: 'DELETE' }),
 
   getPackages: () => request('/professionals/packages'),
+  getPaymentConfig: () => request('/professionals/payments/config'),
   getDirectory: (params = {}) => {
     const q = new URLSearchParams(params).toString()
     return request(`/professionals/directory${q ? `?${q}` : ''}`)
@@ -83,10 +84,10 @@ export const api = {
     request('/professionals/me/services', { method: 'PUT', body: JSON.stringify({ serviceIds }) }),
   setMyAreas: (areas) =>
     request('/professionals/me/areas', { method: 'PUT', body: JSON.stringify({ areas }) }),
-  buyTokens: (packageId) =>
+  buyTokens: (packageId, sourceId) =>
     request('/professionals/me/tokens/purchase', {
       method: 'POST',
-      body: JSON.stringify({ packageId }),
+      body: JSON.stringify({ packageId, ...(sourceId ? { sourceId } : {}) }),
     }),
   tokenHistory: () => request('/professionals/me/tokens'),
 

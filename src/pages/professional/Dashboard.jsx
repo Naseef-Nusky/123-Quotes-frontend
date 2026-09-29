@@ -57,7 +57,7 @@ export default function ProDashboard() {
       value: tokens,
       hint: 'Unlock lead contacts',
       icon: Coins,
-      to: '/pro/settings',
+      to: '/pro/tokens',
       accent: 'from-[#38bdf8] to-[#0369a1]',
     },
     {
@@ -139,7 +139,7 @@ export default function ProDashboard() {
               <ArrowRight className="size-4" strokeWidth={2.2} />
             </Link>
             <Link
-              to="/pro/settings"
+              to="/pro/tokens"
               className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/15"
             >
               Buy tokens
