@@ -92,6 +92,7 @@ export const api = {
 
   myLeads: () => request('/leads/mine'),
   unlockLead: (id) => request(`/leads/${id}/unlock`, { method: 'POST', body: '{}' }),
+  declineLead: (id) => request(`/leads/${id}/decline`, { method: 'POST', body: '{}' }),
 
   getHomeContent: () => request('/content/home'),
   getContact: () => request('/content/contact'),

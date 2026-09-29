@@ -74,6 +74,7 @@ export default function ProLeads() {
   const [packages, setPackages] = useState([])
   const [buyingId, setBuyingId] = useState(null)
   const [rechargeError, setRechargeError] = useState('')
+  const [declining, setDeclining] = useState(false)
 
   const leads = useMemo(() => raw.map(mapLeadItem), [raw])
   const [selectedId, setSelectedId] = useState(null)
@@ -149,6 +150,36 @@ export default function ProLeads() {
       }
     } finally {
       setBusyId(null)
+    }
+  }
+
+  async function declineSelected() {
+    if (!selected?.id) return
+    if (!selected.contactLocked) {
+      setError('Cannot decline a lead you have already unlocked')
+      return
+    }
+    if (
+      !window.confirm(
+        `Decline this ${selected.service} lead? It will be removed from your list.`,
+      )
+    ) {
+      return
+    }
+
+    setDeclining(true)
+    setError('')
+    const declinedId = selected.id
+    try {
+      await api.declineLead(declinedId)
+      const d = await api.myLeads()
+      const list = d.leads || []
+      setRaw(list)
+      setSelectedId(list[0]?.lead?.id || list[0]?.id || null)
+    } catch (err) {
+      setError(err.message || 'Decline failed')
+    } finally {
+      setDeclining(false)
     }
   }
 
@@ -346,9 +377,11 @@ export default function ProLeads() {
                 </button>
                 <button
                   type="button"
-                  className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-slate transition hover:border-danger/30 hover:bg-danger/5 hover:text-danger"
+                  className="rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-slate transition hover:border-danger/30 hover:bg-danger/5 hover:text-danger disabled:opacity-60"
+                  disabled={declining || busyId === selected.id || !selected.contactLocked}
+                  onClick={declineSelected}
                 >
-                  Decline
+                  {declining ? 'Declining…' : 'Decline'}
                 </button>
               </div>
             </div>
