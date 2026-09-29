@@ -39,10 +39,10 @@ function PageBackdrop({ services, onSelect }) {
 
   return (
     <div className="w-full px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
-      <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">Services</h1>
-      <p className="mt-2 max-w-2xl text-slate">Choose a service to start a quote request.</p>
+      <h1 className="text-lg font-bold text-navy sm:text-xl">Services</h1>
+      <p className="mt-1 max-w-2xl text-sm text-muted">Choose a service to start a quote request.</p>
 
-      <ul className="mt-8 w-full divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
+      <ul className="mt-6 w-full divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
         {list.map((s) => {
           const content = (
             <>
@@ -50,7 +50,7 @@ function PageBackdrop({ services, onSelect }) {
                 <p className="text-xs font-bold uppercase tracking-wider text-primary">
                   {s.category?.name || 'Service'}
                 </p>
-                <h2 className="mt-1 font-display text-lg font-bold text-navy sm:text-xl">
+                <h2 className="mt-1 text-base font-bold text-navy sm:text-lg">
                   {s.name || '…'}
                 </h2>
                 {s.shortDesc || s.description ? (
@@ -185,7 +185,19 @@ export default function NewRequest() {
   const serviceName = services.find((s) => s.id === serviceId)?.name || 'Service'
 
   function close() {
-    navigate(isCustomer ? '/app' : '/services')
+    // Close the wizard and return to the service list on this page
+    // (don't leave New Request / jump to dashboard).
+    setServiceId('')
+    setQuestions([])
+    setAnswers({})
+    setQIndex(0)
+    setCommonIndex(-1)
+    setError('')
+    setDone(null)
+    setBusy(false)
+    setFrequency('')
+    setDetails('')
+    setFiles([null, null, null])
   }
 
   function goBack() {

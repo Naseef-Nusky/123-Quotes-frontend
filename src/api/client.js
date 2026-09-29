@@ -78,6 +78,7 @@ export const api = {
   getMyProfile: () => request('/professionals/me'),
   updateMyProfile: (body) =>
     request('/professionals/me', { method: 'PUT', body: JSON.stringify(body) }),
+  deleteMyAccount: () => request('/professionals/me', { method: 'DELETE' }),
   setMyServices: (serviceIds) =>
     request('/professionals/me/services', { method: 'PUT', body: JSON.stringify({ serviceIds }) }),
   setMyAreas: (areas) =>

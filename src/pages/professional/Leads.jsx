@@ -7,10 +7,11 @@ import {
   Mail,
   MapPin,
   Phone,
-  Users,
+  X,
   Zap,
 } from 'lucide-react'
 import { api } from '../../api/client'
+import { useAuth } from '../../context/AuthContext'
 
 function timeAgo(date) {
   if (!date) return '—'
@@ -21,7 +22,7 @@ function timeAgo(date) {
   const hr = Math.floor(min / 60)
   if (hr < 24) return `${hr}h ago`
   const days = Math.floor(hr / 24)
-  if (days < 30) return `${days}d ago`
+  if (days < 30) return `${days} Day(s) ago`
   return `${Math.floor(days / 30)}mo ago`
 }
 
@@ -58,16 +59,27 @@ function mapLeadItem(item) {
   }
 }
 
+function isInsufficientTokensError(err) {
+  const msg = String(err?.message || err?.data?.message || '').toLowerCase()
+  return msg.includes('insufficient') || msg.includes('token')
+}
+
 export default function ProLeads() {
+  const { user, refreshMe } = useAuth()
   const [raw, setRaw] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState(null)
+  const [showRecharge, setShowRecharge] = useState(false)
+  const [packages, setPackages] = useState([])
+  const [buyingId, setBuyingId] = useState(null)
+  const [rechargeError, setRechargeError] = useState('')
 
   const leads = useMemo(() => raw.map(mapLeadItem), [raw])
   const [selectedId, setSelectedId] = useState(null)
   const selected = leads.find((l) => l.id === selectedId) || leads[0]
   const lockedCount = leads.filter((l) => l.contactLocked).length
+  const tokenBalance = user?.professional?.tokenBalance ?? 0
 
   useEffect(() => {
     let cancelled = false
@@ -90,18 +102,84 @@ export default function ProLeads() {
     }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    api
+      .getPackages()
+      .then((d) => {
+        if (!cancelled) setPackages((d.packages || []).filter((p) => p.isActive !== false))
+      })
+      .catch(() => {
+        if (!cancelled) setPackages([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  async function refreshLeads() {
+    const d = await api.myLeads()
+    setRaw(d.leads || [])
+  }
+
+  function openRecharge() {
+    setRechargeError('')
+    setShowRecharge(true)
+  }
+
   async function unlockSelected() {
     if (!selected?.id || !selected.contactLocked) return
-    setBusyId(selected.id)
     setError('')
+
+    if (tokenBalance < selected.tokenCost) {
+      openRecharge()
+      return
+    }
+
+    setBusyId(selected.id)
     try {
       await api.unlockLead(selected.id)
-      const d = await api.myLeads()
-      setRaw(d.leads || [])
+      await refreshLeads()
+      await refreshMe?.()
     } catch (err) {
-      setError(err.message || 'Unlock failed')
+      if (isInsufficientTokensError(err)) {
+        openRecharge()
+      } else {
+        setError(err.message || 'Unlock failed')
+      }
     } finally {
       setBusyId(null)
+    }
+  }
+
+  async function purchasePackage(pkg) {
+    setBuyingId(pkg.id)
+    setRechargeError('')
+    try {
+      await api.buyTokens(pkg.id)
+      await refreshMe?.()
+      setShowRecharge(false)
+      // Retry unlock after top-up if a locked lead is still selected
+      if (selected?.contactLocked) {
+        setBusyId(selected.id)
+        try {
+          await api.unlockLead(selected.id)
+          await refreshLeads()
+          await refreshMe?.()
+        } catch (err) {
+          if (isInsufficientTokensError(err)) {
+            openRecharge()
+          } else {
+            setError(err.message || 'Unlock failed')
+          }
+        } finally {
+          setBusyId(null)
+        }
+      }
+    } catch (err) {
+      setRechargeError(err.message || 'Purchase failed')
+    } finally {
+      setBuyingId(null)
     }
   }
 
@@ -260,15 +338,10 @@ export default function ProLeads() {
                   disabled={busyId === selected.id || !selected.contactLocked}
                   onClick={unlockSelected}
                 >
-                  {selected.contactLocked ? (
-                    <Lock className="size-4" strokeWidth={2} />
-                  ) : (
-                    <LockOpen className="size-4" strokeWidth={2} />
-                  )}
                   {selected.contactLocked
                     ? busyId === selected.id
-                      ? 'Unlocking…'
-                      : `Unlock contact · ${selected.tokenCost} token${selected.tokenCost === 1 ? '' : 's'}`
+                      ? 'Reaching out…'
+                      : `Reach out to ${selected.maskedName}`
                     : 'Contact unlocked'}
                 </button>
                 <button
@@ -281,27 +354,11 @@ export default function ProLeads() {
             </div>
 
             <div className="flex-1 space-y-5 px-5 py-6 sm:px-8">
-              <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Users className="size-4 text-primary" strokeWidth={2} />
-                  <h3 className="text-sm font-bold text-navy">Professional interest</h3>
-                </div>
-                <div className="mt-3 flex gap-1.5">
-                  {Array.from({ length: selected.maxRespond }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`h-2.5 flex-1 rounded-full ${
-                        i < selected.responded ? 'bg-primary' : 'bg-line'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="mt-2 text-sm text-slate">
-                  <span className="font-bold text-navy">
-                    {selected.responded}/{selected.maxRespond}
-                  </span>{' '}
-                  professionals have unlocked this lead.
-                </p>
+              <div className="rounded-md bg-[#e8e8e8] px-4 py-3 text-sm text-slate">
+                <span className="font-semibold text-navy">
+                  {selected.responded}/{selected.maxRespond}
+                </span>{' '}
+                Professionals have responded.
               </div>
 
               <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
@@ -332,6 +389,60 @@ export default function ProLeads() {
           </div>
         )}
       </div>
+
+      {showRecharge ? (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/45 px-4 pt-[12vh]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="recharge-title"
+          onClick={() => setShowRecharge(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-md bg-white px-6 pb-6 pt-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="absolute right-3 top-3 flex size-7 items-center justify-center rounded text-muted transition hover:bg-canvas hover:text-navy"
+              aria-label="Close"
+              onClick={() => setShowRecharge(false)}
+            >
+              <X className="size-5" strokeWidth={2} />
+            </button>
+
+            <h2 id="recharge-title" className="pr-8 text-center text-xl font-semibold text-navy">
+              You Need To Recharge
+            </h2>
+
+            {rechargeError ? (
+              <p className="mt-3 text-center text-sm text-danger">{rechargeError}</p>
+            ) : null}
+
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {(packages.length
+                ? packages
+                : [
+                    { id: 'fallback-100', tokens: 100 },
+                    { id: 'fallback-200', tokens: 200 },
+                    { id: 'fallback-500', tokens: 500 },
+                    { id: 'fallback-1000', tokens: 1000 },
+                  ]
+              ).map((pkg) => (
+                <button
+                  key={pkg.id}
+                  type="button"
+                  disabled={buyingId === pkg.id || String(pkg.id).startsWith('fallback-')}
+                  onClick={() => purchasePackage(pkg)}
+                  className="rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-3 py-3 text-sm font-bold text-white shadow-md shadow-navy/20 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {buyingId === pkg.id ? 'Buying…' : `${pkg.tokens} Points`}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

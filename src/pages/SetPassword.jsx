@@ -21,7 +21,8 @@ export default function SetPassword() {
   }, [params])
 
   function goLogin() {
-    navigate('/login', { replace: true })
+    const audience = params.get('audience')
+    navigate(audience === 'business' ? '/business/login' : '/login', { replace: true })
   }
 
   async function onSubmit(e) {
@@ -55,7 +56,9 @@ export default function SetPassword() {
           return
         }
       }
-      navigate('/login', { replace: true })
+      navigate(params.get('audience') === 'business' ? '/business/login' : '/login', {
+        replace: true,
+      })
     } catch (err) {
       setError(err.message || 'Could not set password')
     } finally {
@@ -63,10 +66,16 @@ export default function SetPassword() {
     }
   }
 
+  const loginPath = params.get('audience') === 'business' ? '/business/login' : '/login'
+
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-12">
       <h1 className="text-center font-display text-3xl font-bold text-navy">Set password</h1>
-      <p className="mt-2 text-center text-sm text-muted">Create a password to access your account.</p>
+      <p className="mt-2 text-center text-sm text-muted">
+        {params.get('audience') === 'business'
+          ? 'Create a password for your business account, then you can log in.'
+          : 'Create a password to access your account.'}
+      </p>
 
       <form onSubmit={onSubmit} className="surface mt-8 space-y-4 p-6">
         {!token ? (
@@ -130,15 +139,15 @@ export default function SetPassword() {
         {error ? <p className="text-sm text-danger">{error}</p> : null}
 
         <button type="submit" className="btn-primary w-full" disabled={loading || !token}>
-          {loading ? 'Saving…' : 'Set password'}
+          {loading ? 'Saving…' : 'Set password & continue'}
         </button>
 
         <div className="flex items-center justify-between gap-3 text-sm">
           <button type="button" onClick={goLogin} className="font-semibold text-slate hover:text-navy">
             Skip for now
           </button>
-          <Link to="/login" className="font-semibold text-primary">
-            Back to login
+          <Link to={loginPath} className="font-semibold text-primary">
+            {params.get('audience') === 'business' ? 'Business login' : 'Back to login'}
           </Link>
         </div>
       </form>

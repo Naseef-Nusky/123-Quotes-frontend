@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
 import PhoneInput from '../../components/PhoneInput'
 import {
@@ -9,8 +10,11 @@ import {
 } from '../../data/countryDialCodes'
 import { formatMoney } from '../../utils/questionnaire'
 import { Building2 } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
 
 export default function Settings() {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
   const [profile, setProfile] = useState({
     name: '',
     email: '',
@@ -25,6 +29,8 @@ export default function Settings() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState('')
 
   useEffect(() => {
     api
@@ -96,6 +102,32 @@ export default function Settings() {
     }
   }
 
+  async function deleteAccount() {
+    if (confirmDelete.trim().toUpperCase() !== 'DELETE') {
+      setError('Type DELETE to confirm account deletion.')
+      return
+    }
+    if (
+      !window.confirm(
+        'This permanently deletes your business profile. You will also be removed from the admin panel. Continue?',
+      )
+    ) {
+      return
+    }
+
+    setDeleting(true)
+    setError('')
+    setMessage('')
+    try {
+      await api.deleteMyAccount()
+      logout()
+      navigate('/business/login', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Failed to delete account')
+      setDeleting(false)
+    }
+  }
+
   return (
     <section className="w-full px-4 py-10 text-left sm:px-6">
       <div className="grid gap-10 lg:grid-cols-2">
@@ -151,30 +183,60 @@ export default function Settings() {
           </button>
         </form>
 
-        <div className="surface p-6">
-          <h2 className="text-lg font-bold text-navy">Tokens</h2>
-          <select
-            className="input-field mt-4"
-            value={selectedPkg}
-            onChange={(e) => setSelectedPkg(e.target.value)}
-          >
-            {packages.map((pkg) => (
-              <option key={pkg.id} value={pkg.id}>
-                Token - {pkg.tokens} ({formatMoney(pkg.priceCents, pkg.currency || 'GBP')})
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={payTokens}
-            className="mt-4 rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-5 py-2.5 text-sm font-bold text-white"
-          >
-            Pay with Square
-          </button>
-          <p className="mt-2 text-xs text-muted">Payments are processed securely via Square only.</p>
-          {!packages.length ? <p className="mt-4 text-sm text-muted">No packages available.</p> : null}
-          {error ? <p className="mt-4 text-left text-sm text-danger">{error}</p> : null}
-          {message ? <p className="mt-4 text-left text-sm text-primary">{message}</p> : null}
+        <div className="space-y-6">
+          <div className="surface p-6">
+            <h2 className="text-lg font-bold text-navy">Tokens</h2>
+            <select
+              className="input-field mt-4"
+              value={selectedPkg}
+              onChange={(e) => setSelectedPkg(e.target.value)}
+            >
+              {packages.map((pkg) => (
+                <option key={pkg.id} value={pkg.id}>
+                  Token - {pkg.tokens} ({formatMoney(pkg.priceCents, pkg.currency || 'GBP')})
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={payTokens}
+              className="mt-4 rounded-md bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-5 py-2.5 text-sm font-bold text-white"
+            >
+              Pay with Square
+            </button>
+            <p className="mt-2 text-xs text-muted">Payments are processed securely via Square only.</p>
+            {!packages.length ? <p className="mt-4 text-sm text-muted">No packages available.</p> : null}
+          </div>
+
+          <div className="rounded-2xl border border-danger/25 bg-danger/5 p-6">
+            <h2 className="text-lg font-bold text-danger">Delete account</h2>
+            <p className="mt-2 text-sm text-slate">
+              Permanently delete your business / professional profile. This also removes your
+              account from the admin panel (professionals list and related business registration
+              details). This cannot be undone.
+            </p>
+            <label className="mt-4 block">
+              <span className="label">Type DELETE to confirm</span>
+              <input
+                className="input-field"
+                value={confirmDelete}
+                onChange={(e) => setConfirmDelete(e.target.value)}
+                placeholder="DELETE"
+                autoComplete="off"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={deleteAccount}
+              disabled={deleting || confirmDelete.trim().toUpperCase() !== 'DELETE'}
+              className="mt-4 rounded-md bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+            >
+              {deleting ? 'Deleting…' : 'Delete my account'}
+            </button>
+          </div>
+
+          {error ? <p className="text-left text-sm text-danger">{error}</p> : null}
+          {message ? <p className="text-left text-sm text-primary">{message}</p> : null}
         </div>
       </div>
     </section>
