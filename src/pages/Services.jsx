@@ -51,9 +51,9 @@ export default function Services() {
   }, [services, query])
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <h1 className="font-display text-4xl font-bold text-navy">Services</h1>
           <p className="mt-2 max-w-2xl text-slate">Choose a service to start a quote request.</p>
           <p className="mt-3 text-sm">
@@ -63,7 +63,7 @@ export default function Services() {
           </p>
         </div>
 
-        <label className="relative block w-full max-w-sm">
+        <label className="relative block w-full max-w-sm shrink-0">
           <span className="sr-only">Search services</span>
           <Search
             className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
@@ -82,16 +82,22 @@ export default function Services() {
       {error ? <p className="mt-6 text-danger">{error}</p> : null}
       {loading ? <p className="mt-8 text-muted">Loading services…</p> : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((s) => (
           <Link
             key={s.id}
             to={`/request?service=${encodeURIComponent(s.slug)}`}
-            className="surface p-5 transition hover:border-primary/40 hover:shadow-md"
+            className="surface group flex h-full min-w-0 flex-col p-5 transition hover:border-primary/40 hover:shadow-md"
           >
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">{s.category?.name}</p>
-            <h2 className="mt-2 font-display text-xl font-bold text-navy">{s.name}</h2>
-            <p className="mt-2 text-sm text-muted">{s.shortDesc || s.description}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">
+              {s.category?.name}
+            </p>
+            <h2 className="mt-2 font-display text-xl font-bold text-navy group-hover:text-primary">
+              {s.name}
+            </h2>
+            <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-muted">
+              {s.shortDesc || s.description}
+            </p>
             <p className="mt-4 text-sm font-bold text-primary">Get quotes →</p>
           </Link>
         ))}

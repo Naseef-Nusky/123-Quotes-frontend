@@ -38,11 +38,11 @@ function PageBackdrop({ services, onSelect }) {
   const list = services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]
 
   return (
-    <div className="w-full px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 text-left sm:px-6 sm:py-10" aria-hidden={!onSelect}>
       <h1 className="text-lg font-bold text-navy sm:text-xl">Services</h1>
       <p className="mt-1 max-w-2xl text-sm text-muted">Choose a service to start a quote request.</p>
 
-      <ul className="mt-6 w-full divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
+      <ul className="mt-6 w-full divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_28px_rgba(10,47,92,0.06)]">
         {list.map((s) => {
           const content = (
             <>

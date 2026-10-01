@@ -67,15 +67,17 @@ export default function UserAvatarMenu({ settingsTo }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex max-w-[220px] items-center gap-2 rounded-full border border-line bg-white py-1 pl-1 pr-2.5 transition hover:border-primary/40 hover:shadow-sm"
+        className="inline-flex max-w-[min(100%,11rem)] items-center gap-1.5 rounded-full border border-line bg-white py-1 pl-1 pr-2 transition hover:border-primary/40 hover:shadow-sm sm:max-w-[220px] sm:gap-2 sm:pr-2.5"
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Account menu"
       >
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] text-xs font-bold text-white">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] text-xs font-bold text-white sm:size-9">
           {initials(name, email)}
         </span>
-        <span className="min-w-0 truncate text-left text-sm font-semibold text-navy">{name}</span>
+        <span className="hidden min-w-0 truncate text-left text-sm font-semibold text-navy sm:inline">
+          {name}
+        </span>
         <ChevronDown
           className={`size-4 shrink-0 text-slate transition ${open ? 'rotate-180' : ''}`}
           strokeWidth={2}

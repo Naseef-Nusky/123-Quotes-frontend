@@ -45,9 +45,9 @@ export default function Categories() {
   }, [categories, query])
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <h1 className="font-display text-4xl font-bold text-navy">Categories</h1>
           <p className="mt-2 max-w-2xl text-slate">
             Browse by category, then pick a service to get free quotes.
@@ -59,7 +59,7 @@ export default function Categories() {
           </p>
         </div>
 
-        <label className="relative block w-full max-w-sm">
+        <label className="relative block w-full max-w-sm shrink-0">
           <span className="sr-only">Search categories</span>
           <Search
             className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
@@ -78,20 +78,20 @@ export default function Categories() {
       {error ? <p className="mt-6 text-danger">{error}</p> : null}
       {loading ? <p className="mt-8 text-muted">Loading categories…</p> : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((c) => {
           const count = c.services?.length ?? 0
           return (
             <Link
               key={c.id}
               to={`/categories/${encodeURIComponent(c.slug)}`}
-              className="surface group p-5 transition hover:border-primary/40 hover:shadow-md"
+              className="surface group flex h-full min-w-0 flex-col p-5 transition hover:border-primary/40 hover:shadow-md"
             >
               <p className="text-xs font-bold uppercase tracking-wider text-primary">Category</p>
               <h2 className="mt-2 font-display text-xl font-bold text-navy group-hover:text-primary">
                 {c.name}
               </h2>
-              <p className="mt-2 text-sm text-muted">
+              <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-muted">
                 {c.description || `${count} service${count === 1 ? '' : 's'} available`}
               </p>
               <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary">

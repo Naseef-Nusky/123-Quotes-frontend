@@ -91,11 +91,11 @@ export default function PopularServicePage({ slug }) {
             </div>
           </div>
           {page.intro.image ? (
-            <div className="overflow-hidden">
+            <div className="overflow-hidden rounded-2xl border border-line/80 shadow-[0_8px_28px_rgba(10,47,92,0.08)]">
               <img
                 src={page.intro.image}
                 alt=""
-                className="h-full max-h-[340px] w-full object-cover"
+                className="aspect-[4/3] h-full max-h-[340px] w-full object-cover sm:aspect-[5/4]"
               />
             </div>
           ) : null}
@@ -112,11 +112,13 @@ export default function PopularServicePage({ slug }) {
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
             {HOW_IT_WORKS_STEPS.map((step) => (
               <article key={step.title} className="text-center">
-                <img
-                  src={step.image}
-                  alt=""
-                  className="mx-auto aspect-[4/3] w-full max-w-[280px] object-cover"
-                />
+                <div className="mx-auto overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_24px_rgba(10,47,92,0.06)]">
+                  <img
+                    src={step.image}
+                    alt=""
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                </div>
                 <h3 className="mt-4 text-base font-bold text-navy">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate">{step.text}</p>
               </article>
@@ -151,58 +153,75 @@ export default function PopularServicePage({ slug }) {
                 ))}
               </ul>
               {page.advantages.image ? (
-                <img
-                  src={page.advantages.image}
-                  alt=""
-                  className="w-full object-cover"
-                />
+                <div className="overflow-hidden rounded-2xl border border-line/80 shadow-[0_8px_28px_rgba(10,47,92,0.08)]">
+                  <img
+                    src={page.advantages.image}
+                    alt=""
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                </div>
               ) : null}
             </div>
             {page.advantages.cards?.length ? (
-              <div className="mt-12 grid gap-8 sm:grid-cols-2">
+              <div className="mt-12 grid gap-6 sm:grid-cols-2">
                 {page.advantages.cards.map((card) => (
-                  <article key={card.title}>
-                    <h3 className="text-lg font-bold text-navy">{card.title}</h3>
+                  <article
+                    key={card.title}
+                    className="overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)]"
+                  >
                     <img
                       src={card.image}
                       alt=""
-                      className="mt-3 aspect-[16/10] w-full object-cover"
+                      className="aspect-[16/10] w-full object-cover"
                     />
-                    <p className="mt-3 text-sm leading-relaxed text-slate">{card.text}</p>
+                    <div className="p-5">
+                      <h3 className="text-lg font-bold text-navy">{card.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-slate">{card.text}</p>
+                    </div>
                   </article>
                 ))}
               </div>
             ) : null}
           </>
         ) : page.advantages.layout === 'service-grid' ? (
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {(page.advantages.items || []).map((item) => (
-              <article key={item.title} className="flex h-full flex-col">
-                <h3 className="text-lg font-bold text-navy">{item.title}</h3>
+              <article
+                key={item.title}
+                className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)]"
+              >
                 {item.image ? (
                   <img
                     src={item.image}
                     alt=""
-                    className="mt-3 aspect-[16/10] w-full object-cover"
+                    className="aspect-[16/10] w-full object-cover"
                   />
                 ) : null}
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate">{item.text}</p>
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="text-lg font-bold text-navy">{item.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-slate">{item.text}</p>
+                </div>
               </article>
             ))}
           </div>
         ) : (
-          <div className="mt-10 grid gap-10 sm:grid-cols-2">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
             {(page.advantages.items || []).map((item) => (
-              <article key={item.title}>
-                <h3 className="text-lg font-bold text-navy">{item.title}</h3>
+              <article
+                key={item.title}
+                className="overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)]"
+              >
                 {item.image ? (
                   <img
                     src={item.image}
                     alt=""
-                    className="mt-3 aspect-[16/10] w-full object-cover"
+                    className="aspect-[16/10] w-full object-cover"
                   />
                 ) : null}
-                <p className="mt-3 text-sm leading-relaxed text-slate">{item.text}</p>
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-navy">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate">{item.text}</p>
+                </div>
               </article>
             ))}
           </div>
