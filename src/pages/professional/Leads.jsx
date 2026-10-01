@@ -54,7 +54,7 @@ function mapLeadItem(item) {
     emailMasked: unlocked ? customer.email || '—' : '••••@••••',
     details: answers.map((a) => ({ q: a.question, a: a.value })),
     responded: lead.unlockedCount || 0,
-    maxRespond: Math.max(lead.matchedCount || 5, 5),
+    maxRespond: lead.maxUnlocks > 0 ? lead.maxUnlocks : Math.max(lead.matchedCount || 0, lead.unlockedCount || 0, 1),
     contactLocked: !!lead.contactLocked,
     tokenCost: lead.tokenCost || 1,
   }
