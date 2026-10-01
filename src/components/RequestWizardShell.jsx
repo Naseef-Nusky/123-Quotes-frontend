@@ -82,29 +82,112 @@ export function WizardFooter({ onBack, onContinue, continueLabel = 'Continue', b
   )
 }
 
-export function RadioOptionList({ name, options, value, onChange }) {
+function ChoiceMark({ selected, control }) {
+  if (control === 'checkbox') {
+    return (
+      <span
+        className={`flex size-4 shrink-0 items-center justify-center rounded border ${
+          selected ? 'border-primary bg-primary text-white' : 'border-[#9db8cf] bg-white'
+        }`}
+        aria-hidden
+      >
+        {selected ? (
+          <svg viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M2.5 6.5l2.5 2.5 4.5-5" />
+          </svg>
+        ) : null}
+      </span>
+    )
+  }
+
   return (
-    <div className="overflow-hidden rounded-xl border border-[#d6e4f0] bg-white/60">
+    <span
+      className={`flex size-4 shrink-0 items-center justify-center rounded-full border ${
+        selected ? 'border-primary' : 'border-[#9db8cf] bg-white'
+      }`}
+      aria-hidden
+    >
+      {selected ? <span className="size-2 rounded-full bg-primary" /> : null}
+    </span>
+  )
+}
+
+/** Single-select options (radio or checkbox look). */
+export function RadioOptionList({
+  name,
+  options,
+  value,
+  onChange,
+  isSelected,
+  getToken,
+  control = 'radio',
+}) {
+  return (
+    <div
+      className="overflow-hidden rounded-xl border border-[#d6e4f0] bg-white/60"
+      role="radiogroup"
+      aria-label={name}
+    >
       {options.map((opt, i) => {
-        const selected = value === opt.value
+        const token = getToken ? getToken(opt) : opt.value
+        const selected = isSelected ? isSelected(opt, value) : value === opt.value
         return (
-          <label
-            key={opt.value}
-            className={`flex cursor-pointer items-center gap-3 px-4 py-3.5 transition ${
+          <button
+            key={opt.id || `${name}-${i}-${token}`}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(token)}
+            className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition ${
               i > 0 ? 'border-t border-[#d6e4f0]' : ''
             } ${selected ? 'bg-primary/10' : 'hover:bg-[#eef7fc]/80'}`}
           >
-            <input
-              type="radio"
-              name={name}
-              className="size-4 accent-primary"
-              checked={selected}
-              onChange={() => onChange(opt.value)}
-            />
+            <ChoiceMark selected={selected} control={control} />
             <span className="text-sm font-medium text-navy">{opt.label}</span>
-          </label>
+          </button>
         )
       })}
+    </div>
+  )
+}
+
+/** Multi-select options (checkbox or radio look). */
+export function CheckboxOptionList({
+  name,
+  options,
+  value,
+  onChange,
+  isSelected,
+  toggleOption,
+  control = 'checkbox',
+}) {
+  return (
+    <div>
+      <p className="mb-2 text-xs font-medium text-muted">Select all that apply</p>
+      <div
+        className="overflow-hidden rounded-xl border border-[#d6e4f0] bg-white/60"
+        role="group"
+        aria-label={name}
+      >
+        {options.map((opt, i) => {
+          const checked = isSelected ? isSelected(opt, value) : false
+          return (
+            <button
+              key={opt.id || `${name}-${i}`}
+              type="button"
+              role="checkbox"
+              aria-checked={checked}
+              onClick={() => onChange(toggleOption ? toggleOption(opt, value) : value)}
+              className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition ${
+                i > 0 ? 'border-t border-[#d6e4f0]' : ''
+              } ${checked ? 'bg-primary/10' : 'hover:bg-[#eef7fc]/80'}`}
+            >
+              <ChoiceMark selected={checked} control={control} />
+              <span className="text-sm font-medium text-navy">{opt.label}</span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

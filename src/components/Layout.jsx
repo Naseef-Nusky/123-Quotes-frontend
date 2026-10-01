@@ -34,7 +34,7 @@ export default function Layout({ variant = 'public', children }) {
   const logoTo = isCustomerPortal ? '/app' : '/'
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-white">
+    <div className="flex min-h-screen flex-col bg-white">
       <header className="sticky top-0 z-30 border-b border-line bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6">
           <div className="min-w-0 shrink">
