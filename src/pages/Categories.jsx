@@ -50,9 +50,17 @@ export default function Categories() {
   return (
     <div className="relative isolate overflow-hidden bg-canvas">
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[280px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.14),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_65%,#f4f8fc_100%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[280px] overflow-hidden"
         aria-hidden
-      />
+      >
+        <img
+          src="/banner-categories.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#f4f8fc]/95 via-[#f4f8fc]/75 to-[#f4f8fc]/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e8f4fb]/40 via-transparent to-[#f4f8fc]" />
+      </div>
 
       <div className="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">

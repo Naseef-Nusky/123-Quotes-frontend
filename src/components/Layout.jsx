@@ -138,26 +138,35 @@ export default function Layout({ variant = 'public', children }) {
       <main className="flex-1">{children ?? <Outlet />}</main>
 
       <footer className="mt-auto bg-[#0a2f5c] text-white">
-        <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6">
-          <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-white/90">
-            <Mail className="size-3.5 shrink-0 text-primary" strokeWidth={2} />
-            <a href="mailto:info@123quotes.co.uk" className="hover:text-primary">
+        <div className="mx-auto max-w-4xl px-4 py-8 text-center sm:px-6 sm:py-10">
+          <div className="flex flex-col items-center gap-3 text-sm text-white/90 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-2 sm:gap-y-1">
+            <a
+              href="mailto:info@123quotes.co.uk"
+              className="inline-flex max-w-full items-center justify-center gap-2 break-all hover:text-primary"
+            >
+              <Mail className="size-3.5 shrink-0 text-primary" strokeWidth={2} />
               info@123quotes.co.uk
             </a>
-            <span className="opacity-50">|</span>
-            <MapPin className="size-3.5 shrink-0 text-primary" strokeWidth={2} />
-            <span>1st Floor, 239 Kensington High St, London W8 6SN</span>
-          </p>
-          <p className="mt-4 text-sm text-white/80">
+            <span className="hidden opacity-50 sm:inline" aria-hidden>
+              |
+            </span>
+            <p className="inline-flex max-w-full items-center justify-center gap-1.5 whitespace-nowrap text-xs text-white/90 sm:gap-2 sm:text-sm">
+              <MapPin className="size-3.5 shrink-0 text-primary" strokeWidth={2} />
+              <span>1st Floor, 239 Kensington High St, London W8 6SN</span>
+            </p>
+          </div>
+          <p className="mt-4 flex flex-col items-center gap-2 text-sm text-white/80 sm:flex-row sm:justify-center sm:gap-0">
             <Link to="/terms" className="hover:text-primary">
               Terms of Use
             </Link>
-            <span className="mx-2 opacity-60">||</span>
+            <span className="hidden opacity-60 sm:mx-2 sm:inline" aria-hidden>
+              ||
+            </span>
             <Link to="/privacy" className="hover:text-primary">
               Terms and conditions
             </Link>
           </p>
-          <div className="mx-auto my-5 h-px max-w-xl bg-white/15" />
+          <div className="mx-auto my-5 h-px w-full max-w-xl bg-white/15" />
           <p className="text-xs text-white/55">© {new Date().getFullYear()}, All Rights Reserved</p>
         </div>
       </footer>
