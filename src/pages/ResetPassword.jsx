@@ -28,8 +28,8 @@ export default function ResetPassword() {
       setError('This reset link is invalid or missing. Please request a new one.')
       return
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
       return
     }
     if (password !== confirm) {
@@ -74,7 +74,7 @@ export default function ResetPassword() {
               id="new-password"
               type={showPassword ? 'text' : 'password'}
               required
-              minLength={6}
+              minLength={8}
               className="input-field pr-11"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -100,7 +100,7 @@ export default function ResetPassword() {
               id="confirm-password"
               type={showConfirm ? 'text' : 'password'}
               required
-              minLength={6}
+              minLength={8}
               className="input-field pr-11"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}

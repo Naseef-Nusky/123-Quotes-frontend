@@ -32,8 +32,8 @@ export default function SetPassword() {
       setError('This set-password link is invalid or missing.')
       return
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
       return
     }
     if (password !== confirm) {
@@ -93,7 +93,7 @@ export default function SetPassword() {
               id="set-password"
               type={showPassword ? 'text' : 'password'}
               required
-              minLength={6}
+              minLength={8}
               className="input-field pr-11"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -119,7 +119,7 @@ export default function SetPassword() {
               id="set-confirm"
               type={showConfirm ? 'text' : 'password'}
               required
-              minLength={6}
+              minLength={8}
               className="input-field pr-11"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
