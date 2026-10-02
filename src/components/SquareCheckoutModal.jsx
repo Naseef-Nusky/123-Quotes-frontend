@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk'
 import { X } from 'lucide-react'
 import { api } from '../api/client'
+import Loading from './Loading'
 import { formatMoney } from '../utils/questionnaire'
 
 const SANDBOX_SCRIPT = 'https://sandbox.web.squarecdn.com/v1/square.js'
@@ -151,9 +152,7 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
           {pkg.name} · {pkg.tokens} points · {amountLabel}
         </p>
 
-        {loadingConfig || !sdkReady ? (
-          <p className="mt-4 text-sm text-muted">Loading checkout…</p>
-        ) : null}
+        {loadingConfig || !sdkReady ? <Loading className="mt-4 py-6" /> : null}
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
 
         {!loadingConfig && sdkReady && config && !config.paymentsEnabled ? (

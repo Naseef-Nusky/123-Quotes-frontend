@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Building2 } from 'lucide-react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 
 export default function AvailablePros() {
   const [pros, setPros] = useState([])
@@ -29,7 +30,7 @@ export default function AvailablePros() {
   return (
     <section className="w-full px-4 py-10 text-left sm:px-6">
       <h1 className="text-2xl font-bold text-navy">Available Pros.</h1>
-      {loading ? <p className="mt-4 text-sm text-muted">Loading…</p> : null}
+      {loading ? <Loading className="mt-4 py-6" /> : null}
       {error ? <p className="mt-4 text-sm text-rose-600">{error}</p> : null}
       <div className="mt-6 divide-y divide-line border-y border-line">
         {pros.map((pro) => (

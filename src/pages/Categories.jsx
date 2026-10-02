@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
 import { api } from '../api/client'
+import Loading from '../components/Loading'
 
 export default function Categories() {
   const [categories, setCategories] = useState([])
@@ -76,7 +77,7 @@ export default function Categories() {
       </div>
 
       {error ? <p className="mt-6 text-danger">{error}</p> : null}
-      {loading ? <p className="mt-8 text-muted">Loading categories…</p> : null}
+      {loading ? <Loading className="mt-8" /> : null}
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((c) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
+import Loading from '../components/Loading'
 
 export default function ProfessionalProfile() {
   const { id } = useParams()
@@ -25,7 +26,7 @@ export default function ProfessionalProfile() {
     }
   }, [id])
 
-  if (loading) return <p className="mx-auto max-w-3xl px-4 py-16 text-muted">Loading…</p>
+  if (loading) return <Loading overlay />
   if (error) return <p className="mx-auto max-w-3xl px-4 py-16 text-danger">{error}</p>
   if (!pro) return null
 

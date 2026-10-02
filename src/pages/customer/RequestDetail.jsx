@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 import StatusBadge from '../../components/StatusBadge'
 import { formatDate } from '../../utils/questionnaire'
 
@@ -44,7 +45,7 @@ export default function RequestDetail() {
   }
 
   if (loading) {
-    return <p className="px-4 py-8 text-sm text-muted sm:px-6">Loading…</p>
+    return <Loading overlay />
   }
   if (error && !request) {
     return <p className="px-4 py-8 text-sm text-danger sm:px-6">{error}</p>

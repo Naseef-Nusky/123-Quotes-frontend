@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Mail, Phone, MapPin } from 'lucide-react'
 import Logo from '../components/Logo'
+import Loading from '../components/Loading'
 import { api } from '../api/client'
 
 export default function Contact() {
@@ -48,7 +49,7 @@ export default function Contact() {
       <p className="mt-2 text-slate">Questions about quotes, accounts or partnerships? Send a note.</p>
 
       <div className="surface mt-6 space-y-3 p-5 text-sm text-slate">
-        {loading ? <p className="text-muted">Loading contact details…</p> : null}
+        {loading ? <Loading className="py-6" /> : null}
         <p className="flex items-start gap-2.5">
           <Mail className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2} />
           <span>

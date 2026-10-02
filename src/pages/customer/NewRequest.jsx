@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
+import Loading from '../../components/Loading'
 import QuestionField from '../../components/QuestionField'
 import PostcodeInput from '../../components/PostcodeInput'
 import PhoneInput from '../../components/PhoneInput'
@@ -388,11 +389,7 @@ export default function NewRequest() {
     return (
       <div>
         <PageBackdrop services={[]} onSelect={null} />
-        <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-900/20 backdrop-blur-[2px]">
-          <div className="rounded-2xl border border-white/50 bg-white/80 px-8 py-5 text-sm font-medium text-slate-700 shadow-xl backdrop-blur-xl">
-            Loading…
-          </div>
-        </div>
+        <Loading overlay />
       </div>
     )
   }
@@ -441,13 +438,7 @@ export default function NewRequest() {
       </WizardShell>
     )
   } else if (questionsLoading) {
-    modal = (
-      <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-900/20 backdrop-blur-[2px]">
-        <div className="rounded-2xl border border-white/50 bg-white/80 px-8 py-5 text-sm font-medium text-slate-700 shadow-xl backdrop-blur-xl">
-          Loading questions…
-        </div>
-      </div>
-    )
+    modal = <Loading overlay />
   } else if (commonIndex < 0 && !visible.length) {
     modal = (
       <WizardShell

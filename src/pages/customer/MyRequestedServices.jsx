@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 
 function timeAgo(date) {
   if (!date) return '—'
@@ -70,7 +71,7 @@ export default function MyRequestedServices() {
       <h2 className="text-lg font-bold text-navy">Requested services</h2>
       <p className="mt-1 text-sm text-muted">Services you have already requested quotes for.</p>
 
-      {loading ? <p className="mt-4 text-sm text-muted">Loading…</p> : null}
+      {loading ? <Loading className="mt-4 py-6" /> : null}
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
       <div className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">

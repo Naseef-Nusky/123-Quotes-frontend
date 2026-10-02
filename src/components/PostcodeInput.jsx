@@ -195,7 +195,9 @@ export default function PostcodeInput({
           className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-[#d6e4f0] bg-white py-1 shadow-xl"
         >
           {loading ? (
-            <li className="px-3 py-3 text-sm text-muted">Loading postcodes…</li>
+            <li className="grid place-items-center px-3 py-3">
+              <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </li>
           ) : null}
           {!loading && !filtered.length ? (
             <li className="px-3 py-3 text-sm text-muted">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 import SquareCheckoutModal from '../../components/SquareCheckoutModal'
 import { formatMoney } from '../../utils/questionnaire'
 import { useAuth } from '../../context/AuthContext'
@@ -28,7 +29,7 @@ export default function BuyTokens() {
         View token history →
       </Link>
 
-      {loading ? <p className="mt-6 text-muted">Loading packages…</p> : null}
+      {loading ? <Loading className="mt-6" /> : null}
       {error ? <p className="mt-4 text-danger">{error}</p> : null}
       {message ? <p className="mt-4 text-success">{message}</p> : null}
 

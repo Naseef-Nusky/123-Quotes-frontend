@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
+import Loading from '../components/Loading'
 
 export default function ServiceDetail() {
   const { slug } = useParams()
@@ -26,7 +27,7 @@ export default function ServiceDetail() {
     }
   }, [slug])
 
-  if (loading) return <p className="mx-auto max-w-3xl px-4 py-16 text-muted">Loading…</p>
+  if (loading) return <Loading overlay />
   if (error) return <p className="mx-auto max-w-3xl px-4 py-16 text-danger">{error}</p>
   if (!service) return null
 

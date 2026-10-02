@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Building2, Phone, Mail } from 'lucide-react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 
 export default function ProPublicProfile() {
   const { id } = useParams()
@@ -34,11 +35,7 @@ export default function ProPublicProfile() {
   )
 
   if (loading) {
-    return (
-      <section className="w-full px-4 py-10 text-left sm:px-6">
-        <p className="text-sm text-muted">Loading profile…</p>
-      </section>
-    )
+    return <Loading overlay />
   }
 
   if (error || !pro) {

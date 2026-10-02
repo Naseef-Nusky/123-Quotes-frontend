@@ -8,6 +8,7 @@ import {
   Layers,
 } from 'lucide-react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 import { useAuth } from '../../context/AuthContext'
 
 export default function CustomerDashboard() {
@@ -181,7 +182,7 @@ export default function CustomerDashboard() {
             Request a quotation from matched providers.
           </p>
           {error ? <p className="mt-2 text-sm text-danger">{error}</p> : null}
-          {loading ? <p className="mt-2 text-sm text-muted">Loading…</p> : null}
+          {loading ? <Loading className="mt-2 py-6" /> : null}
         </div>
 
         <div className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pb-6 pr-1">

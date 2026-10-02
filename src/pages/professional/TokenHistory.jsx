@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 import { formatDate } from '../../utils/questionnaire'
 
 export default function TokenHistory() {
@@ -18,7 +19,7 @@ export default function TokenHistory() {
   return (
     <div>
       <p className="mb-6 text-slate">Purchases, unlocks and adjustments.</p>
-      {loading ? <p className="text-muted">Loading…</p> : null}
+      {loading ? <Loading className="py-6" /> : null}
       {error ? <p className="text-danger">{error}</p> : null}
 
       <div className="surface overflow-x-auto">

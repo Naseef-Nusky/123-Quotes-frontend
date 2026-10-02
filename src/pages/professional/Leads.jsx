@@ -11,6 +11,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 import SquareCheckoutModal from '../../components/SquareCheckoutModal'
 import { useAuth } from '../../context/AuthContext'
 
@@ -215,7 +216,13 @@ export default function ProLeads() {
             <div>
               <h2 className="text-base font-bold text-navy">Your leads</h2>
               <p className="mt-0.5 text-xs text-muted">
-                {loading ? 'Loading…' : `${leads.length} matched · ${lockedCount} locked`}
+                {loading ? (
+                  <span className="inline-flex items-center">
+                    <span className="size-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  </span>
+                ) : (
+                  `${leads.length} matched · ${lockedCount} locked`
+                )}
               </p>
             </div>
             <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -228,10 +235,8 @@ export default function ProLeads() {
           {error && !selected ? <p className="px-5 py-3 text-sm text-danger">{error}</p> : null}
 
           {loading ? (
-            <div className="space-y-3 p-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 animate-pulse rounded-2xl bg-canvas" />
-              ))}
+            <div className="grid place-items-center py-16">
+              <Loading className="py-0" />
             </div>
           ) : null}
 

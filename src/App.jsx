@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { CustomerShell, ProfessionalShell } from './components/PortalShell'
+import Loading from './components/Loading'
 import { useAuth } from './context/AuthContext'
 
 import Home from './pages/Home'
@@ -44,7 +45,7 @@ import ProProfile from './pages/professional/Profile'
 
 function RoleRedirect() {
   const { user, loading } = useAuth()
-  if (loading) return <p className="p-8 text-center text-muted">Loading…</p>
+  if (loading) return <Loading overlay />
   if (!user) return <Navigate to="/login" replace />
   if (user.role === 'PROFESSIONAL') return <Navigate to="/pro" replace />
   if (user.role === 'CUSTOMER') return <Navigate to="/app" replace />

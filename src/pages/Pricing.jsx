@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import Loading from '../components/Loading'
 import { formatMoney } from '../utils/questionnaire'
 import { useAuth } from '../context/AuthContext'
 
@@ -34,7 +35,7 @@ export default function Pricing() {
         Professionals unlock customer leads with tokens. Buy a pack that matches your pipeline.
       </p>
 
-      {loading ? <p className="mt-8 text-muted">Loading packages…</p> : null}
+      {loading ? <Loading className="mt-8" /> : null}
       {error ? <p className="mt-8 text-danger">{error}</p> : null}
 
       <div className="mt-10 grid gap-5 md:grid-cols-3">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
+import Loading from '../../components/Loading'
 import PhoneInput from '../../components/PhoneInput'
 import {
   DEFAULT_COUNTRY_CODE,
@@ -95,7 +96,7 @@ export default function ProProfile() {
     }
   }
 
-  if (loading) return <p className="text-muted">Loading profile…</p>
+  if (loading) return <Loading overlay />
 
   return (
     <form onSubmit={onSave} className="w-full space-y-6">

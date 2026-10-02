@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
 import { api } from '../api/client'
+import Loading from '../components/Loading'
 
 export default function Services() {
   const [services, setServices] = useState([])
@@ -91,7 +92,7 @@ export default function Services() {
         </div>
 
         {error ? <p className="mt-8 text-danger">{error}</p> : null}
-        {loading ? <p className="mt-8 text-muted">Loading services…</p> : null}
+        {loading ? <Loading className="mt-8" /> : null}
 
         {!loading && filtered.length ? (
           <ul className="mt-10 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">

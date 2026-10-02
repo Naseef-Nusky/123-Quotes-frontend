@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
+import Loading from '../components/Loading'
 
 export default function Professionals() {
   const [pros, setPros] = useState([])
@@ -115,7 +116,7 @@ export default function Professionals() {
         </p>
       ) : null}
 
-      {loading ? <p className="mt-8 text-muted">Loading directory…</p> : null}
+      {loading ? <Loading className="mt-8" /> : null}
       {error ? <p className="mt-8 text-danger">{error}</p> : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
