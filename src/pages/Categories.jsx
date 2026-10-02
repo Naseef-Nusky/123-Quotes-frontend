@@ -32,86 +32,110 @@ export default function Categories() {
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase()
-    if (!term) return categories
-    return categories.filter(
-      (c) =>
-        c.name.toLowerCase().includes(term) ||
-        String(c.description || '')
-          .toLowerCase()
-          .includes(term) ||
-        String(c.slug || '')
-          .toLowerCase()
-          .includes(term),
-    )
+    const list = term
+      ? categories.filter(
+          (c) =>
+            c.name.toLowerCase().includes(term) ||
+            String(c.description || '')
+              .toLowerCase()
+              .includes(term) ||
+            String(c.slug || '')
+              .toLowerCase()
+              .includes(term),
+        )
+      : categories
+    return [...list].sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
   }, [categories, query])
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="font-display text-4xl font-bold text-navy">Categories</h1>
-          <p className="mt-2 max-w-2xl text-slate">
-            Browse by category, then pick a service to get free quotes.
-          </p>
-          <p className="mt-3 text-sm">
-            <Link to="/services" className="font-semibold text-primary hover:underline">
-              View all services →
-            </Link>
-          </p>
+    <div className="relative isolate overflow-hidden bg-canvas">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[280px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.14),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_65%,#f4f8fc_100%)]"
+        aria-hidden
+      />
+
+      <div className="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 animate-fade-up">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Directory</p>
+            <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-navy sm:text-5xl">
+              Categories
+            </h1>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-slate">
+              Browse by category, then pick a service to get free quotes.
+            </p>
+            <p className="mt-3 text-sm">
+              <Link to="/services" className="font-semibold text-primary hover:underline">
+                View all services →
+              </Link>
+              {!loading ? (
+                <span className="ml-3 text-muted">
+                  {filtered.length} categor{filtered.length === 1 ? 'y' : 'ies'}
+                  {query.trim() ? ' matched' : ''}
+                </span>
+              ) : null}
+            </p>
+          </div>
+
+          <label className="relative block w-full max-w-sm shrink-0">
+            <span className="sr-only">Search categories</span>
+            <Search
+              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
+              strokeWidth={2}
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search categories…"
+              className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
         </div>
 
-        <label className="relative block w-full max-w-sm shrink-0">
-          <span className="sr-only">Search categories</span>
-          <Search
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
-            strokeWidth={2}
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search categories…"
-            className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-        </label>
+        {error ? <p className="mt-8 text-danger">{error}</p> : null}
+        {loading ? <Loading className="mt-8" /> : null}
+
+        {!loading && filtered.length ? (
+          <div className="mt-10 border-t border-line/80">
+            <ul className="divide-y divide-line/70">
+              {filtered.map((c) => {
+                const count = c.services?.length ?? 0
+                return (
+                  <li key={c.id}>
+                    <Link
+                      to={`/categories/${encodeURIComponent(c.slug)}`}
+                      className="group flex items-center gap-3 py-3.5 transition hover:bg-white/60 sm:gap-4 sm:px-1"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <h2 className="truncate font-display text-base font-bold text-navy transition group-hover:text-primary sm:text-lg">
+                          {c.name}
+                        </h2>
+                        {c.description ? (
+                          <p className="mt-0.5 line-clamp-1 text-sm text-muted">{c.description}</p>
+                        ) : null}
+                      </div>
+                      <span className="hidden shrink-0 text-xs font-semibold text-muted sm:inline">
+                        {count} service{count === 1 ? '' : 's'}
+                      </span>
+                      <ArrowRight
+                        className="size-4 shrink-0 text-primary opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-100"
+                        strokeWidth={2.25}
+                      />
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : null}
+
+        {!loading && !filtered.length && !error ? (
+          <p className="mt-8 text-muted">
+            {query.trim() ? 'No categories match your search.' : 'No categories available yet.'}
+          </p>
+        ) : null}
       </div>
-
-      {error ? <p className="mt-6 text-danger">{error}</p> : null}
-      {loading ? <Loading className="mt-8" /> : null}
-
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((c) => {
-          const count = c.services?.length ?? 0
-          return (
-            <Link
-              key={c.id}
-              to={`/categories/${encodeURIComponent(c.slug)}`}
-              className="surface group flex h-full min-w-0 flex-col p-5 transition hover:border-primary/40 hover:shadow-md"
-            >
-              <p className="text-xs font-bold uppercase tracking-wider text-primary">Category</p>
-              <h2 className="mt-2 font-display text-xl font-bold text-navy group-hover:text-primary">
-                {c.name}
-              </h2>
-              <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-muted">
-                {c.description || `${count} service${count === 1 ? '' : 's'} available`}
-              </p>
-              <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary">
-                {count} service{count === 1 ? '' : 's'}
-                <ArrowRight
-                  className="size-4 transition group-hover:translate-x-0.5"
-                  strokeWidth={2.25}
-                />
-              </p>
-            </Link>
-          )
-        })}
-      </div>
-
-      {!loading && !filtered.length && !error ? (
-        <p className="mt-8 text-muted">
-          {query.trim() ? 'No categories match your search.' : 'No categories available yet.'}
-        </p>
-      ) : null}
     </div>
   )
 }
