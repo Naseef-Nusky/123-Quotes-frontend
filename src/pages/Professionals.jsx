@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+import PostcodeInput from '../components/PostcodeInput'
 
 export default function Professionals() {
   const [pros, setPros] = useState([])
@@ -99,12 +100,14 @@ export default function Professionals() {
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
         />
-        <input
-          className="input-field sm:max-w-[160px]"
-          placeholder="Postcode"
-          value={postcodeInput}
-          onChange={(e) => setPostcodeInput(e.target.value)}
-        />
+        <div className="w-full sm:max-w-[220px]">
+          <PostcodeInput
+            value={postcodeInput}
+            onChange={setPostcodeInput}
+            placeholder="Postcode"
+            className="flex w-full items-center gap-2 rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+          />
+        </div>
         <button type="submit" className="btn-primary">
           Search
         </button>

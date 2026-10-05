@@ -49,18 +49,16 @@ function PageBackdrop({ services, onSelect }) {
   return (
     <div className="relative isolate overflow-hidden bg-canvas" aria-hidden={!onSelect}>
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[280px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.16),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_60%,#f4f8fc_100%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.16),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_60%,#f4f8fc_100%)]"
         aria-hidden
       />
-      <div className="relative mx-auto w-full max-w-6xl px-4 py-8 text-left sm:px-6 sm:py-10">
-        <h1 className="font-display text-3xl font-bold tracking-tight text-navy sm:text-4xl">
-          Services
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate sm:text-base">
+      <div className="relative w-full px-4 py-8 text-left sm:px-6 sm:py-10 lg:px-8">
+        <h1 className="text-lg font-bold text-navy">Services</h1>
+        <p className="mt-1 text-sm text-muted">
           Choose a service to start a quote request.
         </p>
 
-        <ul className="mt-8 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">
+        <ul className="mt-4 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">
           {list.map((s) => {
             const content = (
               <>
@@ -68,11 +66,11 @@ function PageBackdrop({ services, onSelect }) {
                   <p className="text-xs font-bold uppercase tracking-wider text-primary">
                     {s.category?.name || 'Service'}
                   </p>
-                  <h2 className="mt-1 font-display text-lg font-bold text-navy sm:text-xl">
+                  <h2 className="mt-1 text-lg font-bold text-navy">
                     {s.name || '…'}
                   </h2>
                   {s.shortDesc || s.description ? (
-                    <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate">
+                    <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate">
                       {s.shortDesc || s.description}
                     </p>
                   ) : null}
@@ -541,7 +539,7 @@ export default function NewRequest() {
         <PostcodeInput
           value={postcode}
           onChange={setPostcode}
-          placeholder="Search postcode…"
+          placeholder="Search or add postcode…"
         />
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </WizardShell>

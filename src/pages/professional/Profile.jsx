@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import Loading from '../../components/Loading'
 import PhoneInput from '../../components/PhoneInput'
+import PostcodeInput from '../../components/PostcodeInput'
 import {
   DEFAULT_COUNTRY_CODE,
   dialForCountry,
@@ -106,7 +107,6 @@ export default function ProProfile() {
           ['companyName', 'Company name'],
           ['contactName', 'Contact name'],
           ['website', 'Website'],
-          ['postcode', 'Postcode'],
           ['city', 'City'],
           ['address', 'Address'],
         ].map(([key, label]) => (
@@ -119,6 +119,14 @@ export default function ProProfile() {
             />
           </div>
         ))}
+        <div>
+          <label className="label">Postcode</label>
+          <PostcodeInput
+            value={form.postcode || ''}
+            onChange={(v) => setForm({ ...form, postcode: v })}
+            placeholder="Search or add postcode…"
+          />
+        </div>
         <div>
           <label className="label">Phone</label>
           <PhoneInput

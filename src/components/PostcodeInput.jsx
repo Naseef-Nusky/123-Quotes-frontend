@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, Plus, X } from 'lucide-react'
 import { api } from '../api/client'
 
 let cachedPostcodes = null
@@ -26,8 +26,15 @@ function optionLabel(row) {
   return [row.outcode, row.town].filter(Boolean).join(' — ')
 }
 
+function normalizePostcode(raw) {
+  return String(raw || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, ' ')
+}
+
 /**
- * Searchable select for UK postcodes — type to filter, click to select.
+ * Searchable postcode dropdown — pick from list or add a manual value.
  */
 export default function PostcodeInput({
   value,
@@ -37,6 +44,7 @@ export default function PostcodeInput({
   className = '',
   id,
   disabled,
+  allowCustom = true,
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -51,8 +59,25 @@ export default function PostcodeInput({
     [options, value],
   )
 
-  // Closed field shows selected label; open field shows search query
   const inputValue = open ? query : selected ? optionLabel(selected) : value || ''
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toUpperCase()
+    if (!q) return options.slice(0, 80)
+    return options
+      .filter(
+        (o) =>
+          o.outcode.includes(q) ||
+          (o.town && o.town.toUpperCase().includes(q)) ||
+          (o.region && o.region.toUpperCase().includes(q)),
+      )
+      .slice(0, 80)
+  }, [options, query])
+
+  const typed = normalizePostcode(query)
+  const hasExactOutcode = options.some((o) => o.outcode === typed)
+  const showCustom = allowCustom && typed.length >= 2 && !hasExactOutcode
+  const listLength = filtered.length + (showCustom ? 1 : 0)
 
   useEffect(() => {
     function onDoc(e) {
@@ -74,19 +99,6 @@ export default function PostcodeInput({
       .finally(() => setLoading(false))
   }, [options.length])
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toUpperCase()
-    if (!q) return options.slice(0, 80)
-    return options
-      .filter(
-        (o) =>
-          o.outcode.includes(q) ||
-          (o.town && o.town.toUpperCase().includes(q)) ||
-          (o.region && o.region.toUpperCase().includes(q)),
-      )
-      .slice(0, 80)
-  }, [options, query])
-
   useEffect(() => {
     setHighlight(0)
   }, [query, open])
@@ -94,6 +106,15 @@ export default function PostcodeInput({
   function pick(row) {
     onChange(row.outcode)
     onSelect?.(row)
+    setQuery('')
+    setOpen(false)
+  }
+
+  function pickCustom(raw) {
+    const v = normalizePostcode(raw)
+    if (!v) return
+    onChange(v)
+    onSelect?.({ outcode: v, town: null, region: null, custom: true })
     setQuery('')
     setOpen(false)
   }
@@ -112,14 +133,23 @@ export default function PostcodeInput({
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setOpen(true)
-      setHighlight((h) => Math.min(h + 1, Math.max(filtered.length - 1, 0)))
+      setHighlight((h) => Math.min(h + 1, Math.max(listLength - 1, 0)))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setHighlight((h) => Math.max(h - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      if (open && filtered[highlight]) pick(filtered[highlight])
-      else setOpen(true)
+      if (!open) {
+        setOpen(true)
+        return
+      }
+      if (showCustom && highlight === 0) {
+        pickCustom(typed)
+        return
+      }
+      const idx = showCustom ? highlight - 1 : highlight
+      if (filtered[idx]) pick(filtered[idx])
+      else if (showCustom) pickCustom(typed)
     } else if (e.key === 'Escape') {
       setOpen(false)
       setQuery('')
@@ -161,13 +191,13 @@ export default function PostcodeInput({
             const next = e.target.value.toUpperCase()
             setQuery(next)
             setOpen(true)
-            // Clear selection while searching for a new one
             if (value) onChange('')
           }}
           onFocus={() => {
             if (disabled) return
             setOpen(true)
             if (selected) setQuery('')
+            else if (value) setQuery(String(value).toUpperCase())
           }}
           onKeyDown={onKeyDown}
           className="min-w-0 flex-1 border-0 bg-transparent uppercase outline-none placeholder:normal-case placeholder:text-slate-400"
@@ -199,14 +229,33 @@ export default function PostcodeInput({
               <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </li>
           ) : null}
-          {!loading && !filtered.length ? (
+          {!loading && showCustom ? (
+            <li role="option" aria-selected={highlight === 0}>
+              <button
+                type="button"
+                className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
+                  highlight === 0 ? 'bg-primary/10' : 'hover:bg-[#eef7fc]'
+                }`}
+                onMouseEnter={() => setHighlight(0)}
+                onClick={() => pickCustom(typed)}
+              >
+                <Plus className="size-4 shrink-0 text-primary" strokeWidth={2} />
+                <span className="text-slate">
+                  Use <span className="font-bold text-navy">{typed}</span>
+                  <span className="ml-1 text-muted">(add manually)</span>
+                </span>
+              </button>
+            </li>
+          ) : null}
+          {!loading && !filtered.length && !showCustom ? (
             <li className="px-3 py-3 text-sm text-muted">
               {query ? 'No matches — try another search' : 'Start typing a postcode or town'}
             </li>
           ) : null}
           {filtered.map((r, i) => {
+            const optionIndex = showCustom ? i + 1 : i
             const active = value === r.outcode
-            const focused = i === highlight
+            const focused = optionIndex === highlight
             return (
               <li key={r.outcode} role="option" aria-selected={active}>
                 <button
@@ -214,7 +263,7 @@ export default function PostcodeInput({
                   className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
                     focused || active ? 'bg-primary/10' : 'hover:bg-[#eef7fc]'
                   }`}
-                  onMouseEnter={() => setHighlight(i)}
+                  onMouseEnter={() => setHighlight(optionIndex)}
                   onClick={() => pick(r)}
                 >
                   <span className="font-bold text-navy">{r.outcode}</span>
