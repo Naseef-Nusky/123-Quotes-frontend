@@ -43,22 +43,25 @@ function splitName(full) {
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') }
 }
 
-function PageBackdrop({ services, onSelect }) {
+function PublicServicesPicker({ services, onSelect }) {
   const list = services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]
 
   return (
     <div className="relative isolate overflow-hidden bg-canvas" aria-hidden={!onSelect}>
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.16),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_60%,#f4f8fc_100%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[280px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.16),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_60%,#f4f8fc_100%)]"
         aria-hidden
       />
-      <div className="relative w-full px-4 py-8 text-left sm:px-6 sm:py-10 lg:px-8">
-        <h1 className="text-lg font-bold text-navy">Services</h1>
-        <p className="mt-1 text-sm text-muted">
+      <div className="relative mx-auto w-full max-w-6xl px-4 py-8 text-left sm:px-6 sm:py-10">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Marketplace</p>
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-navy sm:text-5xl">
+          Services
+        </h1>
+        <p className="mt-3 max-w-xl text-base leading-relaxed text-slate">
           Choose a service to start a quote request.
         </p>
 
-        <ul className="mt-4 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">
+        <ul className="mt-10 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">
           {list.map((s) => {
             const content = (
               <>
@@ -66,7 +69,7 @@ function PageBackdrop({ services, onSelect }) {
                   <p className="text-xs font-bold uppercase tracking-wider text-primary">
                     {s.category?.name || 'Service'}
                   </p>
-                  <h2 className="mt-1 text-lg font-bold text-navy">
+                  <h2 className="mt-1 font-display text-xl font-bold text-navy">
                     {s.name || '…'}
                   </h2>
                   {s.shortDesc || s.description ? (
@@ -109,10 +112,72 @@ function PageBackdrop({ services, onSelect }) {
   )
 }
 
-function withBackdrop(services, modal, onSelect) {
+/** Logged-in seeker portal: full-width, matches My Requests / Dashboard title sizes */
+function PortalServicesPicker({ services, onSelect }) {
+  const list = services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]
+
+  return (
+    <section className="w-full px-4 py-8 text-left sm:px-6 sm:py-10">
+      <h1 className="text-lg font-bold text-navy">Services</h1>
+      <p className="mt-1 text-sm text-muted">Choose a service to start a quote request.</p>
+
+      <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+        {list.map((s) => {
+          const content = (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                  {s.category?.name || 'Service'}
+                </p>
+                <h2 className="mt-1 text-lg font-bold text-navy">{s.name || '…'}</h2>
+                {s.shortDesc || s.description ? (
+                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate">
+                    {s.shortDesc || s.description}
+                  </p>
+                ) : null}
+              </div>
+              {s.name ? (
+                <span className="shrink-0 self-center text-sm font-bold text-primary">
+                  Get quotes →
+                </span>
+              ) : null}
+            </>
+          )
+
+          if (onSelect && s.name) {
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(s.id)}
+                  className="flex w-full items-stretch gap-4 px-4 py-5 text-left transition hover:bg-[#eef7fc]/90 sm:gap-6 sm:px-5"
+                >
+                  {content}
+                </button>
+              </li>
+            )
+          }
+
+          return (
+            <li key={s.id} className="flex items-stretch gap-4 px-4 py-5 sm:gap-6 sm:px-5">
+              {content}
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
+
+function PageBackdrop({ services, onSelect, portal }) {
+  if (portal) return <PortalServicesPicker services={services} onSelect={onSelect} />
+  return <PublicServicesPicker services={services} onSelect={onSelect} />
+}
+
+function withBackdrop(services, modal, onSelect, portal) {
   return (
     <>
-      <PageBackdrop services={services} onSelect={onSelect} />
+      <PageBackdrop services={services} onSelect={onSelect} portal={portal} />
       {modal}
     </>
   )
@@ -381,12 +446,14 @@ export default function NewRequest() {
     }
   }
 
+  const portal = Boolean(isCustomer)
+
   let modal = null
 
   if (loading) {
     return (
       <div>
-        <PageBackdrop services={[]} onSelect={null} />
+        <PageBackdrop services={[]} onSelect={null} portal={portal} />
         <Loading overlay />
       </div>
     )
@@ -399,6 +466,7 @@ export default function NewRequest() {
         {error ? <p className="relative z-10 px-4 py-2 text-sm text-danger sm:px-6">{error}</p> : null}
         <PageBackdrop
           services={services}
+          portal={portal}
           onSelect={(id) => {
             setError('')
             setQuestions([])
@@ -659,5 +727,5 @@ export default function NewRequest() {
     )
   }
 
-  return withBackdrop(services, modal, null)
+  return withBackdrop(services, modal, null, portal)
 }
