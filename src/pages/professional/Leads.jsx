@@ -469,7 +469,7 @@ export default function ProLeads() {
                   }}
                   className="rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-3 py-3 text-sm font-bold text-white shadow-md shadow-navy/20 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {`${pkg.tokens} Points`}
+                  {`${pkg.tokens} Tokens`}
                 </button>
               ))}
             </div>

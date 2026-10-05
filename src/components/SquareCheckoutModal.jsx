@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ApplePay, CreditCard, GooglePay, PaymentForm } from 'react-square-web-payments-sdk'
 import { X } from 'lucide-react'
 import { api } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import Loading from './Loading'
 import { formatMoney } from '../utils/questionnaire'
 
@@ -24,12 +25,22 @@ function loadSquareScript(src) {
   })
 }
 
+function splitContactName(name = '') {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return { givenName: 'Customer', familyName: '' }
+  if (parts.length === 1) return { givenName: parts[0], familyName: '' }
+  return { givenName: parts[0], familyName: parts.slice(1).join(' ') }
+}
+
 /**
  * Square checkout modal for token packages.
- * - Live mode: card form → tokenize → POST purchase with sourceId
- * - Mock mode (PAYMENTS_ENABLED=false): one-click mock purchase
+ * - Live: Apple Pay / Google Pay / card → tokenize → POST purchase with sourceId
+ * - Mock (PAYMENTS_ENABLED=false): one-click mock purchase
+ *
+ * Card/wallet PAN never touches our servers — Square tokenizes in-browser (PCI SAQ-A).
  */
 export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
+  const { user } = useAuth()
   const [config, setConfig] = useState(null)
   const [loadingConfig, setLoadingConfig] = useState(false)
   const [sdkReady, setSdkReady] = useState(false)
@@ -62,7 +73,6 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
         try {
           const Square = await loadSquareScript(scriptSrc)
           if (cancelled) return
-          // Fail fast with a clear message if App ID / environment don't match
           await Square.payments(square.applicationId, square.locationId)
           if (!cancelled) setSdkReady(true)
         } catch (err) {
@@ -70,7 +80,7 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
           const msg = String(err?.message || err || 'Square checkout failed to start')
           if (msg.toLowerCase().includes('environment')) {
             setError(
-              'Square Application ID does not match sandbox. In Square Developer → 123quotes → Credentials, copy the Sandbox Application ID (usually starts with sandbox-sq0idb-) into SQUARE_APPLICATION_ID in the backend .env, then restart the API.',
+              'Square Application ID does not match sandbox. In Square Developer → Credentials, copy the Sandbox Application ID into SQUARE_APPLICATION_ID, then restart the API.',
             )
           } else {
             setError(msg)
@@ -103,11 +113,42 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
     return (Number(pkg.priceCents || 0) / 100).toFixed(2)
   }, [pkg])
 
+  const currencyCode = pkg?.currency || 'GBP'
+
+  const createPaymentRequest = useCallback(
+    () => ({
+      countryCode: 'GB',
+      currencyCode,
+      total: {
+        amount: amountForVerify,
+        label: pkg?.name || '123 Quotes tokens',
+      },
+    }),
+    [amountForVerify, currencyCode, pkg?.name],
+  )
+
+  const createVerificationDetails = useCallback(() => {
+    const { givenName, familyName } = splitContactName(
+      user?.professional?.contactName || user?.email?.split('@')[0] || 'Customer',
+    )
+    return {
+      amount: amountForVerify,
+      currencyCode,
+      intent: 'CHARGE',
+      billingContact: {
+        givenName,
+        familyName: familyName || givenName,
+        email: user?.email || undefined,
+        countryCode: 'GB',
+      },
+    }
+  }, [amountForVerify, currencyCode, user?.email, user?.professional?.contactName])
+
   if (!open || !pkg) return null
 
   const liveReady =
     config?.paymentsEnabled && config?.applicationId && config?.locationId && !error
-  const showCardForm = liveReady && sdkReady && !loadingConfig
+  const showPaymentMethods = liveReady && sdkReady && !loadingConfig
 
   async function completePurchase(sourceId) {
     setPaying(true)
@@ -121,6 +162,16 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
     } finally {
       setPaying(false)
     }
+  }
+
+  async function onTokenize(tokenResult) {
+    if (tokenResult.status !== 'OK' || !tokenResult.token) {
+      const detail =
+        tokenResult.errors?.[0]?.message || tokenResult.status || 'Payment tokenization failed'
+      setError(detail)
+      return
+    }
+    await completePurchase(tokenResult.token)
   }
 
   return (
@@ -146,10 +197,13 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
         </button>
 
         <h2 id="square-checkout-title" className="pr-8 text-xl font-bold text-navy">
-          Pay with Square
+          Secure checkout
         </h2>
         <p className="mt-1 text-sm text-slate">
-          {pkg.name} · {pkg.tokens} points · {amountLabel}
+          {pkg.name} · {pkg.tokens} tokens · {amountLabel}
+        </p>
+        <p className="mt-1 text-xs text-muted">
+          Card and wallet details are processed by Square — never stored on 123 Quotes.
         </p>
 
         {loadingConfig || !sdkReady ? <Loading className="mt-4 py-6" /> : null}
@@ -159,7 +213,7 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
           <div className="mt-5 space-y-4">
             <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
               Square live checkout is off (`PAYMENTS_ENABLED=false` or missing keys). This will
-              complete a <strong>mock test purchase</strong> in the CRM only.
+              complete a <strong>mock test purchase</strong> only.
             </p>
             <button
               type="button"
@@ -172,16 +226,22 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
           </div>
         ) : null}
 
-        {showCardForm ? (
-          <div className="mt-5">
-            <p className="mb-3 text-xs text-muted">
-              Sandbox test card: 4111 1111 1111 1111 · any future expiry · any CVV · any postal
-              code
-            </p>
-            {paying ? (
-              <p className="mb-2 text-sm font-semibold text-primary">Processing payment…</p>
+        {showPaymentMethods ? (
+          <div className="mt-5 space-y-4">
+            {config.environment === 'sandbox' ? (
+              <p className="text-xs text-muted">
+                Sandbox card: 4111 1111 1111 1111 · any future expiry · any CVV · any postal
+                code. Google Pay works in Chrome when enabled; Apple Pay needs Safari + domain
+                verification in Square.
+              </p>
             ) : null}
+
+            {paying ? (
+              <p className="text-sm font-semibold text-primary">Processing payment…</p>
+            ) : null}
+
             <PaymentForm
+              key={`${pkg.id}-${amountForVerify}`}
               applicationId={config.applicationId}
               locationId={config.locationId}
               overrides={
@@ -189,38 +249,28 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
                   ? { scriptSrc: SANDBOX_SCRIPT }
                   : { scriptSrc: PRODUCTION_SCRIPT }
               }
-              cardTokenizeResponseReceived={async (tokenResult) => {
-                if (tokenResult.status !== 'OK' || !tokenResult.token) {
-                  const detail =
-                    tokenResult.errors?.[0]?.message ||
-                    tokenResult.status ||
-                    'Card tokenization failed'
-                  setError(detail)
-                  return
-                }
-                await completePurchase(tokenResult.token)
-              }}
-              createVerificationDetails={() => ({
-                amount: amountForVerify,
-                currencyCode: pkg.currency || 'GBP',
-                intent: 'CHARGE',
-                billingContact: {
-                  givenName: 'Test',
-                  familyName: 'Buyer',
-                  countryCode: 'GB',
-                },
-              })}
+              createPaymentRequest={createPaymentRequest}
+              createVerificationDetails={createVerificationDetails}
+              cardTokenizeResponseReceived={onTokenize}
             >
-              <CreditCard
-                buttonProps={{
-                  isLoading: paying,
-                  css: {
-                    backgroundColor: '#1e8fd5',
-                    fontSize: '15px',
-                    color: '#ffffff',
-                  },
-                }}
-              />
+              <div className="space-y-3">
+                <ApplePay />
+                <GooglePay />
+                <div className="relative py-1 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                  <span className="relative z-10 bg-white px-2">or pay by card</span>
+                  <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-line" />
+                </div>
+                <CreditCard
+                  buttonProps={{
+                    isLoading: paying,
+                    css: {
+                      backgroundColor: '#1e8fd5',
+                      fontSize: '15px',
+                      color: '#ffffff',
+                    },
+                  }}
+                />
+              </div>
             </PaymentForm>
           </div>
         ) : null}
