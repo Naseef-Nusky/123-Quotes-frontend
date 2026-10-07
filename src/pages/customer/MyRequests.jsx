@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Trash2 } from 'lucide-react'
 import { api } from '../../api/client'
 import Loading from '../../components/Loading'
 import StatusBadge from '../../components/StatusBadge'
@@ -22,38 +21,25 @@ export default function MyRequests() {
   const [requests, setRequests] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [deletingId, setDeletingId] = useState(null)
-
-  async function load() {
-    setLoading(true)
-    setError('')
-    try {
-      const d = await api.myRequests()
-      setRequests(d.requests || [])
-    } catch (err) {
-      setError(err.message || 'Failed to load requests')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
-    load()
-  }, [])
-
-  async function onDelete(id) {
-    if (!window.confirm('Delete this request? This cannot be undone.')) return
-    setDeletingId(id)
-    setError('')
-    try {
-      await api.deleteRequest(id)
-      setRequests((list) => list.filter((r) => r.id !== id))
-    } catch (err) {
-      setError(err.message || 'Failed to delete request')
-    } finally {
-      setDeletingId(null)
+    let cancelled = false
+    ;(async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const d = await api.myRequests()
+        if (!cancelled) setRequests(d.requests || [])
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Failed to load requests')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
     }
-  }
+  }, [])
 
   return (
     <section className="w-full px-4 py-8 text-left sm:px-6 sm:py-10">
@@ -79,7 +65,7 @@ export default function MyRequests() {
             key={r.id}
             className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5"
           >
-            <Link to={`/app/requests/${r.id}`} className="min-w-0 flex-1 text-left">
+            <div className="min-w-0 flex-1 text-left">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-bold text-navy">{r.service?.name || r.title || 'Service request'}</h3>
                 <StatusBadge status={r.status} />
@@ -91,16 +77,13 @@ export default function MyRequests() {
                 {r.postcode || '—'}
                 {r.city ? ` · ${r.city}` : ''}
               </p>
-            </Link>
-            <button
-              type="button"
-              onClick={() => onDelete(r.id)}
-              disabled={deletingId === r.id}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm font-semibold text-danger transition hover:border-danger/30 hover:bg-danger/5 disabled:opacity-60"
+            </div>
+            <Link
+              to={`/app/requests/${r.id}`}
+              className="inline-flex items-center justify-center rounded-xl border border-line px-3 py-2 text-sm font-semibold text-navy transition hover:border-primary/30 hover:bg-primary/5"
             >
-              <Trash2 className="size-4" strokeWidth={2} />
-              {deletingId === r.id ? 'Deleting…' : 'Delete'}
-            </button>
+              View
+            </Link>
           </article>
         ))}
       </div>

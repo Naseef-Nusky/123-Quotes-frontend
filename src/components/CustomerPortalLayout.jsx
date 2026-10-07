@@ -4,7 +4,6 @@ import {
   ClipboardList,
   FilePlus2,
   Home,
-  Layers,
   LogOut,
   Menu,
   X,
@@ -16,7 +15,6 @@ import { useAuth } from '../context/AuthContext'
 const NAV = [
   { to: '/app', label: 'Dashboard', icon: Home, end: true },
   { to: '/app/requests', label: 'My Requests', icon: ClipboardList, end: true },
-  { to: '/app/requested-services', label: 'Requested Services', icon: Layers },
   { to: '/app/requests/new', label: 'New Request', icon: FilePlus2 },
 ]
 

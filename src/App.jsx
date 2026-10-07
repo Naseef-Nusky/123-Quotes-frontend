@@ -27,7 +27,6 @@ import PopularServicePage from './pages/PopularServicePage'
 
 import CustomerDashboard from './pages/customer/Dashboard'
 import MyRequests from './pages/customer/MyRequests'
-import MyRequestedServices from './pages/customer/MyRequestedServices'
 import NewRequest from './pages/customer/NewRequest'
 import RequestDetail from './pages/customer/RequestDetail'
 
@@ -101,7 +100,7 @@ export default function App() {
         <Route path="requests/new" element={<NewRequest />} />
         <Route path="requests/:id" element={<RequestDetail />} />
         <Route path="requests" element={<MyRequests />} />
-        <Route path="requested-services" element={<MyRequestedServices />} />
+        <Route path="requested-services" element={<Navigate to="/app/requests" replace />} />
       </Route>
 
       <Route

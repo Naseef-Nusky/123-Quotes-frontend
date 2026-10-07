@@ -66,6 +66,8 @@ export const api = {
     request(`/requests/${id}/submit`, { method: 'POST', body: JSON.stringify(body) }),
   myRequests: () => request('/requests/mine'),
   getRequest: (id) => request(`/requests/${id}`),
+  updateRequest: (id, body) =>
+    request(`/requests/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteRequest: (id) => request(`/requests/${id}`, { method: 'DELETE' }),
 
   getPackages: () => request('/professionals/packages'),

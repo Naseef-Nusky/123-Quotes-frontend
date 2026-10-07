@@ -17,7 +17,6 @@ const customerLinks = [
   { to: '/categories', label: 'Categories' },
   { to: '/app', label: 'Dashborad', end: true },
   { to: '/app/requests', label: 'My Requests', end: true },
-  { to: '/app/requested-services', label: 'My Requested Services' },
 ]
 
 export default function Layout({ variant = 'public', children }) {
