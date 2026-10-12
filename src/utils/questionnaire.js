@@ -97,3 +97,37 @@ export function formatDate(value) {
     minute: '2-digit',
   })
 }
+
+/** Resolve stored option id/value tokens to human-readable labels. */
+export function formatAnswerDisplay(raw, options = []) {
+  if (raw == null) return ''
+  const list = options || []
+
+  function resolve(token) {
+    const t = String(token ?? '').trim()
+    if (!t) return ''
+    const opt = list.find(
+      (o) =>
+        String(o.id) === t ||
+        String(o.value ?? '').trim() === t ||
+        String(o.label ?? '').trim() === t,
+    )
+    if (!opt) return t
+    return String(opt.label || opt.value || t).trim()
+  }
+
+  if (Array.isArray(raw)) {
+    return raw.map(resolve).filter(Boolean).join(', ')
+  }
+
+  const s = String(raw).trim()
+  if (!s) return ''
+  if (s.includes(',')) {
+    return s
+      .split(',')
+      .map((part) => resolve(part.trim()))
+      .filter(Boolean)
+      .join(', ')
+  }
+  return resolve(s)
+}

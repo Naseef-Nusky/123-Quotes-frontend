@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../../api/client'
 import Loading from '../../components/Loading'
 import StatusBadge from '../../components/StatusBadge'
-import { formatDate } from '../../utils/questionnaire'
+import { formatAnswerDisplay, formatDate } from '../../utils/questionnaire'
 
 export default function RequestDetail() {
   const { id } = useParams()
@@ -67,7 +67,10 @@ export default function RequestDetail() {
             {request.answers.map((a) => (
               <div key={a.id}>
                 <dt className="text-sm font-semibold text-muted">{a.question?.label}</dt>
-                <dd className="text-navy">{a.value}</dd>
+                <dd className="text-navy">
+                  {a.displayValue ||
+                    formatAnswerDisplay(a.rawValue ?? a.value, a.question?.options || [])}
+                </dd>
               </div>
             ))}
           </dl>
