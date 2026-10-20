@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+import BannerHeader from '../components/BannerHeader'
+import { BANNERS } from '../data/banners'
 
 export default function ServiceDetail() {
   const { slug } = useParams()
@@ -34,15 +36,19 @@ export default function ServiceDetail() {
   const ctaTo = `/request?service=${encodeURIComponent(service.slug || service.id)}`
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <Link to="/services" className="text-sm font-semibold text-primary">
-        ← All services
-      </Link>
-      <p className="mt-6 text-xs font-bold uppercase tracking-wider text-primary">{service.category?.name}</p>
-      <h1 className="mt-2 font-display text-4xl font-bold text-navy">{service.name}</h1>
-      <p className="mt-4 text-lg text-slate">{service.description || service.shortDesc}</p>
+    <div>
+      <BannerHeader
+        image={BANNERS.serviceDetail}
+        eyebrow={service.category?.name || 'Service'}
+        title={service.name}
+        subtitle={service.description || service.shortDesc}
+      />
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <Link to="/services" className="text-sm font-semibold text-primary">
+          ← All services
+        </Link>
 
-      <div className="surface mt-8 p-6">
+        <div className="surface mt-6 p-6">
         <p className="font-display text-lg font-bold text-navy">What happens next</p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-muted">
           <li>Answer a short questionnaire tailored to this service.</li>
@@ -55,9 +61,10 @@ export default function ServiceDetail() {
             {service.questions.length === 1 ? '' : 's'}.
           </p>
         ) : null}
-        <Link to={ctaTo} className="btn-primary mt-6">
-          Get quotes for {service.name}
-        </Link>
+          <Link to={ctaTo} className="btn-primary mt-6">
+            Get quotes for {service.name}
+          </Link>
+        </div>
       </div>
     </div>
   )

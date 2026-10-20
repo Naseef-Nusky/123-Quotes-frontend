@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { api } from '../api/client'
 import PostcodeInput from '../components/PostcodeInput'
+import { BANNERS } from '../data/banners'
 import PhoneInput from '../components/PhoneInput'
 import {
   DEFAULT_COUNTRY_CODE,
@@ -51,7 +52,21 @@ function WizardShell({ children }) {
         aria-hidden
       />
 
-      <div className="mx-auto w-full max-w-3xl animate-fade-up">{children}</div>
+      <div className="mx-auto w-full max-w-3xl animate-fade-up">
+        <div className="relative mb-6 overflow-hidden rounded-3xl shadow-[0_20px_45px_-20px_rgba(10,47,92,0.5)]">
+          <img src={BANNERS.businessSignup} alt="" className="h-40 w-full object-cover sm:h-48" />
+          <div className="absolute inset-0 bg-gradient-to-r from-navy/85 via-navy/55 to-transparent" />
+          <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-8">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8fd0f5]">
+              For professionals
+            </p>
+            <p className="mt-1.5 max-w-md font-display text-2xl font-bold leading-tight text-white sm:text-3xl">
+              Grow your business with 123 Quotes
+            </p>
+          </div>
+        </div>
+        {children}
+      </div>
     </section>
   )
 }

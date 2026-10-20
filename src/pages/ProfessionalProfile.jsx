@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Star } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+import BannerHeader from '../components/BannerHeader'
+import { BANNERS } from '../data/banners'
 import { useAuth } from '../context/AuthContext'
 
 function Stars({ value }) {
@@ -83,11 +85,17 @@ export default function ProfessionalProfile() {
   if (!pro) return null
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <Link to="/professionals" className="text-sm font-semibold text-primary">
-        ← Directory
-      </Link>
-      <h1 className="mt-6 font-display text-4xl font-bold text-navy">{pro.companyName}</h1>
+    <div>
+      <BannerHeader
+        image={BANNERS.professionalProfile}
+        eyebrow="Professional profile"
+        title={pro.companyName}
+        subtitle={pro.city ? `Based in ${pro.city} · Available on 123 Quotes` : 'Available on 123 Quotes'}
+      />
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <Link to="/professionals" className="text-sm font-semibold text-primary">
+          ← Directory
+        </Link>
       <p className="mt-2 text-slate">
         {pro.contactName}
         {pro.city ? ` · ${pro.city}` : ''}
@@ -217,6 +225,7 @@ export default function ProfessionalProfile() {
             ))}
           </ul>
         )}
+      </div>
       </div>
     </div>
   )

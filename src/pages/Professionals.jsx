@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
 import PostcodeInput from '../components/PostcodeInput'
+import BannerHeader from '../components/BannerHeader'
+import { BANNERS } from '../data/banners'
 
 export default function Professionals() {
   const [pros, setPros] = useState([])
@@ -78,9 +80,14 @@ export default function Professionals() {
   const hasFilters = Boolean(service || city || postcode || q)
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-4xl font-bold text-navy">Professional directory</h1>
-      <p className="mt-2 max-w-2xl text-slate">Browse available professionals by service, city and postcode.</p>
+    <div>
+      <BannerHeader
+        image={BANNERS.professionals}
+        eyebrow="Directory"
+        title="Professional directory"
+        subtitle="Browse available professionals by service, city and postcode."
+      />
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
 
       <form onSubmit={applyFilters} className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-stretch">
         <select
@@ -160,6 +167,7 @@ export default function Professionals() {
       {!loading && !pros.length && !error ? (
         <p className="mt-8 text-muted">No professionals match these filters yet.</p>
       ) : null}
+      </div>
     </div>
   )
 }

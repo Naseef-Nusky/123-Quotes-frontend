@@ -12,10 +12,13 @@
   --color-surface: #ffffff;
   --color-canvas: #f4f8fc;
   --color-line: #d6e4f0;
-  --color-success: #1e8fd5;
+  --color-success: #16a34a;
   --color-warning: #f97316;
   --color-danger: #dc2626;
   --color-panel: #e8f4fb;
+  --color-accent: #f59e0b;
+  --color-accent-dark: #d97706;
+  --color-ink: #071c3a;
 }
 
 html {
@@ -159,6 +162,102 @@ h4,
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 1rem;
+}
+
+/* ---- 2026 redesign utilities ---- */
+
+/* Gradient headline text (light blue → deep navy) */
+.text-gradient {
+  background: linear-gradient(92deg, #3baee8 0%, #1e8fd5 45%, #0a3a7a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-light {
+  background: linear-gradient(92deg, #a5dcf7 0%, #ffffff 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Brand gradient background (buttons, CTA bands) */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #3baee8 0%, #1e8fd5 42%, #0a3a7a 100%);
+}
+
+.bg-navy-gradient {
+  background: linear-gradient(150deg, #0d3d75 0%, #0a2f5c 55%, #071c3a 100%);
+}
+
+/* Soft dotted texture used on hero / CTA bands */
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Scroll reveal (see components/Reveal.jsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Card that lifts on hover */
+.card-hover {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px -18px rgba(10, 47, 92, 0.28);
+  border-color: rgba(30, 143, 213, 0.35);
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-x 36s linear infinite;
 }
 
 .wizard-card {

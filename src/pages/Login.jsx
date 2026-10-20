@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import BannerHeader from '../components/BannerHeader'
+import { BANNERS } from '../data/banners'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api/client'
 
@@ -113,15 +115,18 @@ export default function Login({ audience = 'customer' }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12">
-      <h1 className="text-center font-display text-3xl font-bold text-navy">
-        {isBusiness ? 'Business Login' : 'Login'}
-      </h1>
-      <p className="mt-2 text-center text-sm text-muted">
-        {isBusiness
-          ? 'Sign in to your business account to manage leads and tokens.'
-          : 'Sign in to manage your quotes and requests.'}
-      </p>
+    <div>
+      <BannerHeader
+        image={BANNERS.login}
+        eyebrow={isBusiness ? 'Business portal' : 'Welcome back'}
+        title={isBusiness ? 'Business Login' : 'Login'}
+        subtitle={
+          isBusiness
+            ? 'Sign in to your business account to manage leads and tokens.'
+            : 'Sign in to manage your quotes and requests.'
+        }
+      />
+      <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-10">
 
       <div className="mt-8 grid grid-cols-2 gap-1 rounded-xl bg-canvas p-1">
         <button
@@ -269,6 +274,7 @@ export default function Login({ audience = 'customer' }) {
           </Link>
         </p>
       )}
+      </div>
     </div>
   )
 }

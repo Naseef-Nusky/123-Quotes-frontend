@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+import { BANNERS } from '../data/banners'
 
 export default function CategoryDetail() {
   const { slug } = useParams()
@@ -39,10 +40,11 @@ export default function CategoryDetail() {
 
   return (
     <div className="relative isolate overflow-hidden bg-canvas">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.16),_transparent_55%),linear-gradient(180deg,#e8f4fb_0%,#f4f8fc_60%,#f4f8fc_100%)]"
-        aria-hidden
-      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[360px] overflow-hidden" aria-hidden>
+        <img src={BANNERS.categoryDetail} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#f4f8fc]/95 via-[#f4f8fc]/75 to-[#f4f8fc]/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#e8f4fb]/40 via-transparent to-[#f4f8fc]" />
+      </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
         <Link

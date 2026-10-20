@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User } from 'lucide-react'
+import { BadgeCheck, Check, ChevronRight, Search, Star, User } from 'lucide-react'
 import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
 import PostcodeInput from '../components/PostcodeInput'
@@ -43,8 +43,8 @@ export default function Home() {
       const rest = title.slice(breakAfter.length).trim() || 'The Professional Service You Need'
       return (
         <>
-          <span className="block whitespace-nowrap">{breakAfter}</span>
-          <span className="block">{rest}</span>
+          <span className="block">{breakAfter}</span>
+          <span className="text-gradient-light block">{rest}</span>
         </>
       )
     }
@@ -55,84 +55,203 @@ export default function Home() {
     return (
       <>
         <span className="block">{words.slice(0, mid).join(' ')}</span>
-        <span className="block">{words.slice(mid).join(' ')}</span>
+        <span className="text-gradient-light block">{words.slice(mid).join(' ')}</span>
       </>
     )
   }
 
+  const popularSearches = (content.popularServices || []).slice(0, 4)
+
   return (
     <div>
-      <section className="relative isolate flex min-h-[52vh] items-center justify-center px-4 py-14 sm:min-h-[58vh] sm:px-6 lg:py-16">
-        <div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden" aria-hidden>
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url('/images/hero-city.png')" }}
-          />
-          <div className="absolute inset-0 bg-black/15" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/15" />
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(0,0,0,0.2) 0, rgba(0,0,0,0.2) 10px, transparent 10px),
-                linear-gradient(to bottom, rgba(0,0,0,0.2) 0, rgba(0,0,0,0.2) 10px, transparent 10px)
-              `,
-              backgroundSize: 'calc(100% / 3) calc(100% / 2)',
-              backgroundPosition: '0 0',
-              opacity: 0.1,
-            }}
-          />
-        </div>
+      <section className="bg-navy-gradient relative isolate overflow-hidden">
+        <div className="bg-dot-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden />
+        <div
+          className="pointer-events-none absolute -left-24 top-0 size-96 rounded-full bg-primary/25 blur-3xl"
+          aria-hidden
+        />
 
-        <div className="relative z-10 mx-auto w-full max-w-5xl text-center animate-fade-up">
-          <h1 className="mx-auto max-w-4xl text-[2.1rem] font-semibold leading-tight tracking-tight text-white sm:text-5xl md:text-[3.35rem] md:leading-[1.12]">
-            {renderHeroTitle(heroTitle)}
-          </h1>
+        <div className="relative mx-auto grid max-w-6xl items-stretch gap-10 px-4 pb-14 pt-12 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:pb-0 lg:pt-0">
+          {/* Copy + search */}
+          <div className="flex flex-col justify-center lg:col-span-7 lg:py-16">
+            <p className="animate-fade-up inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 py-1.5 pl-2 pr-3.5 text-xs font-bold text-white backdrop-blur">
+              <span className="bg-brand-gradient rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">
+                New
+              </span>
+              <BadgeCheck className="size-4 text-[#8fd0f5]" strokeWidth={2.25} />
+              Verified UK professionals · Free quotes
+            </p>
 
-          <form
-            onSubmit={onSearch}
-            className="mx-auto mt-8 w-full max-w-3xl animate-fade-up-delay rounded-[2rem] border border-white/15 bg-white/12 p-2.5 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-md sm:mt-10 sm:rounded-full sm:p-3"
-          >
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-2.5">
-              <label className="relative min-w-0 flex-1 text-left">
-                <span className="sr-only">Tell us what you need</span>
-                <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400">
-                  <User className="size-4" strokeWidth={1.8} />
+            <h1 className="animate-fade-up-delay mt-5 font-display text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-[3.3rem]">
+              {renderHeroTitle(heroTitle)}
+            </h1>
+
+            <p className="animate-fade-up-delay-2 mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+              {content.hero?.subtitle ||
+                'Tell us what you need, answer a few quick questions, and compare free quotes from trusted local professionals — all in minutes.'}
+            </p>
+
+            <form
+              onSubmit={onSearch}
+              className="animate-fade-up-delay-2 mt-7 w-full max-w-xl rounded-3xl bg-white p-2 shadow-[0_24px_55px_-18px_rgba(0,0,0,0.55)]"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                <label className="relative min-w-0 flex-1 rounded-2xl px-3.5 py-2 text-left transition focus-within:bg-canvas">
+                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">
+                    What do you need?
+                  </span>
+                  <span className="mt-0.5 flex items-center gap-2">
+                    <User className="size-4 shrink-0 text-slate-400" strokeWidth={1.8} />
+                    <input
+                      list="service-options"
+                      value={need}
+                      onChange={(e) => setNeed(e.target.value)}
+                      placeholder={content.hero?.needPlaceholder || 'Tell us what you need?'}
+                      className="w-full min-w-0 bg-transparent py-1 text-sm font-medium text-navy outline-none placeholder:font-normal placeholder:text-slate-400"
+                      required
+                    />
+                  </span>
+                </label>
+
+                <div className="hidden w-px bg-line sm:block" aria-hidden />
+
+                <label className="relative w-full rounded-2xl px-3.5 py-2 text-left transition focus-within:bg-canvas sm:max-w-[170px]">
+                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">
+                    Postcode
+                  </span>
+                  <PostcodeInput
+                    value={postcode}
+                    onChange={setPostcode}
+                    placeholder="Postcode"
+                    className="mt-0.5 flex w-full items-center gap-2 bg-transparent py-1 text-sm font-medium text-navy outline-none"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="bg-brand-gradient inline-flex shrink-0 items-center justify-center gap-2 self-center rounded-2xl px-6 py-3.5 text-sm font-extrabold tracking-wide text-white shadow-md shadow-primary-dark/30 transition hover:brightness-110"
+                >
+                  <Search className="size-4" strokeWidth={2.5} />
+                  {(content.hero?.buttonText || 'SEARCH').toUpperCase()}
+                </button>
+              </div>
+
+              <datalist id="service-options">
+                {services.map((s) => (
+                  <option key={s.id} value={s.name} />
+                ))}
+              </datalist>
+            </form>
+
+            {popularSearches.length ? (
+              <div className="animate-fade-up-delay-2 mt-5 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/55">
+                  Popular:
                 </span>
-                <input
-                  list="service-options"
-                  value={need}
-                  onChange={(e) => setNeed(e.target.value)}
-                  placeholder={content.hero?.needPlaceholder || 'Tell us what you need?'}
-                  className="w-full rounded-full border border-white/25 bg-white py-3 pl-11 pr-4 text-sm text-navy outline-none placeholder:text-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/25"
-                  required
-                />
-              </label>
+                {popularSearches.map((item) => (
+                  <Link
+                    key={item.id}
+                    to={item.link || '/services'}
+                    className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur transition hover:border-white/45 hover:bg-white/15 hover:text-white"
+                  >
+                    {item.title}
+                    <ChevronRight className="size-3.5" strokeWidth={2.5} />
+                  </Link>
+                ))}
+              </div>
+            ) : null}
 
-              <label className="relative w-full text-left sm:max-w-[210px]">
-                <span className="sr-only">Postcode</span>
-                <PostcodeInput
-                  value={postcode}
-                  onChange={setPostcode}
-                  placeholder="Postcode"
-                  className="flex w-full items-center gap-2 rounded-full border border-white/25 bg-white px-4 py-3 text-sm text-navy outline-none transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25"
-                />
-              </label>
+            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-white/10 pt-5">
+              <p className="flex items-center gap-2.5">
+                <span className="flex -space-x-1.5" aria-hidden>
+                  {['S', 'D', 'P'].map((initial, i) => (
+                    <span
+                      key={initial}
+                      className={`flex size-7 items-center justify-center rounded-full border-2 border-navy text-[10px] font-extrabold text-white ${
+                        i === 0 ? 'bg-primary' : i === 1 ? 'bg-[#0a3a7a]' : 'bg-accent-dark'
+                      }`}
+                    >
+                      {initial}
+                    </span>
+                  ))}
+                </span>
+                <span>
+                  <span className="flex items-center gap-0.5" aria-label="Rated 4.9 out of 5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className="size-3.5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
+                    ))}
+                  </span>
+                  <span className="mt-0.5 block text-xs font-medium text-white/70">
+                    Loved by customers UK-wide
+                  </span>
+                </span>
+              </p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-semibold text-white/80">
+                {['Free to use', 'No obligation'].map((chip) => (
+                  <li key={chip} className="inline-flex items-center gap-1.5">
+                    <Check className="size-3.5 text-[#8fd0f5]" strokeWidth={3} />
+                    {chip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
 
-              <button
-                type="submit"
-                className="shrink-0 rounded-full bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-8 py-3 text-sm font-extrabold tracking-wide text-white shadow-md shadow-[#0a3a7a]/30 transition hover:brightness-105 sm:px-9"
-              >
-                {(content.hero?.buttonText || 'SEARCH').toUpperCase()}
-              </button>
+          {/* Image side */}
+          <div className="relative hidden lg:col-span-5 lg:block">
+            <img
+              src="/images/hero-city.png"
+              alt="City professionals ready to quote for your job"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-[#0a2f5c] via-[#0a2f5c]/25 to-transparent"
+              aria-hidden
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-[#071c3a]/70 via-transparent to-[#071c3a]/20"
+              aria-hidden
+            />
+
+            <div className="animate-float-slow absolute right-6 top-10 w-56 rounded-2xl bg-white/95 p-4 shadow-2xl backdrop-blur">
+              <div className="flex items-center gap-1" aria-label="Rated 4.9 out of 5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} className="size-4 fill-amber-400 text-amber-400" strokeWidth={1.5} />
+                ))}
+                <span className="ml-1 text-xs font-extrabold text-navy">4.9/5</span>
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-slate">
+                “Three quotes within the hour — booked the same week.”
+              </p>
+              <p className="mt-2 text-[11px] font-bold text-navy">Sarah M. · Manchester</p>
             </div>
 
-            <datalist id="service-options">
-              {services.map((s) => (
-                <option key={s.id} value={s.name} />
-              ))}
-            </datalist>
-          </form>
+            <div className="animate-float-slow absolute bottom-10 left-2 w-60 rounded-2xl bg-white/95 p-4 shadow-2xl backdrop-blur [animation-delay:1.4s]">
+              <p className="flex items-center justify-between text-xs font-extrabold text-navy">
+                Quotes received
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
+                  FREE
+                </span>
+              </p>
+              <div className="mt-3 space-y-2">
+                {[
+                  ['Local Pro A', '£240'],
+                  ['Local Pro B', '£265'],
+                ].map(([name, price]) => (
+                  <p
+                    key={name}
+                    className="flex items-center justify-between rounded-xl bg-canvas px-3 py-2 text-xs font-semibold text-slate"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      <BadgeCheck className="size-3.5 text-primary" strokeWidth={2.25} />
+                      {name}
+                    </span>
+                    <span className="font-extrabold text-navy">{price}</span>
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

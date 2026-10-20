@@ -1,8 +1,16 @@
+import BannerHeader from '../components/BannerHeader'
+import { BANNERS } from '../data/banners'
+
 export default function Terms() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-4xl font-bold text-navy">Terms of Use</h1>
-      <p className="mt-2 text-sm text-muted">123Quotes Website</p>
+    <div>
+      <BannerHeader
+        image={BANNERS.terms}
+        eyebrow="Legal"
+        title="Terms of Use"
+        subtitle="123Quotes Website"
+      />
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-slate sm:text-base">
         <section className="space-y-4">
@@ -348,6 +356,7 @@ export default function Terms() {
           </a>{' '}
           | 1st Floor, 239 Kensington High St, London W8 6SN
         </p>
+      </div>
       </div>
     </div>
   )

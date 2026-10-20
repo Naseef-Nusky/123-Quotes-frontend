@@ -1,8 +1,17 @@
+import BannerHeader from '../components/BannerHeader'
+import { BANNERS } from '../data/banners'
+
 export default function Privacy() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-4xl font-bold text-navy">Terms and Conditions</h1>
-      <p className="mt-2 text-sm font-semibold text-navy">
+    <div>
+      <BannerHeader
+        image={BANNERS.privacy}
+        eyebrow="Legal"
+        title="Terms and Conditions"
+        subtitle="How we protect your privacy on 123 Quotes"
+      />
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <p className="text-sm font-semibold text-navy">
         CONSUMERS (Buyers) PLEASE READ THESE TERMS AND CONDITIONS CAREFULLY BEFORE USING THIS SITE.
       </p>
 
@@ -277,6 +286,7 @@ export default function Privacy() {
           </a>{' '}
           | 1st Floor, 239 Kensington High St, London W8 6SN
         </p>
+      </div>
       </div>
     </div>
   )
