@@ -4,7 +4,7 @@ export default function Logo({ className = '', to = '/', size = 'md', fullWidth 
   const heights = { sm: 'h-10', md: 'h-12', lg: 'h-16', xl: 'h-24' }
   const img = (
     <img
-      src="/logo.png"
+      src="/logo.jpeg"
       alt="123 Quotes"
       className={
         fullWidth
