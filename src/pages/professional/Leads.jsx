@@ -54,6 +54,8 @@ function mapLeadItem(item) {
     phoneMasked: unlocked ? customer.phone || '—' : '••• ••• ••••',
     emailMasked: unlocked ? customer.email || '—' : '••••@••••',
     details: answers.map((a) => ({ q: a.question, a: a.value })),
+    attachments: unlocked ? lead.attachments || [] : [],
+    attachmentCount: lead.attachmentCount || (lead.attachments || []).length || 0,
     responded: lead.unlockedCount || 0,
     maxRespond: lead.maxUnlocks > 0 ? lead.maxUnlocks : Math.max(lead.matchedCount || 0, lead.unlockedCount || 0, 1),
     contactLocked: !!lead.contactLocked,
@@ -408,6 +410,35 @@ export default function ProLeads() {
                   <p className="mt-3 text-sm text-muted">No questionnaire answers for this lead.</p>
                 )}
               </div>
+
+              {(selected.attachmentCount > 0 || selected.attachments?.length) ? (
+                <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+                  <h3 className="text-sm font-bold text-navy">Attachments</h3>
+                  {selected.contactLocked ? (
+                    <p className="mt-3 text-sm text-muted">
+                      {selected.attachmentCount} file(s) — unlock this lead to download.
+                    </p>
+                  ) : (
+                    <ul className="mt-3 space-y-2">
+                      {selected.attachments.map((file) => (
+                        <li key={file.id}>
+                          <button
+                            type="button"
+                            className="text-sm font-semibold text-primary hover:underline"
+                            onClick={() =>
+                              api
+                                .downloadAttachment(file.requestId, file.id, file.originalName)
+                                .catch((e) => setError(e.message || 'Download failed'))
+                            }
+                          >
+                            {file.originalName}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
         ) : (

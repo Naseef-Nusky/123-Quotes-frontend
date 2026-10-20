@@ -58,6 +58,29 @@ export default function RequestDetail() {
           <StatusBadge status={request.status} />
         </div>
         {request.description ? <p className="mt-4 text-slate">{request.description}</p> : null}
+        {(request.attachments || []).length ? (
+          <div className="mt-4 border-t border-line pt-4">
+            <h3 className="text-sm font-bold text-navy">Attachments</h3>
+            <ul className="mt-2 space-y-1">
+              {request.attachments.map((file) => (
+                <li key={file.id}>
+                  <button
+                    type="button"
+                    className="text-sm font-semibold text-primary hover:underline"
+                    onClick={() =>
+                      api
+                        .downloadAttachment(request.id, file.id, file.originalName)
+                        .catch((e) => setError(e.message || 'Download failed'))
+                    }
+                  >
+                    {file.originalName}
+                    {file.ext ? ` (.${file.ext})` : ''}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
 
       {(request.answers || []).length ? (

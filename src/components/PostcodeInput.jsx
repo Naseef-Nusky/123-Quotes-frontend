@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, Plus, X } from 'lucide-react'
 import { api } from '../api/client'
 
@@ -35,6 +36,7 @@ function normalizePostcode(raw) {
 
 /**
  * Searchable postcode dropdown — pick from list or add a manual value.
+ * Menu is portaled so hero/modals with overflow:hidden cannot clip it.
  */
 export default function PostcodeInput({
   value,
@@ -46,12 +48,15 @@ export default function PostcodeInput({
   disabled,
   allowCustom = true,
 }) {
+  const listboxId = useId()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [options, setOptions] = useState(cachedPostcodes || [])
   const [loading, setLoading] = useState(false)
   const [highlight, setHighlight] = useState(0)
+  const [menuPos, setMenuPos] = useState(null)
   const wrapRef = useRef(null)
+  const listRef = useRef(null)
   const inputRef = useRef(null)
 
   const selected = useMemo(
@@ -79,12 +84,29 @@ export default function PostcodeInput({
   const showCustom = allowCustom && typed.length >= 2 && !hasExactOutcode
   const listLength = filtered.length + (showCustom ? 1 : 0)
 
+  function updateMenuPos() {
+    const el = wrapRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const gap = 4
+    const maxH = 240
+    const spaceBelow = window.innerHeight - r.bottom - gap
+    const openUp = spaceBelow < 160 && r.top > spaceBelow
+    setMenuPos({
+      left: r.left,
+      width: Math.max(r.width, 200),
+      top: openUp ? undefined : r.bottom + gap,
+      bottom: openUp ? window.innerHeight - r.top + gap : undefined,
+      maxHeight: Math.min(maxH, openUp ? r.top - gap - 8 : spaceBelow - 8),
+    })
+  }
+
   useEffect(() => {
     function onDoc(e) {
-      if (!wrapRef.current?.contains(e.target)) {
-        setOpen(false)
-        setQuery('')
-      }
+      if (wrapRef.current?.contains(e.target)) return
+      if (listRef.current?.contains(e.target)) return
+      setOpen(false)
+      setQuery('')
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
@@ -102,6 +124,22 @@ export default function PostcodeInput({
   useEffect(() => {
     setHighlight(0)
   }, [query, open])
+
+  useEffect(() => {
+    if (!open) {
+      setMenuPos(null)
+      return
+    }
+    updateMenuPos()
+    const onReposition = () => updateMenuPos()
+    window.addEventListener('resize', onReposition)
+    // capture scroll from any ancestor (hero, modals, page)
+    window.addEventListener('scroll', onReposition, true)
+    return () => {
+      window.removeEventListener('resize', onReposition)
+      window.removeEventListener('scroll', onReposition, true)
+    }
+  }, [open])
 
   function pick(row) {
     onChange(row.outcode)
@@ -139,6 +177,7 @@ export default function PostcodeInput({
       setHighlight((h) => Math.max(h - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
+      e.stopPropagation()
       if (!open) {
         setOpen(true)
         return
@@ -159,6 +198,81 @@ export default function PostcodeInput({
   const shellClass =
     className ||
     'flex w-full items-center gap-2 rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20'
+
+  const menu =
+    open && menuPos
+      ? createPortal(
+          <ul
+            ref={listRef}
+            id={listboxId}
+            role="listbox"
+            style={{
+              position: 'fixed',
+              top: menuPos.top,
+              bottom: menuPos.bottom,
+              left: menuPos.left,
+              width: menuPos.width,
+              maxHeight: menuPos.maxHeight,
+              zIndex: 9999,
+            }}
+            className="overflow-auto rounded-xl border border-[#d6e4f0] bg-white py-1 shadow-xl"
+          >
+            {loading ? (
+              <li className="grid place-items-center px-3 py-3">
+                <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </li>
+            ) : null}
+            {!loading && showCustom ? (
+              <li role="option" aria-selected={highlight === 0}>
+                <button
+                  type="button"
+                  className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
+                    highlight === 0 ? 'bg-primary/10' : 'hover:bg-[#eef7fc]'
+                  }`}
+                  onMouseEnter={() => setHighlight(0)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => pickCustom(typed)}
+                >
+                  <Plus className="size-4 shrink-0 text-primary" strokeWidth={2} />
+                  <span className="text-slate">
+                    Use <span className="font-bold text-navy">{typed}</span>
+                    <span className="ml-1 text-muted">(add manually)</span>
+                  </span>
+                </button>
+              </li>
+            ) : null}
+            {!loading && !filtered.length && !showCustom ? (
+              <li className="px-3 py-3 text-sm text-muted">
+                {query ? 'No matches — try another search' : 'Start typing a postcode or town'}
+              </li>
+            ) : null}
+            {filtered.map((r, i) => {
+              const optionIndex = showCustom ? i + 1 : i
+              const active = value === r.outcode
+              const focused = optionIndex === highlight
+              return (
+                <li key={r.outcode} role="option" aria-selected={active}>
+                  <button
+                    type="button"
+                    className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
+                      focused || active ? 'bg-primary/10' : 'hover:bg-[#eef7fc]'
+                    }`}
+                    onMouseEnter={() => setHighlight(optionIndex)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => pick(r)}
+                  >
+                    <span className="font-bold text-navy">{r.outcode}</span>
+                    <span className="truncate text-slate">
+                      {[r.town, r.region].filter(Boolean).join(', ')}
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>,
+          document.body,
+        )
+      : null
 
   return (
     <div ref={wrapRef} className="relative">
@@ -184,7 +298,7 @@ export default function PostcodeInput({
           role="combobox"
           aria-expanded={open}
           aria-autocomplete="list"
-          aria-controls="postcode-listbox"
+          aria-controls={listboxId}
           placeholder={placeholder}
           value={inputValue}
           onChange={(e) => {
@@ -217,65 +331,7 @@ export default function PostcodeInput({
           strokeWidth={2}
         />
       </div>
-
-      {open ? (
-        <ul
-          id="postcode-listbox"
-          role="listbox"
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-[#d6e4f0] bg-white py-1 shadow-xl"
-        >
-          {loading ? (
-            <li className="grid place-items-center px-3 py-3">
-              <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            </li>
-          ) : null}
-          {!loading && showCustom ? (
-            <li role="option" aria-selected={highlight === 0}>
-              <button
-                type="button"
-                className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
-                  highlight === 0 ? 'bg-primary/10' : 'hover:bg-[#eef7fc]'
-                }`}
-                onMouseEnter={() => setHighlight(0)}
-                onClick={() => pickCustom(typed)}
-              >
-                <Plus className="size-4 shrink-0 text-primary" strokeWidth={2} />
-                <span className="text-slate">
-                  Use <span className="font-bold text-navy">{typed}</span>
-                  <span className="ml-1 text-muted">(add manually)</span>
-                </span>
-              </button>
-            </li>
-          ) : null}
-          {!loading && !filtered.length && !showCustom ? (
-            <li className="px-3 py-3 text-sm text-muted">
-              {query ? 'No matches — try another search' : 'Start typing a postcode or town'}
-            </li>
-          ) : null}
-          {filtered.map((r, i) => {
-            const optionIndex = showCustom ? i + 1 : i
-            const active = value === r.outcode
-            const focused = optionIndex === highlight
-            return (
-              <li key={r.outcode} role="option" aria-selected={active}>
-                <button
-                  type="button"
-                  className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition ${
-                    focused || active ? 'bg-primary/10' : 'hover:bg-[#eef7fc]'
-                  }`}
-                  onMouseEnter={() => setHighlight(optionIndex)}
-                  onClick={() => pick(r)}
-                >
-                  <span className="font-bold text-navy">{r.outcode}</span>
-                  <span className="truncate text-slate">
-                    {[r.town, r.region].filter(Boolean).join(', ')}
-                  </span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      ) : null}
+      {menu}
     </div>
   )
 }

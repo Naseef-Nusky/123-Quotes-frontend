@@ -37,13 +37,14 @@ export default function PopularServicePage({ slug }) {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="relative isolate flex min-h-[380px] items-center justify-center overflow-hidden px-4 py-16 sm:min-h-[440px] sm:px-6 sm:py-20">
-        <div
-          className="absolute inset-0 -z-20 bg-cover bg-center"
-          style={{ backgroundImage: `url('${page.heroImage}')` }}
-          aria-hidden
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/55 via-black/50 to-black/65" aria-hidden />
+      <section className="relative isolate flex min-h-[380px] items-center justify-center px-4 py-16 sm:min-h-[440px] sm:px-6 sm:py-20">
+        <div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden" aria-hidden>
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url('${page.heroImage}')` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/65" />
+        </div>
         <div className="relative z-10 mx-auto w-full max-w-4xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-[3.25rem] md:leading-tight">
             {page.heroTitle}

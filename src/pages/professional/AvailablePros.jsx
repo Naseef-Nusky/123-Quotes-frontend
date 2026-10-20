@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2 } from 'lucide-react'
+import { Building2, Star } from 'lucide-react'
 import { api } from '../../api/client'
 import Loading from '../../components/Loading'
 
@@ -34,7 +34,10 @@ export default function AvailablePros() {
       {error ? <p className="mt-4 text-sm text-rose-600">{error}</p> : null}
       <div className="mt-6 divide-y divide-line border-y border-line">
         {pros.map((pro) => (
-          <article key={pro.id} className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <article
+            key={pro.id}
+            className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div className="flex gap-4">
               <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-white">
                 <Building2 className="size-7" strokeWidth={1.75} />
@@ -42,17 +45,32 @@ export default function AvailablePros() {
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <h2 className="text-lg font-bold text-navy">{pro.companyName}</h2>
-                  <span className="text-xs text-muted">No reviews.</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-muted">
+                    {pro.reviewCount > 0 ? (
+                      <>
+                        <Star className="size-3.5 fill-amber-500 text-amber-500" />
+                        {pro.averageRating} ({pro.reviewCount})
+                      </>
+                    ) : (
+                      'No reviews.'
+                    )}
+                  </span>
                 </div>
                 <p className="mt-1 text-sm text-slate">{pro.bio || 'No Additional Details.'}</p>
-                <Link to={`/pro/available-pros/${pro.id}`} className="mt-2 inline-flex text-sm font-semibold text-primary">
+                <Link
+                  to={`/pro/available-pros/${pro.id}`}
+                  className="mt-2 inline-flex text-sm font-semibold text-primary"
+                >
                   View Profile &gt;
                 </Link>
               </div>
             </div>
-            <button type="button" className="btn-primary !rounded-md !py-2.5 self-start sm:self-center">
-              Request Quotation
-            </button>
+            <Link
+              to={`/pro/available-pros/${pro.id}`}
+              className="btn-primary !rounded-md !py-2.5 self-start sm:self-center"
+            >
+              View & reviews
+            </Link>
           </article>
         ))}
         {!loading && !pros.length ? (

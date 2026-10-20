@@ -6,7 +6,7 @@ function getToken() {
 
 async function request(path, options = {}) {
   const headers = {
-    'Content-Type': 'application/json',
+    ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...options.headers,
   }
 
@@ -26,6 +26,10 @@ async function request(path, options = {}) {
     throw err
   }
   return data
+}
+
+async function uploadForm(path, formData, method = 'POST') {
+  return request(path, { method, body: formData })
 }
 
 export const api = {
@@ -58,12 +62,53 @@ export const api = {
     request(`/postcodes/validate?postcode=${encodeURIComponent(postcode)}`),
 
   createRequest: (body) => request('/requests', { method: 'POST', body: JSON.stringify(body) }),
-  submitGuestRequest: (body) =>
-    request('/requests/guest', { method: 'POST', body: JSON.stringify(body) }),
+  submitGuestRequest: (body, files = []) => {
+    const selected = (files || []).filter(Boolean)
+    if (!selected.length) {
+      return request('/requests/guest', { method: 'POST', body: JSON.stringify(body) })
+    }
+    const form = new FormData()
+    Object.entries(body || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null) return
+      if (key === 'answers') form.append('answers', JSON.stringify(value))
+      else form.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value))
+    })
+    selected.forEach((file) => form.append('files', file))
+    return uploadForm('/requests/guest', form)
+  },
   saveAnswers: (id, answers) =>
     request(`/requests/${id}/answers`, { method: 'PUT', body: JSON.stringify({ answers }) }),
   submitRequest: (id, body = {}) =>
     request(`/requests/${id}/submit`, { method: 'POST', body: JSON.stringify(body) }),
+  uploadRequestAttachments: (id, files = []) => {
+    const form = new FormData()
+    ;(files || []).filter(Boolean).forEach((file) => form.append('files', file))
+    return uploadForm(`/requests/${id}/attachments`, form)
+  },
+  attachmentDownloadUrl: (requestId, attachmentId) =>
+    `${API_BASE}/requests/${requestId}/attachments/${attachmentId}/download`,
+  downloadAttachment: async (requestId, attachmentId, filename = 'attachment') => {
+    const headers = {}
+    const token = getToken()
+    if (token) headers.Authorization = `Bearer ${token}`
+    const res = await fetch(
+      `${API_BASE}/requests/${requestId}/attachments/${attachmentId}/download`,
+      { headers },
+    )
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.message || 'Download failed')
+    }
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  },
   myRequests: () => request('/requests/mine'),
   getRequest: (id) => request(`/requests/${id}`),
   updateRequest: (id, body) =>
@@ -96,6 +141,25 @@ export const api = {
   myLeads: () => request('/leads/mine'),
   unlockLead: (id) => request(`/leads/${id}/unlock`, { method: 'POST', body: '{}' }),
   declineLead: (id) => request(`/leads/${id}/decline`, { method: 'POST', body: '{}' }),
+
+  // Client ↔ pro messages (legacy client_requ)
+  sendMessage: (body) => request('/messages', { method: 'POST', body: JSON.stringify(body) }),
+  messageInbox: () => request('/messages/inbox'),
+  messageSent: () => request('/messages/sent'),
+  myMessages: (params = {}) => {
+    const q = new URLSearchParams(params).toString()
+    return request(`/messages/mine${q ? `?${q}` : ''}`)
+  },
+  updateMessageStatus: (id, status) =>
+    request(`/messages/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+  // Reviews
+  getReviews: (professionalId) => request(`/reviews/professional/${professionalId}`),
+  submitReview: (professionalId, body) =>
+    request(`/reviews/professional/${professionalId}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 
   getHomeContent: () => request('/content/home'),
   getContact: () => request('/content/contact'),

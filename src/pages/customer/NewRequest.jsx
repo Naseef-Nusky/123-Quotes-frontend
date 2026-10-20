@@ -394,11 +394,10 @@ export default function NewRequest() {
     setBusy(true)
     setError('')
     const { firstName, lastName } = splitName(fullName)
-    const fileNames = files.filter(Boolean).map((f) => f.name)
+    const selectedFiles = files.filter(Boolean)
     const description = [
       frequency ? `Frequency: ${frequency}` : null,
       details.trim() || null,
-      fileNames.length ? `Attachments: ${fileNames.join(', ')}` : null,
       marketing ? 'Marketing emails: yes' : 'Marketing emails: no',
     ]
       .filter(Boolean)
@@ -413,6 +412,9 @@ export default function NewRequest() {
           title: `${serviceName} request`,
         })
         const id = created.request.id
+        if (selectedFiles.length) {
+          await api.uploadRequestAttachments(id, selectedFiles)
+        }
         await api.saveAnswers(id, answersToPayload(answers, visible))
         const data = await api.submitRequest(id, {
           postcode: postcode.trim(),
@@ -423,17 +425,20 @@ export default function NewRequest() {
       }
 
       const dial = dialForCountry(countryCode)
-      const data = await api.submitGuestRequest({
-        firstName,
-        lastName,
-        email: email.trim(),
-        phone: phone ? formatIntlPhone(dial, phone) : undefined,
-        serviceId,
-        postcode: postcode.trim(),
-        description,
-        title: `${serviceName} request`,
-        answers: answersToPayload(answers, visible),
-      })
+      const data = await api.submitGuestRequest(
+        {
+          firstName,
+          lastName,
+          email: email.trim(),
+          phone: phone ? formatIntlPhone(dial, phone) : undefined,
+          serviceId,
+          postcode: postcode.trim(),
+          description,
+          title: `${serviceName} request`,
+          answers: answersToPayload(answers, visible),
+        },
+        selectedFiles,
+      )
       setDone({
         message: data.message,
         matchCount: data.matchCount,

@@ -69,20 +69,28 @@ export default function Professionals() {
     setParams(next)
   }
 
+  function clearFilters() {
+    setCityInput('')
+    setPostcodeInput('')
+    setParams({})
+  }
+
+  const hasFilters = Boolean(service || city || postcode || q)
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <h1 className="font-display text-4xl font-bold text-navy">Professional directory</h1>
       <p className="mt-2 max-w-2xl text-slate">Browse available professionals by service, city and postcode.</p>
 
-      <form onSubmit={applyFilters} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <form onSubmit={applyFilters} className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-stretch">
         <select
-          className="input-field sm:max-w-xs"
+          className="input-field h-12 w-full"
           value={service}
           onChange={(e) => {
             const next = {}
             if (e.target.value) next.service = e.target.value
-            if (city) next.city = city
-            if (postcode) next.postcode = postcode
+            if (cityInput.trim()) next.city = cityInput.trim()
+            if (postcodeInput.trim()) next.postcode = postcodeInput.trim()
             if (q) next.q = q
             setParams(next)
           }}
@@ -95,22 +103,29 @@ export default function Professionals() {
           ))}
         </select>
         <input
-          className="input-field sm:max-w-xs"
+          className="input-field h-12 w-full"
           placeholder="City"
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
         />
-        <div className="w-full sm:max-w-[220px]">
+        <div className="w-full">
           <PostcodeInput
             value={postcodeInput}
             onChange={setPostcodeInput}
             placeholder="Postcode"
-            className="flex w-full items-center gap-2 rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+            className="flex h-12 w-full items-center gap-2 rounded-xl border border-slate-300/80 bg-white px-3 text-sm shadow-sm outline-none focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
           />
         </div>
-        <button type="submit" className="btn-primary">
+        <button type="submit" className="btn-primary h-12 w-full">
           Search
         </button>
+        {hasFilters ? (
+          <button type="button" onClick={clearFilters} className="btn-secondary h-12 w-full">
+            Clear
+          </button>
+        ) : (
+          <div className="hidden lg:block" aria-hidden />
+        )}
       </form>
 
       {q ? (
