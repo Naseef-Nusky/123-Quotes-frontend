@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { BadgeCheck, Check, ChevronRight, Search, Star, User } from 'lucide-react'
+import { Search, User } from 'lucide-react'
 import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
 import PostcodeInput from '../components/PostcodeInput'
@@ -40,98 +40,112 @@ export default function Home() {
   function renderHeroTitle(title) {
     const breakAfter = 'The Contemporary Method Of Locating'
     if (title === defaultHeroTitle || title.startsWith(breakAfter)) {
-      const rest = title.slice(breakAfter.length).trim() || 'The Professional Service You Need'
       return (
         <>
-          <span className="block">{breakAfter}</span>
-          <span className="text-gradient-light block">{rest}</span>
+          {/* Mobile / tablet: 4 lines */}
+          <span className="block lg:hidden">
+            <span className="block whitespace-nowrap">The Contemporary</span>
+            <span className="block whitespace-nowrap">Method Of Locating</span>
+            <span className="block whitespace-nowrap">The Professional</span>
+            <span className="text-gradient-light block whitespace-nowrap">Service You Need</span>
+          </span>
+          {/* Desktop: 3 lines */}
+          <span className="hidden lg:block">
+            <span className="block whitespace-nowrap">The Contemporary Method</span>
+            <span className="block whitespace-nowrap">Of Locating The Professional</span>
+            <span className="text-gradient-light block whitespace-nowrap">Service You Need</span>
+          </span>
         </>
       )
     }
 
+    // Split any other (CMS) title into three lines balanced by length
     const words = title.trim().split(/\s+/)
-    if (words.length < 4) return title
-    const mid = Math.ceil(words.length / 2)
+    if (words.length < 3) return title
+    const target = title.trim().length / 3
+    const lines = []
+    let current = ''
+    for (const word of words) {
+      const next = current ? `${current} ${word}` : word
+      if (current && next.length > target && lines.length < 2) {
+        lines.push(current)
+        current = word
+      } else {
+        current = next
+      }
+    }
+    if (current) lines.push(current)
     return (
       <>
-        <span className="block">{words.slice(0, mid).join(' ')}</span>
-        <span className="text-gradient-light block">{words.slice(mid).join(' ')}</span>
+        {lines.map((line, i) => (
+          <span
+            key={i}
+            className={`block lg:whitespace-nowrap ${i === lines.length - 1 ? 'text-gradient-light' : ''}`}
+          >
+            {line}
+          </span>
+        ))}
       </>
     )
   }
 
-  const popularSearches = (content.popularServices || []).slice(0, 4)
-
   return (
     <div>
-      <section className="bg-navy-gradient relative isolate overflow-hidden">
-        <div className="bg-dot-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden />
-        <div
-          className="pointer-events-none absolute -left-24 top-0 size-96 rounded-full bg-primary/25 blur-3xl"
-          aria-hidden
-        />
+      <section className="bg-navy-gradient relative isolate overflow-hidden max-lg:flex max-lg:min-h-dvh max-lg:items-center">
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+          <img
+            src="/images/hero-city.png"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071c3a]/70 via-[#0a2f5c]/45 to-[#0a3a7a]/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#071c3a]/10 via-transparent to-[#071c3a]/30" />
+          <div className="bg-dot-grid absolute inset-0 opacity-20" />
+        </div>
 
-        <div className="relative mx-auto grid max-w-6xl items-stretch gap-10 px-4 pb-14 pt-12 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:pb-0 lg:pt-0">
-          {/* Copy + search */}
-          <div className="flex flex-col justify-center lg:col-span-7 lg:py-16">
-            <p className="animate-fade-up inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 py-1.5 pl-2 pr-3.5 text-xs font-bold text-white backdrop-blur">
-              <span className="bg-brand-gradient rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">
-                New
-              </span>
-              <BadgeCheck className="size-4 text-[#8fd0f5]" strokeWidth={2.25} />
-              Verified UK professionals · Free quotes
-            </p>
-
-            <h1 className="animate-fade-up-delay mt-5 font-display text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-[3.3rem]">
+        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:py-24">
+          <div className="lg:col-span-8">
+            <h1 className="animate-fade-up-delay mx-auto max-w-3xl text-center font-display text-[clamp(1.75rem,9vw,2.8rem)] font-bold leading-[1.15] tracking-tight text-white lg:mx-0 lg:text-left lg:text-[2.35rem] xl:text-[3rem]">
               {renderHeroTitle(heroTitle)}
             </h1>
 
-            <p className="animate-fade-up-delay-2 mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
-              {content.hero?.subtitle ||
-                'Tell us what you need, answer a few quick questions, and compare free quotes from trusted local professionals — all in minutes.'}
-            </p>
-
             <form
               onSubmit={onSearch}
-              className="animate-fade-up-delay-2 mt-7 w-full max-w-xl rounded-3xl bg-white p-2 shadow-[0_24px_55px_-18px_rgba(0,0,0,0.55)]"
+              className="animate-fade-up-delay-2 relative z-10 mx-auto mt-10 max-w-xl overflow-hidden rounded-[1.75rem] bg-white/10 shadow-[0_32px_70px_-20px_rgba(0,0,0,0.55)] ring-1 ring-white/40 backdrop-blur-md sm:rounded-full lg:mx-0"
             >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-                <label className="relative min-w-0 flex-1 rounded-2xl px-3.5 py-2 text-left transition focus-within:bg-canvas">
-                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">
-                    What do you need?
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0">
+                <label className="relative min-w-0 flex-1 text-left">
+                  <span className="sr-only">Tell us what you need</span>
+                  <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-white/60">
+                    <User className="size-4" strokeWidth={1.8} />
                   </span>
-                  <span className="mt-0.5 flex items-center gap-2">
-                    <User className="size-4 shrink-0 text-slate-400" strokeWidth={1.8} />
-                    <input
-                      list="service-options"
-                      value={need}
-                      onChange={(e) => setNeed(e.target.value)}
-                      placeholder={content.hero?.needPlaceholder || 'Tell us what you need?'}
-                      className="w-full min-w-0 bg-transparent py-1 text-sm font-medium text-navy outline-none placeholder:font-normal placeholder:text-slate-400"
-                      required
-                    />
-                  </span>
+                  <input
+                    list="service-options"
+                    value={need}
+                    onChange={(e) => setNeed(e.target.value)}
+                    placeholder={content.hero?.needPlaceholder || 'Tell us what you need?'}
+                    className="w-full rounded-full border-0 bg-transparent py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/60"
+                    required
+                  />
                 </label>
 
-                <div className="hidden w-px bg-line sm:block" aria-hidden />
+                <span className="mx-1 hidden h-8 w-px shrink-0 bg-white/25 sm:block" aria-hidden />
 
-                <label className="relative w-full rounded-2xl px-3.5 py-2 text-left transition focus-within:bg-canvas sm:max-w-[170px]">
-                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">
-                    Postcode
-                  </span>
+                <label className="relative w-full text-left sm:max-w-[190px]">
+                  <span className="sr-only">Postcode</span>
                   <PostcodeInput
                     value={postcode}
                     onChange={setPostcode}
                     placeholder="Postcode"
-                    className="mt-0.5 flex w-full items-center gap-2 bg-transparent py-1 text-sm font-medium text-navy outline-none"
+                    className="flex w-full items-center gap-2 rounded-full bg-transparent px-4 py-3 text-sm text-white outline-none transition focus-within:ring-2 focus-within:ring-white/40 [&_input::placeholder]:text-white/60 [&_svg]:text-white/70"
                   />
                 </label>
 
                 <button
                   type="submit"
-                  className="bg-brand-gradient inline-flex shrink-0 items-center justify-center gap-2 self-center rounded-2xl px-6 py-3.5 text-sm font-extrabold tracking-wide text-white shadow-md shadow-primary-dark/30 transition hover:brightness-110"
+                  className="bg-brand-gradient inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-extrabold tracking-wide text-white shadow-md shadow-primary-dark/30 transition hover:brightness-105 sm:px-6"
                 >
-                  <Search className="size-4" strokeWidth={2.5} />
+                  <Search className="size-4" strokeWidth={2.6} />
                   {(content.hero?.buttonText || 'SEARCH').toUpperCase()}
                 </button>
               </div>
@@ -142,114 +156,17 @@ export default function Home() {
                 ))}
               </datalist>
             </form>
-
-            {popularSearches.length ? (
-              <div className="animate-fade-up-delay-2 mt-5 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-white/55">
-                  Popular:
-                </span>
-                {popularSearches.map((item) => (
-                  <Link
-                    key={item.id}
-                    to={item.link || '/services'}
-                    className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur transition hover:border-white/45 hover:bg-white/15 hover:text-white"
-                  >
-                    {item.title}
-                    <ChevronRight className="size-3.5" strokeWidth={2.5} />
-                  </Link>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-white/10 pt-5">
-              <p className="flex items-center gap-2.5">
-                <span className="flex -space-x-1.5" aria-hidden>
-                  {['S', 'D', 'P'].map((initial, i) => (
-                    <span
-                      key={initial}
-                      className={`flex size-7 items-center justify-center rounded-full border-2 border-navy text-[10px] font-extrabold text-white ${
-                        i === 0 ? 'bg-primary' : i === 1 ? 'bg-[#0a3a7a]' : 'bg-accent-dark'
-                      }`}
-                    >
-                      {initial}
-                    </span>
-                  ))}
-                </span>
-                <span>
-                  <span className="flex items-center gap-0.5" aria-label="Rated 4.9 out of 5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="size-3.5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
-                    ))}
-                  </span>
-                  <span className="mt-0.5 block text-xs font-medium text-white/70">
-                    Loved by customers UK-wide
-                  </span>
-                </span>
-              </p>
-              <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-semibold text-white/80">
-                {['Free to use', 'No obligation'].map((chip) => (
-                  <li key={chip} className="inline-flex items-center gap-1.5">
-                    <Check className="size-3.5 text-[#8fd0f5]" strokeWidth={3} />
-                    {chip}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
 
-          {/* Image side */}
-          <div className="relative hidden lg:col-span-5 lg:block">
-            <img
-              src="/images/hero-city.png"
-              alt="City professionals ready to quote for your job"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div
-              className="absolute inset-0 bg-gradient-to-r from-[#0a2f5c] via-[#0a2f5c]/25 to-transparent"
-              aria-hidden
-            />
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-[#071c3a]/70 via-transparent to-[#071c3a]/20"
-              aria-hidden
-            />
-
-            <div className="animate-float-slow absolute right-6 top-10 w-56 rounded-2xl bg-white/95 p-4 shadow-2xl backdrop-blur">
-              <div className="flex items-center gap-1" aria-label="Rated 4.9 out of 5">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className="size-4 fill-amber-400 text-amber-400" strokeWidth={1.5} />
-                ))}
-                <span className="ml-1 text-xs font-extrabold text-navy">4.9/5</span>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-slate">
-                “Three quotes within the hour — booked the same week.”
-              </p>
-              <p className="mt-2 text-[11px] font-bold text-navy">Sarah M. · Manchester</p>
-            </div>
-
-            <div className="animate-float-slow absolute bottom-10 left-2 w-60 rounded-2xl bg-white/95 p-4 shadow-2xl backdrop-blur [animation-delay:1.4s]">
-              <p className="flex items-center justify-between text-xs font-extrabold text-navy">
-                Quotes received
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
-                  FREE
-                </span>
-              </p>
-              <div className="mt-3 space-y-2">
-                {[
-                  ['Local Pro A', '£240'],
-                  ['Local Pro B', '£265'],
-                ].map(([name, price]) => (
-                  <p
-                    key={name}
-                    className="flex items-center justify-between rounded-xl bg-canvas px-3 py-2 text-xs font-semibold text-slate"
-                  >
-                    <span className="inline-flex items-center gap-1.5">
-                      <BadgeCheck className="size-3.5 text-primary" strokeWidth={2.25} />
-                      {name}
-                    </span>
-                    <span className="font-extrabold text-navy">{price}</span>
-                  </p>
-                ))}
-              </div>
+          <div className="relative hidden lg:col-span-4 lg:block" aria-hidden>
+            <div className="absolute -inset-0 translate-x-4 translate-y-4 rounded-[1.75rem] border border-white/20" />
+            <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_40px_90px_-24px_rgba(0,0,0,0.7)] ring-1 ring-white/30">
+              <img
+                src="/images/hire-professional.png"
+                alt=""
+                className="aspect-[4/3] w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#071c3a]/35 via-transparent to-transparent" />
             </div>
           </div>
         </div>
