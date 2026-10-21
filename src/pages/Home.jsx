@@ -103,7 +103,7 @@ export default function Home() {
           <div className="bg-dot-grid absolute inset-0 opacity-20" />
         </div>
 
-        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:py-24">
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-14 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:py-24">
           <div className="lg:col-span-8">
             <h1 className="animate-fade-up-delay mx-auto max-w-3xl text-center font-display text-[clamp(1.75rem,9vw,2.8rem)] font-bold leading-[1.15] tracking-tight text-white lg:mx-0 lg:text-left lg:text-[2.35rem] xl:text-[3rem]">
               {renderHeroTitle(heroTitle)}

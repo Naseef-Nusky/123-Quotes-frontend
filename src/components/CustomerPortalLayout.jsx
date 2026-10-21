@@ -6,7 +6,6 @@ import {
   Home,
   LogOut,
   Menu,
-  MessageSquare,
   X,
 } from 'lucide-react'
 import Logo from './Logo'
@@ -17,13 +16,11 @@ const NAV = [
   { to: '/app', label: 'Dashboard', icon: Home, end: true },
   { to: '/app/requests', label: 'My Requests', icon: ClipboardList, end: true },
   { to: '/app/requests/new', label: 'New Request', icon: FilePlus2 },
-  { to: '/app/messages', label: 'Messages', icon: MessageSquare },
 ]
 
 function pageTitle(pathname) {
   if (pathname === '/app/requests/new') return 'New Request'
   if (pathname.startsWith('/app/requests/') && pathname !== '/app/requests/new') return 'Request detail'
-  if (pathname.startsWith('/app/messages')) return 'Messages'
   const ordered = [...NAV].sort((a, b) => b.to.length - a.to.length)
   const hit = ordered.find((n) => (n.end ? pathname === n.to : pathname === n.to || pathname.startsWith(`${n.to}/`)))
   return hit?.label || 'Dashboard'

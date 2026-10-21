@@ -122,15 +122,6 @@ export default function ProfessionalProfile() {
         <Link to="/services" className="btn-primary">
           Request a quote
         </Link>
-        {user?.role === 'CUSTOMER' ? (
-          <Link to={`/app/messages?professionalId=${pro.id}`} className="btn-secondary">
-            Message professional
-          </Link>
-        ) : (
-          <Link to="/login" className="btn-secondary">
-            Log in to message
-          </Link>
-        )}
       </div>
 
       <div className="mt-8">

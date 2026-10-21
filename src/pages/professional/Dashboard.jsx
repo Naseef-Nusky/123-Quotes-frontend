@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   Building2,
-  ClipboardList,
   Coins,
   Inbox,
   Send,
@@ -88,12 +87,6 @@ export default function ProDashboard() {
       title: 'Request Sent',
       desc: 'Track requests you have already sent.',
       icon: Send,
-    },
-    {
-      to: '/pro/my-request',
-      title: 'My Request',
-      desc: 'Manage your own service requests.',
-      icon: ClipboardList,
     },
     {
       to: '/pro/client-requests',

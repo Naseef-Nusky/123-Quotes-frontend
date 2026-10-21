@@ -41,7 +41,7 @@ export default function RequestSent() {
   return (
     <section className="w-full px-4 py-8 text-left sm:px-6">
       <h1 className="text-2xl font-bold text-navy">Request Sent</h1>
-      <p className="mt-1 text-sm text-muted">Messages you have sent to customers.</p>
+      <p className="mt-1 text-sm text-muted">Messages and quotation requests you have sent.</p>
       {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
 
       {!messages.length ? (
@@ -49,15 +49,20 @@ export default function RequestSent() {
       ) : (
         <ul className="mt-6 divide-y divide-line rounded-2xl border border-line bg-white">
           {messages.map((m) => {
-            const name = [m.customer?.firstName, m.customer?.lastName].filter(Boolean).join(' ')
+            // Pro → pro quotation requests have no customer; show the business sent to.
+            const name =
+              [m.customer?.firstName, m.customer?.lastName].filter(Boolean).join(' ') ||
+              (m.senderProfessionalId ? m.professional?.companyName : '') ||
+              'Customer'
+            const email = m.customer?.email || (m.senderProfessionalId ? m.professional?.email : '') || ''
             return (
               <li key={m.id} className="px-4 py-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-sm font-bold text-navy">{name || 'Customer'}</p>
+                  <p className="text-sm font-bold text-navy">{name}</p>
                   <p className="text-xs text-muted">{formatWhen(m.createdAt)}</p>
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-sm text-slate">{m.message}</p>
-                <p className="mt-1 text-xs text-muted">{m.customer?.email || ''}</p>
+                <p className="mt-1 text-xs text-muted">{email}</p>
               </li>
             )
           })}

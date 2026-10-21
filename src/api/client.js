@@ -153,6 +153,11 @@ export const api = {
   updateMessageStatus: (id, status) =>
     request(`/messages/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
+  // In-app notifications (bell)
+  getNotifications: () => request('/notifications?limit=30'),
+  markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: 'PATCH', body: '{}' }),
+  markAllNotificationsRead: () => request('/notifications/read-all', { method: 'PATCH', body: '{}' }),
+
   // Reviews
   getReviews: (professionalId) => request(`/reviews/professional/${professionalId}`),
   submitReview: (professionalId, body) =>

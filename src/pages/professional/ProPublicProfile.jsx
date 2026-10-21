@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { Building2, Phone, Mail, Star } from 'lucide-react'
 import { api } from '../../api/client'
 import Loading from '../../components/Loading'
+import ReviewModal from '../../components/ReviewModal'
+import RequestQuoteButton from '../../components/RequestQuoteButton'
 import { useAuth } from '../../context/AuthContext'
 
 function Stars({ value }) {
@@ -23,11 +25,7 @@ export default function ProPublicProfile() {
   const [reviews, setReviews] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ title: '', body: '', rating: 5 })
-  const [busy, setBusy] = useState(false)
-  const [formError, setFormError] = useState('')
-  const [formOk, setFormOk] = useState('')
+  const [reviewOpen, setReviewOpen] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -59,29 +57,7 @@ export default function ProPublicProfile() {
     [pro],
   )
 
-  const isCustomer = user?.role === 'CUSTOMER'
-
-  async function submitReview(e) {
-    e.preventDefault()
-    setBusy(true)
-    setFormError('')
-    setFormOk('')
-    try {
-      await api.submitReview(id, {
-        title: form.title.trim(),
-        body: form.body.trim(),
-        rating: Number(form.rating),
-      })
-      setFormOk('Review submitted.')
-      setShowForm(false)
-      setForm({ title: '', body: '', rating: 5 })
-      await load()
-    } catch (err) {
-      setFormError(err.message || 'Failed to submit review')
-    } finally {
-      setBusy(false)
-    }
-  }
+  const isOwnProfile = Boolean(user?.professional?.id && user.professional.id === id)
 
   if (loading) {
     return <Loading overlay />
@@ -130,6 +106,11 @@ export default function ProPublicProfile() {
               {pro.email || '—'}
             </p>
           </div>
+          {!isOwnProfile ? (
+            <div className="mt-5">
+              <RequestQuoteButton professional={pro} className="w-full" />
+            </div>
+          ) : null}
         </aside>
 
         <div>
@@ -143,61 +124,18 @@ export default function ProPublicProfile() {
           <div className="mt-10">
             <div className="flex items-center justify-between border-b border-line pb-2">
               <h2 className="text-lg font-bold text-navy">Reviews</h2>
-              {isCustomer ? (
+              {isOwnProfile ? (
+                <span className="text-xs text-muted">This is your business profile</span>
+              ) : (
                 <button
                   type="button"
                   className="btn-secondary !rounded-md !py-2 !text-sm"
-                  onClick={() => setShowForm((v) => !v)}
+                  onClick={() => setReviewOpen(true)}
                 >
                   Write a Review
                 </button>
-              ) : (
-                <span className="text-xs text-muted">Sign in as a customer to review</span>
               )}
             </div>
-
-            {showForm ? (
-              <form onSubmit={submitReview} className="mt-4 space-y-3 rounded-xl border border-line p-4">
-                {formError ? <p className="text-sm text-danger">{formError}</p> : null}
-                <div>
-                  <label className="label">Rating</label>
-                  <select
-                    className="input-field mt-1"
-                    value={form.rating}
-                    onChange={(e) => setForm((f) => ({ ...f, rating: e.target.value }))}
-                  >
-                    {[5, 4, 3, 2, 1].map((n) => (
-                      <option key={n} value={n}>
-                        {n} star{n === 1 ? '' : 's'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">Title</label>
-                  <input
-                    className="input-field mt-1 w-full"
-                    value={form.title}
-                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="label">Review</label>
-                  <textarea
-                    className="input-field mt-1 w-full"
-                    rows={4}
-                    value={form.body}
-                    onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-                    required
-                  />
-                </div>
-                <button type="submit" className="btn-primary !rounded-md" disabled={busy}>
-                  {busy ? 'Saving…' : 'Submit review'}
-                </button>
-              </form>
-            ) : null}
-            {formOk ? <p className="mt-3 text-sm text-emerald-700">{formOk}</p> : null}
 
             {!reviews.length ? (
               <p className="mt-4 text-sm text-slate">No Reviews Available</p>
@@ -212,6 +150,7 @@ export default function ProPublicProfile() {
                     <p className="mt-1 text-sm text-slate">{r.body}</p>
                     <p className="mt-2 text-xs text-muted">
                       {[r.customer?.firstName, r.customer?.lastName].filter(Boolean).join(' ') ||
+                        r.reviewerName ||
                         'Customer'}
                     </p>
                   </li>
@@ -225,6 +164,14 @@ export default function ProPublicProfile() {
           </Link>
         </div>
       </div>
+
+      {reviewOpen ? (
+        <ReviewModal
+          professional={pro}
+          onClose={() => setReviewOpen(false)}
+          onSubmitted={() => load()}
+        />
+      ) : null}
     </section>
   )
 }

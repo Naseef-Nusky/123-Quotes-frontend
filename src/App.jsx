@@ -29,14 +29,11 @@ import CustomerDashboard from './pages/customer/Dashboard'
 import MyRequests from './pages/customer/MyRequests'
 import NewRequest from './pages/customer/NewRequest'
 import RequestDetail from './pages/customer/RequestDetail'
-import CustomerMessages from './pages/customer/Messages'
-
 import ProDashboard from './pages/professional/Dashboard'
 import ProLeads from './pages/professional/Leads'
 import AvailablePros from './pages/professional/AvailablePros'
 import ProPublicProfile from './pages/professional/ProPublicProfile'
 import RequestSent from './pages/professional/RequestSent'
-import MyRequest from './pages/professional/MyRequest'
 import ClientRequests from './pages/professional/ClientRequests'
 import Settings from './pages/professional/Settings'
 import BuyTokens from './pages/professional/BuyTokens'
@@ -101,7 +98,6 @@ export default function App() {
         <Route path="requests/new" element={<NewRequest />} />
         <Route path="requests/:id" element={<RequestDetail />} />
         <Route path="requests" element={<MyRequests />} />
-        <Route path="messages" element={<CustomerMessages />} />
         <Route path="requested-services" element={<Navigate to="/app/requests" replace />} />
       </Route>
 
@@ -117,7 +113,6 @@ export default function App() {
         <Route path="available-pros" element={<AvailablePros />} />
         <Route path="available-pros/:id" element={<ProPublicProfile />} />
         <Route path="request-sent" element={<RequestSent />} />
-        <Route path="my-request" element={<MyRequest />} />
         <Route path="leads" element={<ProLeads />} />
         <Route path="client-requests" element={<ClientRequests />} />
         <Route path="settings" element={<Settings />} />

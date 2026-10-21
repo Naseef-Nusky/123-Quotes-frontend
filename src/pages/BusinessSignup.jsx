@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { api } from '../api/client'
 import PostcodeInput from '../components/PostcodeInput'
-import { BANNERS } from '../data/banners'
 import PhoneInput from '../components/PhoneInput'
 import {
   DEFAULT_COUNTRY_CODE,
@@ -38,7 +37,7 @@ function randomPassword() {
 
 function WizardShell({ children }) {
   return (
-    <section className="relative isolate min-h-[70vh] overflow-hidden px-4 py-10 sm:px-6 sm:py-14">
+    <section className="relative isolate min-h-[70vh] overflow-x-clip px-4 py-10 sm:px-6 sm:py-14">
       <div
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_rgba(30,143,213,0.16),_transparent_55%),linear-gradient(180deg,#f4f8fc_0%,#ffffff_45%,#eef6fc_100%)]"
         aria-hidden
@@ -52,21 +51,7 @@ function WizardShell({ children }) {
         aria-hidden
       />
 
-      <div className="mx-auto w-full max-w-3xl animate-fade-up">
-        <div className="relative mb-6 overflow-hidden rounded-3xl shadow-[0_20px_45px_-20px_rgba(10,47,92,0.5)]">
-          <img src={BANNERS.businessSignup} alt="" className="h-40 w-full object-cover sm:h-48" />
-          <div className="absolute inset-0 bg-gradient-to-r from-navy/85 via-navy/55 to-transparent" />
-          <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8fd0f5]">
-              For professionals
-            </p>
-            <p className="mt-1.5 max-w-md font-display text-2xl font-bold leading-tight text-white sm:text-3xl">
-              Grow your business with 123 Quotes
-            </p>
-          </div>
-        </div>
-        {children}
-      </div>
+      <div className="mx-auto w-full max-w-3xl animate-fade-up">{children}</div>
     </section>
   )
 }
@@ -439,12 +424,12 @@ export default function BusinessSignup() {
       </div>
 
       <form onSubmit={startSignup} className="relative mx-auto mt-10 max-w-2xl">
-        <WizardCard className="!p-3 sm:!p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+        <WizardCard className="!rounded-[1.75rem] !p-0 sm:!rounded-full">
+          <div className="flex flex-col sm:flex-row sm:items-stretch">
             <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-primary" />
               <input
-                className="input-field !rounded-xl !border-line !py-3.5 !pl-10"
+                className="input-field !rounded-full !border-0 !bg-transparent !py-3.5 !pl-10"
                 placeholder="What type of business or service do you provide?"
                 value={serviceQuery}
                 onChange={(e) => {
@@ -457,7 +442,7 @@ export default function BusinessSignup() {
                 autoComplete="off"
               />
               {showSuggestions && suggestions.length ? (
-                <ul className="absolute z-20 mt-2 max-h-56 w-full overflow-auto rounded-xl border border-line bg-white py-1 shadow-xl shadow-navy/10">
+                <ul className="absolute z-50 mt-2 max-h-56 w-full overflow-auto rounded-xl border border-line bg-white py-1 shadow-xl shadow-navy/10">
                   {suggestions.map((s) => (
                     <li key={s.id}>
                       <button
@@ -471,7 +456,8 @@ export default function BusinessSignup() {
                         }}
                       >
                         <span className="font-semibold text-navy">{s.name}</span>
-                        {s.category?.name ? (
+                        {s.category?.name &&
+                        s.category.name.trim().toLowerCase() !== s.name.trim().toLowerCase() ? (
                           <span className="text-xs text-muted">{s.category.name}</span>
                         ) : null}
                       </button>
@@ -480,7 +466,7 @@ export default function BusinessSignup() {
                 </ul>
               ) : null}
             </div>
-            <button type="submit" className="btn-primary shrink-0 !rounded-xl px-7 !py-3.5">
+            <button type="submit" className="btn-primary shrink-0 !rounded-full px-7 !py-3.5">
               Get started
             </button>
           </div>

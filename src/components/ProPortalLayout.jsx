@@ -3,7 +3,6 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   BriefcaseBusiness,
   Building2,
-  ClipboardList,
   Home,
   Inbox,
   LogOut,
@@ -14,13 +13,13 @@ import {
 } from 'lucide-react'
 import Logo from './Logo'
 import UserAvatarMenu from './UserAvatarMenu'
+import NotificationBell from './NotificationBell'
 import { useAuth } from '../context/AuthContext'
 
 const NAV = [
   { to: '/pro', label: 'Home', icon: Home, end: true },
   { to: '/pro/available-pros', label: 'Available Pros', icon: Building2 },
   { to: '/pro/request-sent', label: 'Request Sent', icon: Send },
-  { to: '/pro/my-request', label: 'My Request', icon: ClipboardList },
   { to: '/pro/leads', label: 'Leads', icon: BriefcaseBusiness },
   { to: '/pro/client-requests', label: 'Client Requests', icon: Inbox },
   { to: '/pro/settings', label: 'Settings', icon: Settings2 },
@@ -164,7 +163,10 @@ export default function ProPortalLayout() {
                 </h1>
               </div>
             </div>
-            <UserAvatarMenu settingsTo="/pro/settings" />
+            <div className="flex shrink-0 items-center gap-2.5">
+              <NotificationBell />
+              <UserAvatarMenu settingsTo="/pro/settings" />
+            </div>
           </div>
         </header>
 

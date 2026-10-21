@@ -195,9 +195,12 @@ export default function PostcodeInput({
     }
   }
 
-  const shellClass =
+  // Always keep the flex shell layout — callers may pass plain input classes
+  // (e.g. `input-field`) which would otherwise stack the chevron below the input.
+  const shellClass = `${
     className ||
-    'flex w-full items-center gap-2 rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20'
+    'w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20'
+  } flex items-center gap-2`
 
   const menu =
     open && menuPos

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { Menu, X, LogIn, LayoutGrid, Mail, MapPin, Phone, ArrowRight } from 'lucide-react'
+import { Menu, X, LogIn, LayoutGrid, Mail, MapPin, Phone } from 'lucide-react'
 import Logo from './Logo'
 import UserAvatarMenu from './UserAvatarMenu'
 import { useAuth } from '../context/AuthContext'
@@ -110,13 +110,6 @@ export default function Layout({ variant = 'public', children }) {
                 >
                   Business Login
                 </Link>
-                <Link
-                  to="/services"
-                  className="bg-brand-gradient inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold text-white shadow-md shadow-primary-dark/25 transition hover:brightness-105"
-                >
-                  Get Quotes
-                  <ArrowRight className="size-4" strokeWidth={2.25} />
-                </Link>
               </div>
             )}
           </div>
@@ -167,13 +160,6 @@ export default function Layout({ variant = 'public', children }) {
                     className="rounded-full border border-primary/40 px-4 py-2 text-center text-sm font-semibold text-primary-dark"
                   >
                     Business Login
-                  </Link>
-                  <Link
-                    to="/services"
-                    onClick={() => setOpen(false)}
-                    className="bg-brand-gradient rounded-full px-4 py-2.5 text-center text-sm font-bold text-white"
-                  >
-                    Get Free Quotes
                   </Link>
                 </>
               ) : null}
