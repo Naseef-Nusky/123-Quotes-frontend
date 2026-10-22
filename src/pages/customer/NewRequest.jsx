@@ -183,10 +183,13 @@ function withBackdrop(services, modal, onSelect, portal) {
   )
 }
 
-export default function NewRequest() {
+export default function NewRequest({ embeddedService = '', onEmbeddedClose } = {}) {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { isCustomer, user } = useAuth()
+  // Embedded mode: render only the wizard modal (opened directly from a
+  // service card), with no services-list page behind it.
+  const embedded = typeof onEmbeddedClose === 'function'
 
   const [services, setServices] = useState([])
   const [serviceId, setServiceId] = useState('')
@@ -216,7 +219,7 @@ export default function NewRequest() {
   const [questionsLoading, setQuestionsLoading] = useState(false)
   const [done, setDone] = useState(null)
 
-  const serviceParam = params.get('service') || ''
+  const serviceParam = embeddedService || params.get('service') || ''
 
   useEffect(() => {
     let alive = true
@@ -281,6 +284,10 @@ export default function NewRequest() {
   const serviceName = services.find((s) => s.id === serviceId)?.name || 'Service'
 
   function close() {
+    if (embedded) {
+      onEmbeddedClose()
+      return
+    }
     // Close the wizard and return to the service list on this page
     // (don't leave New Request / jump to dashboard).
     setServiceId('')
@@ -456,6 +463,7 @@ export default function NewRequest() {
   let modal = null
 
   if (loading) {
+    if (embedded) return <Loading overlay />
     return (
       <div>
         <PageBackdrop services={[]} onSelect={null} portal={portal} />
@@ -465,6 +473,19 @@ export default function NewRequest() {
   }
 
   if (!serviceId) {
+    if (embedded) {
+      return (
+        <WizardShell
+          title="Service unavailable"
+          onClose={close}
+          footer={<WizardFooter hideBack continueLabel="Close" onContinue={close} />}
+        >
+          <p className="text-sm text-slate-600">
+            {error || 'This service is not available right now. Please pick another service.'}
+          </p>
+        </WizardShell>
+      )
+    }
     // Full service picker (no modal) — all active services
     return (
       <div>
@@ -731,6 +752,8 @@ export default function NewRequest() {
       </WizardShell>
     )
   }
+
+  if (embedded) return modal
 
   return withBackdrop(services, modal, null, portal)
 }

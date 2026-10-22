@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { CustomerShell, ProfessionalShell } from './components/PortalShell'
@@ -40,6 +40,19 @@ import BuyTokens from './pages/professional/BuyTokens'
 import TokenHistory from './pages/professional/TokenHistory'
 import ProProfile from './pages/professional/Profile'
 
+/** The standalone /request page is gone: clicking a service opens the
+ *  question wizard directly. Old links land on Services with the wizard open. */
+function RequestRedirect() {
+  const [params] = useSearchParams()
+  const service = params.get('service')
+  return (
+    <Navigate
+      to={service ? `/services?open=${encodeURIComponent(service)}` : '/services'}
+      replace
+    />
+  )
+}
+
 function RoleRedirect() {
   const { user, loading } = useAuth()
   if (loading) return <Loading overlay />
@@ -71,7 +84,7 @@ export default function App() {
         <Route path="house-cleaning" element={<PopularServicePage slug="house-cleaning" />} />
         <Route path="private-investigators" element={<PopularServicePage slug="private-investigators" />} />
         <Route path="web-developer" element={<PopularServicePage slug="web-developer" />} />
-        <Route path="request" element={<NewRequest />} />
+        <Route path="request" element={<RequestRedirect />} />
         <Route path="how-it-works" element={<HowItWorks />} />
         <Route path="pricing" element={<Pricing />} />
         <Route path="professionals" element={<Professionals />} />

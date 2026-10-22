@@ -4,6 +4,7 @@ import { Search, User } from 'lucide-react'
 import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
 import PostcodeInput from '../components/PostcodeInput'
+import NewRequest from './customer/NewRequest'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -11,6 +12,8 @@ export default function Home() {
   const [need, setNeed] = useState('')
   const [postcode, setPostcode] = useState('')
   const [services, setServices] = useState([])
+  // Clicking a service opens the question wizard directly (no /request page).
+  const [wizardSlug, setWizardSlug] = useState('')
 
   useEffect(() => {
     fetchHomeContent().then((data) => {
@@ -185,14 +188,15 @@ export default function Home() {
               {[0, 1].map((half) => (
                 <div key={half} className="flex gap-4 pr-4" aria-hidden={half === 1}>
                   {services.map((s) => (
-                    <Link
+                    <button
                       key={`${half}-${s.id}`}
-                      to={`/services/${s.slug}`}
+                      type="button"
+                      onClick={() => setWizardSlug(s.slug || s.id)}
                       tabIndex={half === 1 ? -1 : 0}
                       className="flex shrink-0 items-center rounded-2xl bg-canvas px-4 py-3 transition hover:bg-panel"
                     >
                       <span className="whitespace-nowrap text-sm font-semibold text-navy">{s.name}</span>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               ))}
@@ -370,6 +374,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {wizardSlug ? (
+        <NewRequest embeddedService={wizardSlug} onEmbeddedClose={() => setWizardSlug('')} />
+      ) : null}
     </div>
   )
 }

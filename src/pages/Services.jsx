@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+import NewRequest from './customer/NewRequest'
 
 const PAGE_SIZE = 16
 
@@ -13,6 +14,10 @@ export default function Services() {
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
   const gridTopRef = useRef(null)
+  const [searchParams] = useSearchParams()
+  // Clicking a service opens the question wizard directly (no /request page).
+  // `?open=<slug>` is honoured so old /request?service= links still land here.
+  const [wizardSlug, setWizardSlug] = useState(() => searchParams.get('open') || '')
 
   useEffect(() => {
     let alive = true
@@ -133,9 +138,10 @@ export default function Services() {
               const showDesc = desc && desc.toLowerCase() !== nameKey
               return (
               <li key={s.id} className="h-full">
-                <Link
-                  to={`/request?service=${encodeURIComponent(s.slug)}`}
-                  className="group flex h-full flex-col rounded-2xl border border-line bg-white p-4 shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
+                <button
+                  type="button"
+                  onClick={() => setWizardSlug(s.slug || s.id)}
+                  className="group flex h-full w-full flex-col rounded-2xl border border-line bg-white p-4 text-left shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
                   style={{
                     animation: 'fade-up 0.5s ease-out both',
                     animationDelay: `${Math.min(index, 8) * 0.05}s`,
@@ -161,7 +167,7 @@ export default function Services() {
                       />
                     </span>
                   </span>
-                </Link>
+                </button>
               </li>
               )
             })}
@@ -218,6 +224,10 @@ export default function Services() {
           </>
         ) : null}
       </div>
+
+      {wizardSlug ? (
+        <NewRequest embeddedService={wizardSlug} onEmbeddedClose={() => setWizardSlug('')} />
+      ) : null}
     </div>
   )
 }

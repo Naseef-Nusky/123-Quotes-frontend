@@ -1,6 +1,6 @@
 /**
  * Landing page content for popular services (matches 123quotes.co.uk layouts).
- * requestSlug = service slug used by /request?service=
+ * requestSlug = service slug whose question wizard opens on "Request a free quote"
  */
 
 export const POPULAR_SERVICE_PAGES = {

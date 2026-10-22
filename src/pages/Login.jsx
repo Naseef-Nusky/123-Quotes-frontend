@@ -215,7 +215,7 @@ export default function Login({ audience = 'customer' }) {
                 Login
               </Link>
             ) : (
-              <Link to="/request" className="font-semibold text-navy">
+              <Link to="/services" className="font-semibold text-navy">
                 Get a quote
               </Link>
             )}
@@ -249,7 +249,7 @@ export default function Login({ audience = 'customer' }) {
               Login
             </Link>
           ) : (
-            <Link to="/request" className="block text-center text-sm font-semibold text-navy">
+            <Link to="/services" className="block text-center text-sm font-semibold text-navy">
               Get a quote
             </Link>
           )}

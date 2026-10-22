@@ -25,7 +25,7 @@ const customerLinks = [
 const customerFooterLinks = [
   { to: '/services', label: 'Browse services' },
   { to: '/categories', label: 'Browse categories' },
-  { to: '/request', label: 'Get free quotes' },
+  { to: '/services', label: 'Get free quotes' },
   { to: '/professionals', label: 'Find professionals' },
   { to: '/how-it-works', label: 'How it works' },
 ]

@@ -4,12 +4,15 @@ import { api } from '../api/client'
 import Loading from '../components/Loading'
 import BannerHeader from '../components/BannerHeader'
 import { BANNERS } from '../data/banners'
+import NewRequest from './customer/NewRequest'
 
 export default function ServiceDetail() {
   const { slug } = useParams()
   const [service, setService] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  // The CTA opens the question wizard directly (no /request page).
+  const [wizardOpen, setWizardOpen] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -32,8 +35,6 @@ export default function ServiceDetail() {
   if (loading) return <Loading overlay />
   if (error) return <p className="mx-auto max-w-3xl px-4 py-16 text-danger">{error}</p>
   if (!service) return null
-
-  const ctaTo = `/request?service=${encodeURIComponent(service.slug || service.id)}`
 
   return (
     <div>
@@ -61,11 +62,18 @@ export default function ServiceDetail() {
             {service.questions.length === 1 ? '' : 's'}.
           </p>
         ) : null}
-          <Link to={ctaTo} className="btn-primary mt-6">
+          <button type="button" onClick={() => setWizardOpen(true)} className="btn-primary mt-6">
             Get quotes for {service.name}
-          </Link>
+          </button>
         </div>
       </div>
+
+      {wizardOpen ? (
+        <NewRequest
+          embeddedService={service.slug || service.id}
+          onEmbeddedClose={() => setWizardOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }

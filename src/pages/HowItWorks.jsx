@@ -134,7 +134,7 @@ export default function HowItWorks() {
               <StepList steps={stepsCustomer} />
             </div>
             <Link
-              to="/request"
+              to="/services"
               className="bg-brand-gradient mt-7 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white shadow-md shadow-primary-dark/25 transition hover:brightness-105"
             >
               Get Quotes

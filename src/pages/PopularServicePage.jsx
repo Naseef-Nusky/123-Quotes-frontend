@@ -1,19 +1,21 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import PostcodeInput from '../components/PostcodeInput'
+import NewRequest from './customer/NewRequest'
 import {
   getPopularServicePage,
   HOW_IT_WORKS_STEPS,
 } from '../data/popularServicePages'
 
-function QuoteButton({ to, className = '' }) {
+function QuoteButton({ onClick, className = '' }) {
   return (
-    <Link
-      to={to}
+    <button
+      type="button"
+      onClick={onClick}
       className={`inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-8 py-3.5 text-sm font-extrabold tracking-wide text-white shadow-md shadow-[#0a3a7a]/25 transition hover:brightness-105 ${className}`}
     >
       REQUEST A FREE QUOTE
-    </Link>
+    </button>
   )
 }
 
@@ -21,10 +23,10 @@ export default function PopularServicePage({ slug }) {
   const navigate = useNavigate()
   const page = getPopularServicePage(slug)
   const [postcode, setPostcode] = useState('')
+  // The quote button opens the question wizard directly (no /request page).
+  const [wizardOpen, setWizardOpen] = useState(false)
 
   if (!page) return <Navigate to="/" replace />
-
-  const quoteTo = `/request?service=${encodeURIComponent(page.requestSlug)}`
 
   function onSearch(e) {
     e.preventDefault()
@@ -102,7 +104,7 @@ export default function PopularServicePage({ slug }) {
           ) : null}
         </div>
         <div className="mt-10 flex justify-center">
-          <QuoteButton to={quoteTo} />
+          <QuoteButton onClick={() => setWizardOpen(true)} />
         </div>
       </section>
 
@@ -229,9 +231,13 @@ export default function PopularServicePage({ slug }) {
         )}
 
         <div className="mt-12 flex justify-center">
-          <QuoteButton to={quoteTo} />
+          <QuoteButton onClick={() => setWizardOpen(true)} />
         </div>
       </section>
+
+      {wizardOpen ? (
+        <NewRequest embeddedService={page.requestSlug} onEmbeddedClose={() => setWizardOpen(false)} />
+      ) : null}
     </div>
   )
 }

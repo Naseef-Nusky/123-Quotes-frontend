@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
 import { BANNERS } from '../data/banners'
+import NewRequest from './customer/NewRequest'
 
 export default function CategoryDetail() {
   const { slug } = useParams()
@@ -11,6 +12,8 @@ export default function CategoryDetail() {
   const [services, setServices] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  // Clicking a service opens the question wizard directly (no /request page).
+  const [wizardSlug, setWizardSlug] = useState('')
 
   useEffect(() => {
     let alive = true
@@ -61,7 +64,10 @@ export default function CategoryDetail() {
             {category?.name || (loading ? '…' : 'Category')}
           </h1>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-slate">
-            {category?.description || 'Choose a service to start a quote request.'}
+            {category?.description &&
+            category.description.trim().toLowerCase() !== (category.name || '').trim().toLowerCase()
+              ? category.description
+              : 'Choose a service to start a quote request.'}
           </p>
         </header>
 
@@ -70,26 +76,39 @@ export default function CategoryDetail() {
 
         {!loading && services.length ? (
           <ul className="mt-10 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">
-            {services.map((s, index) => (
+            {services.map((s, index) => {
+              // Category name, service name and description are often the
+              // same text: show each only when it adds something new.
+              const nameKey = (s.name || '').trim().toLowerCase()
+              const catName = s.category?.name || category?.name || ''
+              const showCategory = catName && catName.trim().toLowerCase() !== nameKey
+              const desc = (s.shortDesc || s.description || '').trim()
+              const showDesc = desc && desc.toLowerCase() !== nameKey
+              return (
               <li key={s.id}>
-                <Link
-                  to={`/request?service=${encodeURIComponent(s.slug)}`}
-                  className="group flex items-stretch gap-4 px-5 py-5 transition hover:bg-[#eef7fc]/90 sm:gap-6 sm:px-7 sm:py-6"
+                <button
+                  type="button"
+                  onClick={() => setWizardSlug(s.slug || s.id)}
+                  className="group flex w-full items-stretch gap-4 px-4 py-3 text-left transition hover:bg-[#eef7fc]/90 sm:gap-6 sm:px-5 sm:py-3.5"
                   style={{
                     animation: 'fade-up 0.5s ease-out both',
                     animationDelay: `${Math.min(index, 8) * 0.05}s`,
                   }}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                      {s.category?.name || category?.name}
-                    </p>
-                    <h2 className="mt-1 font-display text-xl font-bold text-navy transition group-hover:text-primary">
+                    {showCategory ? (
+                      <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                        {catName}
+                      </p>
+                    ) : null}
+                    <h2 className="text-lg font-normal text-navy transition group-hover:text-primary">
                       {s.name}
                     </h2>
-                    <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate">
-                      {s.shortDesc || s.description}
-                    </p>
+                    {showDesc ? (
+                      <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate">
+                        {desc}
+                      </p>
+                    ) : null}
                   </div>
                   <span className="flex shrink-0 items-center self-center text-sm font-bold text-primary">
                     Get quotes
@@ -98,9 +117,10 @@ export default function CategoryDetail() {
                       strokeWidth={2.25}
                     />
                   </span>
-                </Link>
+                </button>
               </li>
-            ))}
+              )
+            })}
           </ul>
         ) : null}
 
@@ -108,6 +128,10 @@ export default function CategoryDetail() {
           <p className="mt-10 text-muted">No services in this category yet.</p>
         ) : null}
       </div>
+
+      {wizardSlug ? (
+        <NewRequest embeddedService={wizardSlug} onEmbeddedClose={() => setWizardSlug('')} />
+      ) : null}
     </div>
   )
 }
