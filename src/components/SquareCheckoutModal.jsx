@@ -203,7 +203,7 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
           {pkg.name} · {pkg.tokens} tokens · {amountLabel}
         </p>
         <p className="mt-1 text-xs text-muted">
-          Card and wallet details are processed by Square — never stored on 123 Quotes.
+          Card and wallet details are processed by Square, never stored on 123 Quotes.
         </p>
 
         {loadingConfig || !sdkReady ? <Loading className="mt-4 py-6" /> : null}

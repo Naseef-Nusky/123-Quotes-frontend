@@ -43,7 +43,7 @@ const pricingFaqs = [
   },
   {
     q: 'Do tokens expire?',
-    a: 'No — tokens stay on your account while it is active, so you can buy a pack and use it whenever the right jobs come in.',
+    a: 'No. Tokens stay on your account while it is active, so you can buy a pack and use it whenever the right jobs come in.',
   },
   {
     q: 'Is there a subscription or commission?',
@@ -84,7 +84,7 @@ export default function Pricing() {
         eyebrow="Pricing for professionals"
         title="Pay only for the leads"
         highlight="you want"
-        subtitle="Professionals unlock customer leads with tokens. No subscriptions, no commission — just flexible packs that match your pipeline."
+        subtitle="Professionals unlock customer leads with tokens. No subscriptions, no commission, just flexible packs that match your pipeline."
         cta={{ to: isProfessional ? '/pro/tokens' : '/business/signup', label: isProfessional ? 'Buy tokens' : 'Join free to get started' }}
         secondaryCta={{ to: '/how-it-works', label: 'How tokens work' }}
       />
@@ -93,14 +93,14 @@ export default function Pricing() {
         {loading ? <Loading className="mt-4" /> : null}
         {error ? <p className="mt-4 text-danger">{error}</p> : null}
 
-        <div className="grid items-stretch gap-6 md:grid-cols-3">
+        <div className="grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {sorted.map((pkg, idx) => {
             const popular = idx === popularIndex && sorted.length > 1
             const perToken = pkg.tokens ? pkg.priceCents / pkg.tokens : 0
             return (
               <Reveal key={pkg.id} delay={idx * 0.08} className="h-full">
                 <div
-                  className={`relative flex h-full flex-col rounded-3xl border bg-white p-7 ${
+                  className={`relative flex h-full flex-col rounded-3xl border bg-white p-5 ${
                     popular
                       ? 'border-primary shadow-[0_28px_60px_-24px_rgba(30,143,213,0.55)] ring-1 ring-primary/40 md:-translate-y-2'
                       : 'card-hover border-line shadow-[0_12px_34px_-20px_rgba(10,47,92,0.3)]'
@@ -113,7 +113,7 @@ export default function Pricing() {
                   ) : null}
                   <h2 className="font-display text-xl font-bold text-navy">{pkg.name}</h2>
                   <p className="mt-1.5 min-h-10 text-sm text-muted">{pkg.description}</p>
-                  <p className="mt-5 font-display text-5xl font-extrabold tracking-tight text-navy">
+                  <p className="mt-4 font-display text-4xl font-extrabold tracking-tight text-navy">
                     {formatMoney(pkg.priceCents, pkg.currency || 'GBP')}
                   </p>
                   <p className="mt-2 text-sm font-bold text-primary">

@@ -106,7 +106,7 @@ export default function RequestDetail() {
           <p className="mt-3 text-sm text-muted">
             {request.status === 'DRAFT'
               ? 'Submit this request to start matching.'
-              : 'No matches yet — check back soon.'}
+              : 'No matches yet. Check back soon.'}
           </p>
         ) : (
           <ul className="mt-4 space-y-3">
@@ -131,7 +131,7 @@ export default function RequestDetail() {
             <ul className="mt-2 space-y-2 text-sm text-slate">
               {unlocks.map((u) => (
                 <li key={u.id}>
-                  {u.professional?.companyName} — {u.professional?.contactName}
+                  {u.professional?.companyName} · {u.professional?.contactName}
                   {u.professional?.phone ? ` · ${u.professional.phone}` : ''}
                 </li>
               ))}

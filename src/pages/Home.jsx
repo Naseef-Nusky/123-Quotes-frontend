@@ -172,6 +172,35 @@ export default function Home() {
         </div>
       </section>
 
+      {services.length ? (
+        <section aria-label="All services" className="overflow-hidden border-b border-line bg-white py-8">
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-muted">
+            All services on 123 Quotes
+          </p>
+          <div className="group relative mt-5 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+            <div
+              className="animate-marquee flex w-max group-hover:[animation-play-state:paused]"
+              style={{ animationDuration: `${Math.max(32, services.length * 2.2)}s` }}
+            >
+              {[0, 1].map((half) => (
+                <div key={half} className="flex gap-4 pr-4" aria-hidden={half === 1}>
+                  {services.map((s) => (
+                    <Link
+                      key={`${half}-${s.id}`}
+                      to={`/services/${s.slug}`}
+                      tabIndex={half === 1 ? -1 : 0}
+                      className="flex shrink-0 items-center rounded-2xl bg-canvas px-4 py-3 transition hover:bg-panel"
+                    >
+                      <span className="whitespace-nowrap text-sm font-semibold text-navy">{s.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="border-t border-line bg-canvas">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <h2 className="text-center text-3xl font-bold text-navy">{content.popularTitle || 'Popular Services'}</h2>

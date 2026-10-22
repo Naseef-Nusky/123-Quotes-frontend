@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+
+const PAGE_SIZE = 16
 
 export default function Categories() {
   const [categories, setCategories] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const gridTopRef = useRef(null)
 
   useEffect(() => {
     let alive = true
@@ -46,6 +50,18 @@ export default function Categories() {
       : categories
     return [...list].sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
   }, [categories, query])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, pageCount)
+  const paged = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  function goToPage(next) {
+    const target = Math.min(Math.max(1, next), pageCount)
+    setPage(target)
+    requestAnimationFrame(() => {
+      gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   return (
     <div className="relative isolate overflow-hidden bg-canvas">
@@ -94,7 +110,10 @@ export default function Categories() {
             <input
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setPage(1)
+              }}
               placeholder="Search categories…"
               className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -105,43 +124,94 @@ export default function Categories() {
         {loading ? <Loading className="mt-8" /> : null}
 
         {!loading && filtered.length ? (
-          <div className="mt-10 border-t border-line/80">
-            <ul className="divide-y divide-line/70">
-              {filtered.map((c) => {
-                const count = c.services?.length ?? 0
-                return (
-                  <li key={c.id}>
-                    <Link
-                      to={`/categories/${encodeURIComponent(c.slug)}`}
-                      className="group flex items-center gap-3 py-3.5 transition hover:bg-white/60 sm:gap-4 sm:px-1"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <h2 className="truncate font-display text-base font-bold text-navy transition group-hover:text-primary sm:text-lg">
-                          {c.name}
-                        </h2>
-                        {c.description ? (
-                          <p className="mt-0.5 line-clamp-1 text-sm text-muted">{c.description}</p>
-                        ) : null}
-                      </div>
-                      <span className="hidden shrink-0 text-xs font-semibold text-muted sm:inline">
+          <ul ref={gridTopRef} className="mt-10 grid scroll-mt-24 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {paged.map((c, index) => {
+              const count = c.services?.length ?? 0
+              const desc = (c.description || '').trim()
+              const showDesc = desc && desc.toLowerCase() !== (c.name || '').trim().toLowerCase()
+              return (
+                <li key={c.id} className="h-full">
+                  <Link
+                    to={`/categories/${encodeURIComponent(c.slug)}`}
+                    className="group flex h-full flex-col rounded-2xl border border-line bg-white p-4 shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
+                    style={{
+                      animation: 'fade-up 0.5s ease-out both',
+                      animationDelay: `${Math.min(index, 8) * 0.05}s`,
+                    }}
+                  >
+                    <h2 className="mt-1 font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
+                      {c.name}
+                    </h2>
+                    {showDesc ? (
+                      <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate">{desc}</p>
+                    ) : null}
+                    <span className="mt-auto flex items-center justify-between gap-2 pt-3">
+                      <span className="text-xs font-semibold text-muted">
                         {count} service{count === 1 ? '' : 's'}
                       </span>
-                      <ArrowRight
-                        className="size-4 shrink-0 text-primary opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-100"
-                        strokeWidth={2.25}
-                      />
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold text-primary transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-[#3baee8] group-hover:via-[#1e8fd5] group-hover:to-[#0a3a7a] group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25">
+                        Explore
+                        <ArrowRight
+                          className="animate-arrow-nudge size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                          strokeWidth={2.5}
+                        />
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
         ) : null}
 
         {!loading && !filtered.length && !error ? (
           <p className="mt-8 text-muted">
             {query.trim() ? 'No categories match your search.' : 'No categories available yet.'}
           </p>
+        ) : null}
+
+        {!loading && pageCount > 1 ? (
+          <>
+            <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Categories pages">
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="size-4" strokeWidth={2.25} />
+                Prev
+              </button>
+              {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => goToPage(n)}
+                  aria-current={n === currentPage ? 'page' : undefined}
+                  className={`min-w-10 rounded-full px-3 py-2 text-sm font-semibold shadow-sm transition ${
+                    n === currentPage
+                      ? 'bg-brand-gradient text-white'
+                      : 'border border-line bg-white text-navy hover:border-primary/40 hover:text-primary'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === pageCount}
+                className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="size-4" strokeWidth={2.25} />
+              </button>
+            </nav>
+            <p className="mt-3 text-center text-xs text-muted">
+              Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+              {Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length} categories
+            </p>
+          </>
         ) : null}
       </div>
     </div>

@@ -260,6 +260,20 @@ h4,
   animation: marquee-x 36s linear infinite;
 }
 
+@keyframes arrow-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-arrow-nudge {
+  animation: arrow-nudge 1.6s ease-in-out infinite;
+}
+
 .wizard-card {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid #cfe0ef;

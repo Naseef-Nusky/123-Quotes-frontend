@@ -342,7 +342,7 @@ export default function BusinessSignup() {
               Finally, Just A Few Details
             </h1>
             <p className="mt-2 text-center text-slate">
-              Give us your details — you&apos;re steps away from seeing{' '}
+              Give us your details. You&apos;re steps away from seeing{' '}
               <span className="font-semibold text-primary">{serviceLabel}</span> leads
             </p>
 

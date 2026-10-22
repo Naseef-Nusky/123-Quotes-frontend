@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+
+const PAGE_SIZE = 16
 
 export default function Services() {
   const [services, setServices] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const gridTopRef = useRef(null)
 
   useEffect(() => {
     let alive = true
@@ -51,6 +55,18 @@ export default function Services() {
     )
   }, [services, query])
 
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, pageCount)
+  const paged = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  function goToPage(next) {
+    const target = Math.min(Math.max(1, next), pageCount)
+    setPage(target)
+    requestAnimationFrame(() => {
+      gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
   return (
     <div className="relative isolate overflow-hidden bg-canvas">
       <div
@@ -92,7 +108,10 @@ export default function Services() {
             <input
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setPage(1)
+              }}
               placeholder="Search services…"
               className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -103,38 +122,49 @@ export default function Services() {
         {loading ? <Loading className="mt-8" /> : null}
 
         {!loading && filtered.length ? (
-          <ul className="mt-10 divide-y divide-line/80 overflow-hidden rounded-2xl border border-line/80 bg-white/80 shadow-[0_18px_50px_-28px_rgba(10,47,92,0.35)] backdrop-blur-sm">
-            {filtered.map((s, index) => (
-              <li key={s.id}>
+          <ul ref={gridTopRef} className="mt-10 grid scroll-mt-24 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {paged.map((s, index) => {
+              // Many services repeat the same text as category + name + blurb.
+              // Show each only when it adds something new.
+              const nameKey = (s.name || '').trim().toLowerCase()
+              const showCategory =
+                s.category?.name && s.category.name.trim().toLowerCase() !== nameKey
+              const desc = (s.shortDesc || s.description || '').trim()
+              const showDesc = desc && desc.toLowerCase() !== nameKey
+              return (
+              <li key={s.id} className="h-full">
                 <Link
                   to={`/request?service=${encodeURIComponent(s.slug)}`}
-                  className="group flex items-stretch gap-4 px-5 py-5 transition hover:bg-[#eef7fc]/90 sm:gap-6 sm:px-7 sm:py-6"
+                  className="group flex h-full flex-col rounded-2xl border border-line bg-white p-4 shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
                   style={{
                     animation: 'fade-up 0.5s ease-out both',
                     animationDelay: `${Math.min(index, 8) * 0.05}s`,
                   }}
                 >
-                  <div className="min-w-0 flex-1">
+                  {showCategory ? (
                     <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                      {s.category?.name}
+                      {s.category.name}
                     </p>
-                    <h2 className="mt-1 font-display text-xl font-bold text-navy transition group-hover:text-primary">
-                      {s.name}
-                    </h2>
-                    <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate">
-                      {s.shortDesc || s.description}
-                    </p>
-                  </div>
-                  <span className="flex shrink-0 items-center self-center text-sm font-bold text-primary">
-                    Get quotes
-                    <ArrowRight
-                      className="ml-2 size-5 transition group-hover:translate-x-1"
-                      strokeWidth={2.25}
-                    />
+                  ) : null}
+                  <h2 className="mt-1 font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
+                    {s.name}
+                  </h2>
+                  {showDesc ? (
+                    <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate">{desc}</p>
+                  ) : null}
+                  <span className="mt-auto block pt-3 text-right">
+                    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold text-primary transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-[#3baee8] group-hover:via-[#1e8fd5] group-hover:to-[#0a3a7a] group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25">
+                      Get quotes
+                      <ArrowRight
+                        className="animate-arrow-nudge size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                        strokeWidth={2.5}
+                      />
+                    </span>
                   </span>
                 </Link>
               </li>
-            ))}
+              )
+            })}
           </ul>
         ) : null}
 
@@ -142,6 +172,50 @@ export default function Services() {
           <p className="mt-10 text-muted">
             {query.trim() ? 'No services match your search.' : 'No services available yet.'}
           </p>
+        ) : null}
+
+        {!loading && pageCount > 1 ? (
+          <>
+            <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Services pages">
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="size-4" strokeWidth={2.25} />
+                Prev
+              </button>
+              {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => goToPage(n)}
+                  aria-current={n === currentPage ? 'page' : undefined}
+                  className={`min-w-10 rounded-full px-3 py-2 text-sm font-semibold shadow-sm transition ${
+                    n === currentPage
+                      ? 'bg-brand-gradient text-white'
+                      : 'border border-line bg-white text-navy hover:border-primary/40 hover:text-primary'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === pageCount}
+                className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="size-4" strokeWidth={2.25} />
+              </button>
+            </nav>
+            <p className="mt-3 text-center text-xs text-muted">
+              Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+              {Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length} services
+            </p>
+          </>
         ) : null}
       </div>
     </div>

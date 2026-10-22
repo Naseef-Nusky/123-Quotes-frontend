@@ -224,7 +224,7 @@ export default function Login({ audience = 'customer' }) {
       ) : (
         <form onSubmit={onLinkSubmit} className="surface mt-4 space-y-4 p-6">
           <p className="text-sm text-slate">
-            We&apos;ll email you a secure link to sign in — no password needed.
+            We&apos;ll email you a secure link to sign in, no password needed.
           </p>
           <div>
             <label className="label" htmlFor="link-email">

@@ -526,7 +526,7 @@ export default function NewRequest() {
           />
         }
       >
-        <p className="text-sm text-slate-600">No extra questions for this service — continue to match.</p>
+        <p className="text-sm text-slate-600">No extra questions for this service. Continue to match.</p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </WizardShell>
     )

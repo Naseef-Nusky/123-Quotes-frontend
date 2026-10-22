@@ -15,7 +15,7 @@ export const POPULAR_SERVICE_PAGES = {
       brand: '(123Quotes)',
       paragraphs: [
         '123Quotes is the place to go for free quotes from wedding photographers near you. Whether you need a photographer for a wedding, engagement shoot, or other special event, we connect you with trusted local professionals.',
-        'Compare portfolios, reviews and prices in minutes — then choose the photographer that fits your day and budget.',
+        'Compare portfolios, reviews and prices in minutes, then choose the photographer that fits your day and budget.',
       ],
       image:
         'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=800&q=80',
@@ -36,7 +36,7 @@ export const POPULAR_SERVICE_PAGES = {
           title: 'Quality Of Photos',
           image:
             'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80',
-          text: 'From ceremony to reception, expect sharp, well-composed images you will treasure for years — not rushed phone snapshots.',
+          text: 'From ceremony to reception, expect sharp, well-composed images you will treasure for years, not rushed phone snapshots.',
         },
       ],
     },
@@ -52,7 +52,7 @@ export const POPULAR_SERVICE_PAGES = {
       title: 'Do You Require Assistance In Locating A Residential Or Commercial Cleaner?',
       brand: '',
       paragraphs: [
-        'On 123Quotes you can receive free quotes from great cleaners near you. Domestic, commercial or end-of-tenancy — enquire today and get instant quotes from vetted local teams.',
+        'On 123Quotes you can receive free quotes from great cleaners near you. Domestic, commercial or end-of-tenancy. Enquire today and get instant quotes from vetted local teams.',
       ],
       image: null,
     },
@@ -162,7 +162,7 @@ export const POPULAR_SERVICE_PAGES = {
       paragraphs: [
         'Here at 123Quotes, you can find the best web developers. Start your search and receive free quotes right away.',
         'Whether you need a new site, an app, or improvements to an existing product, compare local and remote developers who match your brief and budget.',
-        'A strong web presence starts with the right partner — enquire today and let professionals come to you.',
+        'A strong web presence starts with the right partner. Enquire today and let professionals come to you.',
       ],
       image: null,
     },
@@ -188,7 +188,7 @@ export const POPULAR_SERVICE_PAGES = {
           title: 'Functionality',
           image:
             'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=700&q=80',
-          text: 'Features that work reliably — forms, bookings, payments and more.',
+          text: 'Features that work reliably: forms, bookings, payments and more.',
         },
         {
           title: 'User Experience (UX)',

@@ -416,7 +416,7 @@ export default function ProLeads() {
                   <h3 className="text-sm font-bold text-navy">Attachments</h3>
                   {selected.contactLocked ? (
                     <p className="mt-3 text-sm text-muted">
-                      {selected.attachmentCount} file(s) — unlock this lead to download.
+                      {selected.attachmentCount} file(s). Unlock this lead to download.
                     </p>
                   ) : (
                     <ul className="mt-3 space-y-2">

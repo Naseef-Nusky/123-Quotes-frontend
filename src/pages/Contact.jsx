@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react'
+import { Mail, MapPin, Send } from 'lucide-react'
 import Loading from '../components/Loading'
 import PageHero from '../components/PageHero'
 import { BANNERS } from '../data/banners'
@@ -35,7 +35,7 @@ export default function Contact() {
     setStatus({ type: '', message: '' })
     try {
       const data = await api.submitContact(form)
-      setStatus({ type: 'ok', message: data.message || 'Thanks — we received your message.' })
+      setStatus({ type: 'ok', message: data.message || 'Thanks, we received your message.' })
       setForm({ name: '', email: '', message: '' })
     } catch (err) {
       setStatus({ type: 'err', message: err.message || 'Failed to send message' })
@@ -58,22 +58,10 @@ export default function Contact() {
       copy: 'We usually reply within one working day.',
     },
     {
-      icon: Phone,
-      label: 'Call us',
-      value: contact.phone || '—',
-      copy: 'Mon–Fri, 9am–6pm (UK time).',
-    },
-    {
       icon: MapPin,
-      label: 'Visit us',
+      label: 'Location',
       value: contact.address || '—',
-      copy: 'Our London office — appointments by email.',
-    },
-    {
-      icon: Clock,
-      label: 'Support hours',
-      value: 'Mon–Fri · 9am–6pm',
-      copy: 'Quote requests are matched 24/7, automatically.',
+      copy: 'Our London office. Appointments by email.',
     },
   ]
 
@@ -93,26 +81,28 @@ export default function Contact() {
             <Reveal>
               <h2 className="font-display text-2xl font-bold text-navy">Get in touch</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate">
-                Whether you are chasing a quote, growing your business, or reporting an issue —
+                Whether you are chasing a quote, growing your business, or reporting an issue,
                 here is how to reach us.
               </p>
             </Reveal>
             {loading ? <Loading className="mt-6 py-6" /> : null}
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 space-y-5">
               {infoCards.map((card, i) => {
                 const Icon = card.icon
                 return (
                   <Reveal key={card.label} delay={i * 0.06}>
-                    <article className="card-hover h-full rounded-3xl border border-line bg-white p-5 shadow-[0_10px_28px_-18px_rgba(10,47,92,0.3)]">
-                      <span className="bg-brand-gradient flex size-10 items-center justify-center rounded-xl text-white shadow-md shadow-primary-dark/20">
+                    <div className="flex items-start gap-3.5">
+                      <span className="bg-brand-gradient flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-md shadow-primary-dark/20">
                         <Icon className="size-5" strokeWidth={2} />
                       </span>
-                      <p className="mt-3 text-xs font-bold uppercase tracking-wider text-muted">
-                        {card.label}
-                      </p>
-                      <p className="mt-1 break-words text-sm font-bold text-navy">{card.value}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-muted">{card.copy}</p>
-                    </article>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted">
+                          {card.label}
+                        </p>
+                        <p className="mt-0.5 break-words text-sm font-bold text-navy">{card.value}</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-muted">{card.copy}</p>
+                      </div>
+                    </div>
                   </Reveal>
                 )
               })}

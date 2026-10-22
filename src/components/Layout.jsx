@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { Menu, X, LogIn, LayoutGrid, Mail, MapPin, Phone } from 'lucide-react'
+import { Menu, X, LogIn, LayoutGrid, Mail, MapPin } from 'lucide-react'
 import Logo from './Logo'
 import UserAvatarMenu from './UserAvatarMenu'
 import { useAuth } from '../context/AuthContext'
@@ -59,7 +59,7 @@ export default function Layout({ variant = 'public', children }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-30 border-b border-line/80 bg-white/90 shadow-[0_6px_24px_-18px_rgba(10,47,92,0.4)] backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-line/80 bg-white shadow-[0_6px_24px_-18px_rgba(10,47,92,0.4)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6">
           <div className="min-w-0 shrink">
             <Logo size="lg" to={logoTo} />
@@ -179,7 +179,7 @@ export default function Layout({ variant = 'public', children }) {
               </span>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
                 The contemporary way to find the professional service you need. Compare free quotes
-                from verified local professionals — and hire with confidence.
+                from verified local professionals, and hire with confidence.
               </p>
               <div className="mt-5 space-y-2 text-sm text-white/80">
                 <a
@@ -192,10 +192,6 @@ export default function Layout({ variant = 'public', children }) {
                 <p className="flex items-start gap-2">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-[#8fd0f5]" strokeWidth={2} />
                   1st Floor, 239 Kensington High St, London W8 6SN
-                </p>
-                <p className="flex items-center gap-2">
-                  <Phone className="size-4 shrink-0 text-[#8fd0f5]" strokeWidth={2} />
-                  Mon–Fri, 9am–6pm (UK)
                 </p>
               </div>
             </div>

@@ -24,7 +24,7 @@ function loadPostcodes() {
 }
 
 function optionLabel(row) {
-  return [row.outcode, row.town].filter(Boolean).join(' — ')
+  return [row.outcode, row.town].filter(Boolean).join(' · ')
 }
 
 function normalizePostcode(raw) {
@@ -246,7 +246,7 @@ export default function PostcodeInput({
             ) : null}
             {!loading && !filtered.length && !showCustom ? (
               <li className="px-3 py-3 text-sm text-muted">
-                {query ? 'No matches — try another search' : 'Start typing a postcode or town'}
+                {query ? 'No matches, try another search' : 'Start typing a postcode or town'}
               </li>
             ) : null}
             {filtered.map((r, i) => {

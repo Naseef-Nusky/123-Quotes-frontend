@@ -31,7 +31,7 @@ const stepsCustomer = [
   },
   {
     title: 'Submit & get matched',
-    copy: 'We create a lead and notify relevant professionals in your area — usually within minutes.',
+    copy: 'We create a lead and notify relevant professionals in your area, usually within minutes.',
     icon: Users,
   },
   {
@@ -49,12 +49,12 @@ const stepsPro = [
   },
   {
     title: 'Buy token packages',
-    copy: 'Flexible packs let you unlock only the leads you want — no subscriptions, no commission.',
+    copy: 'Flexible packs let you unlock only the leads you want, no subscriptions, no commission.',
     icon: Coins,
   },
   {
     title: 'Review matched leads',
-    copy: 'See job summaries, answers and location first — contact details stay locked until you unlock.',
+    copy: 'See job summaries, answers and location first. Contact details stay locked until you unlock.',
     icon: Eye,
   },
   {
@@ -73,7 +73,7 @@ const assurances = [
   {
     icon: ShieldCheck,
     title: 'Privacy first',
-    copy: 'Customer contact details are never public — they are only revealed to a pro who unlocks the lead.',
+    copy: 'Customer contact details are never public. They are only revealed to a pro who unlocks the lead.',
   },
   {
     icon: Zap,
@@ -146,7 +146,7 @@ export default function HowItWorks() {
             <Reveal>
               <h2 className="font-display text-2xl font-bold text-navy sm:text-3xl">For professionals</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate">
-                Pay only for the leads you pursue — keep 100% of what you earn.
+                Pay only for the leads you pursue and keep 100% of what you earn.
               </p>
             </Reveal>
             <div className="mt-6">

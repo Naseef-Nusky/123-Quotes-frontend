@@ -5,7 +5,7 @@ import Reveal from './Reveal'
 export const defaultFaqs = [
   {
     q: 'Is it free to request quotes?',
-    a: 'Yes. Requesting quotes on 123 Quotes is completely free for customers. Tell us what you need, answer a few quick questions, and local professionals will get in touch with their quotes — there is no obligation to hire anyone.',
+    a: 'Yes. Requesting quotes on 123 Quotes is completely free for customers. Tell us what you need, answer a few quick questions, and local professionals will get in touch with their quotes. There is no obligation to hire anyone.',
   },
   {
     q: 'How do I get matched with professionals?',
@@ -13,7 +13,7 @@ export const defaultFaqs = [
   },
   {
     q: 'Are the professionals verified?',
-    a: 'Every professional on 123 Quotes has a registered business profile. We recommend comparing reviews and asking for references before booking — and you always deal directly with the professional you choose.',
+    a: 'Every professional on 123 Quotes has a registered business profile. We recommend comparing reviews and asking for references before booking, and you always deal directly with the professional you choose.',
   },
   {
     q: 'How does it work for professionals?',
