@@ -9,6 +9,7 @@ import {
   Menu,
   Send,
   Settings2,
+  UserRound,
   X,
 } from 'lucide-react'
 import Logo from './Logo'
@@ -22,6 +23,7 @@ const NAV = [
   { to: '/pro/request-sent', label: 'Request Sent', icon: Send },
   { to: '/pro/leads', label: 'Leads', icon: BriefcaseBusiness },
   { to: '/pro/client-requests', label: 'Client Requests', icon: Inbox },
+  { to: '/pro/profile', label: 'Profile', icon: UserRound },
   { to: '/pro/settings', label: 'Settings', icon: Settings2 },
 ]
 

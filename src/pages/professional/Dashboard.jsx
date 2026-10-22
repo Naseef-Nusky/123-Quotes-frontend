@@ -8,6 +8,7 @@ import {
   Inbox,
   Send,
   Settings2,
+  UserRound,
 } from 'lucide-react'
 import { api } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -93,6 +94,12 @@ export default function ProDashboard() {
       title: 'Client Requests',
       desc: 'Review inbound client opportunities.',
       icon: Inbox,
+    },
+    {
+      to: '/pro/profile',
+      title: 'Profile',
+      desc: 'Company details and the services you provide.',
+      icon: UserRound,
     },
     {
       to: '/pro/settings',

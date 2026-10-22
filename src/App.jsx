@@ -37,7 +37,7 @@ import ProPublicProfile from './pages/professional/ProPublicProfile'
 import RequestSent from './pages/professional/RequestSent'
 import ClientRequests from './pages/professional/ClientRequests'
 import Settings from './pages/professional/Settings'
-import BuyTokens from './pages/professional/BuyTokens'
+
 import TokenHistory from './pages/professional/TokenHistory'
 import ProProfile from './pages/professional/Profile'
 
@@ -86,6 +86,13 @@ export default function App() {
         <Route path="private-investigators" element={<PopularServicePage slug="private-investigators" />} />
         <Route path="web-developer" element={<PopularServicePage slug="web-developer" />} />
         <Route path="request" element={<RequestRedirect />} />
+
+
+
+
+
+
+
         <Route path="how-it-works" element={<HowItWorks />} />
         <Route path="pricing" element={<Pricing />} />
         <Route path="professionals" element={<Professionals />} />
@@ -131,7 +138,7 @@ export default function App() {
         <Route path="leads" element={<ProLeads />} />
         <Route path="client-requests" element={<ClientRequests />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="tokens" element={<BuyTokens />} />
+        <Route path="tokens" element={<Navigate to="/pro/settings" replace />} />
         <Route path="history" element={<TokenHistory />} />
         <Route path="profile" element={<ProProfile />} />
       </Route>

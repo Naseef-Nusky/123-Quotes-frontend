@@ -134,6 +134,11 @@ export const api = {
   changePassword: (body) =>
     request('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
   deleteCustomerAccount: () => request('/auth/me', { method: 'DELETE' }),
+  uploadMyLogo: (file) => {
+    const form = new FormData()
+    form.append('image', file)
+    return uploadForm('/professionals/me/logo', form)
+  },
   setMyServices: (serviceIds) =>
     request('/professionals/me/services', { method: 'PUT', body: JSON.stringify({ serviceIds }) }),
   setMyAreas: (areas) =>
@@ -145,7 +150,12 @@ export const api = {
     }),
   tokenHistory: () => request('/professionals/me/tokens'),
 
-  myLeads: () => request('/leads/mine'),
+  myLeads: (params = {}) => {
+    const q = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== '')),
+    ).toString()
+    return request(`/leads/mine${q ? `?${q}` : ''}`)
+  },
   unlockLead: (id) => request(`/leads/${id}/unlock`, { method: 'POST', body: '{}' }),
   declineLead: (id) => request(`/leads/${id}/decline`, { method: 'POST', body: '{}' }),
 

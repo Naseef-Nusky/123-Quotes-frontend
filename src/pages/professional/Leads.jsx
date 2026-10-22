@@ -39,6 +39,7 @@ function mapLeadItem(item) {
   return {
     id: lead.id,
     matchId: item.matchId,
+    matchType: item.matchType === 'category' ? 'category' : 'service',
     maskedName: name,
     ago: timeAgo(lead.createdAt),
     service: lead.service?.name || 'Service',
@@ -68,6 +69,8 @@ function isInsufficientTokensError(err) {
   return msg.includes('insufficient') || msg.includes('token')
 }
 
+const PAGE_SIZE = 30
+
 export default function ProLeads() {
   const { user, refreshMe } = useAuth()
   const [raw, setRaw] = useState([])
@@ -79,21 +82,79 @@ export default function ProLeads() {
   const [checkoutPkg, setCheckoutPkg] = useState(null)
   const [rechargeError, setRechargeError] = useState('')
   const [declining, setDeclining] = useState(false)
+  const [total, setTotal] = useState(0)
+  const [counts, setCounts] = useState({ all: 0, service: 0, category: 0 })
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   const leads = useMemo(() => raw.map(mapLeadItem), [raw])
+  const [matchFilter, setMatchFilter] = useState('all')
+  const serviceCount = counts.service
+  const categoryCount = counts.category
+  const visibleLeads = leads
   const [selectedId, setSelectedId] = useState(null)
-  const selected = leads.find((l) => l.id === selectedId) || leads[0]
+  const selected = visibleLeads.find((l) => l.id === selectedId) || visibleLeads[0]
   const lockedCount = leads.filter((l) => l.contactLocked).length
   const tokenBalance = user?.professional?.tokenBalance ?? 0
+
+  function applyPage(d, append = false) {
+    const list = d.leads || []
+    setRaw((prev) => (append ? [...prev, ...list] : list))
+    setTotal(d.total ?? list.length)
+    if (d.counts) setCounts(d.counts)
+    setHasMore(Boolean(d.hasMore))
+    return list
+  }
+
+  async function loadFirstPage(type = matchFilter) {
+    const d = await api.myLeads({
+      limit: PAGE_SIZE,
+      offset: 0,
+      ...(type !== 'all' ? { type } : {}),
+    })
+    const list = applyPage(d)
+    setSelectedId(list[0]?.lead?.id || list[0]?.id || null)
+  }
+
+  async function loadMore() {
+    if (loadingMore || !hasMore) return
+    setLoadingMore(true)
+    try {
+      const d = await api.myLeads({
+        limit: PAGE_SIZE,
+        offset: raw.length,
+        ...(matchFilter !== 'all' ? { type: matchFilter } : {}),
+      })
+      applyPage(d, true)
+    } catch {
+      // keep what's loaded; user can scroll again to retry
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
+  function changeFilter(key) {
+    if (key === matchFilter) return
+    setMatchFilter(key)
+    setLoading(true)
+    setError('')
+    loadFirstPage(key)
+      .catch((err) => setError(err.message || 'Failed to load leads'))
+      .finally(() => setLoading(false))
+  }
+
+  function onListScroll(e) {
+    const el = e.currentTarget
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 240) loadMore()
+  }
 
   useEffect(() => {
     let cancelled = false
     api
-      .myLeads()
+      .myLeads({ limit: PAGE_SIZE, offset: 0 })
       .then((d) => {
         if (cancelled) return
-        const list = d.leads || []
-        setRaw(list)
+        const list = applyPage(d)
         setSelectedId(list[0]?.lead?.id || list[0]?.id || null)
       })
       .catch((err) => {
@@ -105,6 +166,7 @@ export default function ProLeads() {
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -123,8 +185,12 @@ export default function ProLeads() {
   }, [])
 
   async function refreshLeads() {
-    const d = await api.myLeads()
-    setRaw(d.leads || [])
+    const d = await api.myLeads({
+      limit: Math.max(PAGE_SIZE, raw.length),
+      offset: 0,
+      ...(matchFilter !== 'all' ? { type: matchFilter } : {}),
+    })
+    applyPage(d)
   }
 
   function openRecharge() {
@@ -176,9 +242,8 @@ export default function ProLeads() {
     const declinedId = selected.id
     try {
       await api.declineLead(declinedId)
-      const d = await api.myLeads()
-      const list = d.leads || []
-      setRaw(list)
+      const d = await api.myLeads({ limit: PAGE_SIZE, offset: 0 })
+      const list = applyPage(d)
       setSelectedId(list[0]?.lead?.id || list[0]?.id || null)
     } catch (err) {
       setError(err.message || 'Decline failed')
@@ -223,7 +288,7 @@ export default function ProLeads() {
                     <span className="size-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                   </span>
                 ) : (
-                  `${leads.length} matched · ${lockedCount} locked`
+                  `${counts.all} matched · ${lockedCount} locked`
                 )}
               </p>
             </div>
@@ -231,9 +296,33 @@ export default function ProLeads() {
               <BriefcaseBusiness className="size-5" strokeWidth={2} />
             </span>
           </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {[
+              { key: 'all', label: 'All', count: counts.all },
+              { key: 'service', label: 'Service', count: serviceCount },
+              { key: 'category', label: 'Category', count: categoryCount },
+            ].map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => changeFilter(f.key)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  matchFilter === f.key
+                    ? 'bg-navy text-white'
+                    : 'bg-white text-slate ring-1 ring-line hover:text-navy'
+                }`}
+              >
+                {f.label} ({f.count})
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="max-h-[42vh] flex-1 overflow-y-auto lg:max-h-none">
+        <div
+          className="max-h-[46vh] flex-1 overflow-y-auto overscroll-contain lg:max-h-[calc(100vh-15rem)]"
+          onScroll={onListScroll}
+        >
           {error && !selected ? <p className="px-5 py-3 text-sm text-danger">{error}</p> : null}
 
           {loading ? (
@@ -242,7 +331,7 @@ export default function ProLeads() {
             </div>
           ) : null}
 
-          {!loading && !leads.length ? (
+          {!loading && !counts.all ? (
             <div className="px-5 py-10 text-left">
               <p className="text-sm font-semibold text-navy">No leads yet</p>
               <p className="mt-1 text-sm text-muted">
@@ -251,8 +340,17 @@ export default function ProLeads() {
             </div>
           ) : null}
 
+          {!loading && counts.all && !visibleLeads.length ? (
+            <div className="px-5 py-10 text-left">
+              <p className="text-sm font-semibold text-navy">No {matchFilter} matches</p>
+              <p className="mt-1 text-sm text-muted">
+                Try the All filter to see every matched lead.
+              </p>
+            </div>
+          ) : null}
+
           <div className="space-y-2 p-3">
-            {leads.map((lead) => {
+            {visibleLeads.map((lead) => {
               const active = selected?.id === lead.id
               return (
                 <button
@@ -299,11 +397,41 @@ export default function ProLeads() {
                       )}
                       {lead.contactLocked ? 'Locked' : 'Unlocked'}
                     </span>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold ${
+                        lead.matchType === 'service'
+                          ? 'bg-primary/10 text-primary'
+                          : 'bg-slate-500/10 text-slate-500'
+                      }`}
+                    >
+                      {lead.matchType === 'service' ? 'Service match' : 'Category match'}
+                    </span>
                   </div>
                 </button>
               )
             })}
           </div>
+
+          {!loading && visibleLeads.length ? (
+            <div className="px-3 pb-4 pt-1 text-center">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-semibold text-navy transition hover:border-primary/40 hover:text-primary disabled:opacity-60"
+                >
+                  {loadingMore
+                    ? 'Loading…'
+                    : `Show more leads (${visibleLeads.length} of ${total})`}
+                </button>
+              ) : (
+                <p className="text-xs text-muted">
+                  Showing all {visibleLeads.length} of {total} leads
+                </p>
+              )}
+            </div>
+          ) : null}
         </div>
       </aside>
 
@@ -328,6 +456,17 @@ export default function ProLeads() {
                       }`}
                     >
                       {selected.contactLocked ? 'Contact locked' : 'Contact unlocked'}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        selected.matchType === 'service'
+                          ? 'bg-primary/15 text-primary'
+                          : 'bg-slate-500/10 text-slate-500'
+                      }`}
+                    >
+                      {selected.matchType === 'service'
+                        ? 'Matched by service'
+                        : 'Matched by category'}
                     </span>
                   </div>
                   <p className="mt-2 text-lg font-bold text-primary">{selected.service}</p>
