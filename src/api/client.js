@@ -127,6 +127,13 @@ export const api = {
   updateMyProfile: (body) =>
     request('/professionals/me', { method: 'PUT', body: JSON.stringify(body) }),
   deleteMyAccount: () => request('/professionals/me', { method: 'DELETE' }),
+
+  // Own account (customer portal settings; works for any logged-in user)
+  updateCustomerProfile: (body) =>
+    request('/auth/me', { method: 'PUT', body: JSON.stringify(body) }),
+  changePassword: (body) =>
+    request('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
+  deleteCustomerAccount: () => request('/auth/me', { method: 'DELETE' }),
   setMyServices: (serviceIds) =>
     request('/professionals/me/services', { method: 'PUT', body: JSON.stringify({ serviceIds }) }),
   setMyAreas: (areas) =>

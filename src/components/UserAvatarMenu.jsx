@@ -37,7 +37,7 @@ export default function UserAvatarMenu({ settingsTo }) {
 
   const name = displayName(user)
   const email = user?.email || ''
-  const settingsPath = settingsTo || (isProfessional ? '/pro/settings' : isCustomer ? '/app' : '/')
+  const settingsPath = settingsTo || (isProfessional ? '/pro/settings' : isCustomer ? '/app/settings' : '/')
 
   useEffect(() => {
     function onDoc(e) {

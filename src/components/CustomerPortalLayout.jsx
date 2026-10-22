@@ -6,6 +6,7 @@ import {
   Home,
   LogOut,
   Menu,
+  Settings2,
   X,
 } from 'lucide-react'
 import Logo from './Logo'
@@ -16,6 +17,7 @@ const NAV = [
   { to: '/app', label: 'Dashboard', icon: Home, end: true },
   { to: '/app/requests', label: 'My Requests', icon: ClipboardList, end: true },
   { to: '/app/requests/new', label: 'New Request', icon: FilePlus2 },
+  { to: '/app/settings', label: 'Settings', icon: Settings2 },
 ]
 
 function pageTitle(pathname) {
@@ -154,7 +156,7 @@ export default function CustomerPortalLayout() {
                 </h1>
               </div>
             </div>
-            <UserAvatarMenu settingsTo="/app" />
+            <UserAvatarMenu settingsTo="/app/settings" />
           </div>
         </header>
 
