@@ -177,10 +177,6 @@ export default function Layout({ variant = 'public', children }) {
               <span className="inline-flex rounded-2xl bg-white px-3 py-1.5">
                 <Logo size="md" to={logoTo} />
               </span>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
-                The contemporary way to find the professional service you need. Compare free quotes
-                from verified local professionals, and hire with confidence.
-              </p>
               <div className="mt-5 space-y-2 text-sm text-white/80">
                 <a
                   href="mailto:info@123quotes.co.uk"
@@ -236,9 +232,8 @@ export default function Layout({ variant = 'public', children }) {
             </nav>
           </div>
 
-          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/15 pt-6 text-xs text-white/55 sm:flex-row">
+          <div className="mt-12 border-t border-white/15 pt-6 text-center text-xs text-white/55">
             <p>© {new Date().getFullYear()} 123 Quotes. All rights reserved.</p>
-            <p>Free quotes from verified UK professionals.</p>
           </div>
         </div>
       </footer>
