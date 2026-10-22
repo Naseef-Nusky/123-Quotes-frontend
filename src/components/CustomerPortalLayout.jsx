@@ -134,7 +134,7 @@ export default function CustomerPortalLayout() {
       ) : null}
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="z-30 shrink-0 border-b border-line/80 bg-white/90 backdrop-blur-md">
+        <header className="z-30 shrink-0 border-b border-line/80 bg-white">
           <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <button
