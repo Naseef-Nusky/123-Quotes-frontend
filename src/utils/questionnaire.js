@@ -4,36 +4,66 @@ function normalizeAnswer(value) {
   return String(value)
 }
 
-function matchesBranch(branch, answer) {
+/** Expand a stored answer token to all equivalent option identifiers. */
+function answerAliases(token, sourceOptions = []) {
+  const t = String(token ?? '').trim()
+  if (!t) return []
+  const aliases = new Set([t])
+  for (const opt of sourceOptions) {
+    const id = opt?.id != null ? String(opt.id) : ''
+    const value = String(opt?.value ?? '').trim()
+    const label = String(opt?.label ?? '').trim()
+    if (t === id || (value && t === value) || (label && t === label)) {
+      if (id) aliases.add(id)
+      if (value) aliases.add(value)
+      if (label) aliases.add(label)
+    }
+  }
+  return [...aliases]
+}
+
+function answerHitsExpected(answerValues, expected, sourceOptions = []) {
+  if (expected == null || expected === '') return false
+  const want = String(expected)
+  for (const raw of answerValues) {
+    if (answerAliases(raw, sourceOptions).includes(want)) return true
+  }
+  return false
+}
+
+function matchesBranch(branch, answer, sourceOptions = []) {
   if (answer == null) return false
   const values = Array.isArray(answer) ? answer : [answer]
-  const expected = branch.value != null ? String(branch.value) : null
+  const expectedValue = branch.value != null ? String(branch.value) : null
+  const expectedOptionId = branch.optionId != null ? String(branch.optionId) : null
   const op = (branch.operator || 'EQUALS').toUpperCase()
 
-  if (branch.optionId) {
-    // Options store value as label in seed; optionId match is best-effort via value
-    // Prefer value when provided; otherwise treat optionId as expected value string
-  }
+  const hits =
+    answerHitsExpected(values, expectedOptionId, sourceOptions) ||
+    answerHitsExpected(values, expectedValue, sourceOptions)
 
   if (op === 'EQUALS' || op === 'EQ') {
-    if (expected != null) return values.includes(expected)
+    if (expectedOptionId != null || expectedValue != null) return hits
     return values.length > 0
   }
   if (op === 'NOT_EQUALS' || op === 'NEQ') {
-    if (expected == null) return true
-    return !values.includes(expected)
+    if (expectedOptionId == null && expectedValue == null) return true
+    return !hits
   }
   if (op === 'INCLUDES' || op === 'CONTAINS') {
-    if (expected == null) return values.length > 0
-    return values.some((v) => v.includes(expected))
+    if (expectedOptionId == null && expectedValue == null) return values.length > 0
+    if (hits) return true
+    const needle = expectedValue || expectedOptionId
+    return values.some((v) => String(v).includes(needle))
   }
-  return values.includes(expected)
+  return hits
 }
 
 /** Questions that are never a branch target are always visible. */
 export function getVisibleQuestions(questions, answersByQuestionId) {
   if (!questions?.length) return []
 
+  const byId = new Map(questions.map((q) => [q.id, q]))
   const incomingByTarget = new Map()
   for (const q of questions) {
     for (const branch of q.branchesFrom || []) {
@@ -46,9 +76,14 @@ export function getVisibleQuestions(questions, answersByQuestionId) {
   return questions.filter((q) => {
     const incoming = incomingByTarget.get(q.id)
     if (!incoming?.length) return true
-    return incoming.some((branch) =>
-      matchesBranch(branch, normalizeAnswer(answersByQuestionId[branch.sourceQuestionId])),
-    )
+    return incoming.some((branch) => {
+      const source = byId.get(branch.sourceQuestionId)
+      return matchesBranch(
+        branch,
+        normalizeAnswer(answersByQuestionId[branch.sourceQuestionId]),
+        source?.options || [],
+      )
+    })
   })
 }
 
