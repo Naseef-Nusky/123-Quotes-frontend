@@ -139,8 +139,11 @@ export const api = {
     form.append('image', file)
     return uploadForm('/professionals/me/logo', form)
   },
-  setMyServices: (serviceIds) =>
-    request('/professionals/me/services', { method: 'PUT', body: JSON.stringify({ serviceIds }) }),
+  setMyServices: (serviceIds, { skipRematch = false } = {}) =>
+    request('/professionals/me/services', {
+      method: 'PUT',
+      body: JSON.stringify({ serviceIds, ...(skipRematch ? { skipRematch: true } : {}) }),
+    }),
   setMyAreas: (areas) =>
     request('/professionals/me/areas', { method: 'PUT', body: JSON.stringify({ areas }) }),
   buyTokens: (packageId, sourceId) =>
