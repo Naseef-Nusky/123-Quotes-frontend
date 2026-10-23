@@ -317,7 +317,10 @@ export default function PostcodeInput({
             else if (value) setQuery(String(value).toUpperCase())
           }}
           onKeyDown={onKeyDown}
-          className="min-w-0 flex-1 border-0 bg-transparent uppercase outline-none placeholder:normal-case placeholder:text-slate-400"
+          className={`min-w-0 flex-1 border-0 bg-transparent outline-none placeholder:normal-case placeholder:text-slate-400 ${
+            open ? 'uppercase' : ''
+          }`}
+          title={!open && selected ? optionLabel(selected) : undefined}
         />
         {value ? (
           <button

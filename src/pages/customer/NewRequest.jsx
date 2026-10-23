@@ -183,13 +183,20 @@ function withBackdrop(services, modal, onSelect, portal) {
   )
 }
 
-export default function NewRequest({ embeddedService = '', onEmbeddedClose } = {}) {
+export default function NewRequest({
+  embeddedService = '',
+  initialPostcode = '',
+  onEmbeddedClose,
+} = {}) {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { isCustomer, user } = useAuth()
   // Embedded mode: render only the wizard modal (opened directly from a
   // service card), with no services-list page behind it.
   const embedded = typeof onEmbeddedClose === 'function'
+  // When postcode was already collected (e.g. home hero search), skip that
+  // step in the wizard so the user is not asked twice.
+  const seededPostcode = String(initialPostcode || '').trim()
 
   const [services, setServices] = useState([])
   const [serviceId, setServiceId] = useState('')
@@ -199,7 +206,7 @@ export default function NewRequest({ embeddedService = '', onEmbeddedClose } = {
   const [commonIndex, setCommonIndex] = useState(-1)
 
   const [frequency, setFrequency] = useState('')
-  const [postcode, setPostcode] = useState('')
+  const [postcode, setPostcode] = useState(seededPostcode)
   const [email, setEmail] = useState(user?.email || '')
   const [marketing, setMarketing] = useState(true)
   const [fullName, setFullName] = useState(
@@ -278,9 +285,18 @@ export default function NewRequest({ embeddedService = '', onEmbeddedClose } = {
     }
   }, [serviceId])
 
+  useEffect(() => {
+    if (seededPostcode) setPostcode(seededPostcode)
+  }, [seededPostcode])
+
+  const activeCommonSteps = useMemo(
+    () => (seededPostcode ? COMMON_STEPS.filter((s) => s !== 'postcode') : COMMON_STEPS),
+    [seededPostcode],
+  )
+
   const visible = useMemo(() => getVisibleQuestions(questions, answers), [questions, answers])
   const currentQuestion = commonIndex < 0 ? visible[qIndex] : null
-  const commonStep = commonIndex >= 0 ? COMMON_STEPS[commonIndex] : null
+  const commonStep = commonIndex >= 0 ? activeCommonSteps[commonIndex] : null
   const serviceName = services.find((s) => s.id === serviceId)?.name || 'Service'
 
   function close() {
@@ -390,7 +406,7 @@ export default function NewRequest({ embeddedService = '', onEmbeddedClose } = {
       setError('Please tell us your contact number')
       return
     }
-    if (commonIndex < COMMON_STEPS.length - 1) {
+    if (commonIndex < activeCommonSteps.length - 1) {
       setCommonIndex((i) => i + 1)
       return
     }

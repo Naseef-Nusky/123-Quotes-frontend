@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, User } from 'lucide-react'
 import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
@@ -7,13 +7,16 @@ import PostcodeInput from '../components/PostcodeInput'
 import NewRequest from './customer/NewRequest'
 
 export default function Home() {
-  const navigate = useNavigate()
   const [content, setContent] = useState(defaultHomeContent)
   const [need, setNeed] = useState('')
   const [postcode, setPostcode] = useState('')
   const [services, setServices] = useState([])
-  // Clicking a service opens the question wizard directly (no /request page).
+  const [searchError, setSearchError] = useState('')
+  // Clicking a service / hero search opens the question wizard directly
+  // (no separate page). Hero search also passes the postcode so the wizard
+  // does not ask for it again.
   const [wizardSlug, setWizardSlug] = useState('')
+  const [wizardPostcode, setWizardPostcode] = useState('')
 
   useEffect(() => {
     fetchHomeContent().then((data) => {
@@ -24,17 +27,28 @@ export default function Home() {
 
   function onSearch(e) {
     e.preventDefault()
-    const q = new URLSearchParams()
+    setSearchError('')
+    const q = need.trim()
+    if (!q) {
+      setSearchError('Please tell us what you need')
+      return
+    }
+    if (!postcode.trim()) {
+      setSearchError('Please enter your postcode')
+      return
+    }
     const matched = services.find(
       (s) =>
-        s.name.toLowerCase() === need.trim().toLowerCase() ||
-        s.slug.toLowerCase() === need.trim().toLowerCase() ||
-        s.name.toLowerCase().includes(need.trim().toLowerCase()),
+        s.name.toLowerCase() === q.toLowerCase() ||
+        s.slug.toLowerCase() === q.toLowerCase() ||
+        s.name.toLowerCase().includes(q.toLowerCase()),
     )
-    if (matched) q.set('service', matched.slug)
-    else if (need.trim()) q.set('q', need.trim())
-    if (postcode.trim()) q.set('postcode', postcode.trim())
-    navigate(`/professionals${q.toString() ? `?${q}` : ''}`)
+    if (!matched) {
+      setSearchError('Please choose a service from the list')
+      return
+    }
+    setWizardPostcode(postcode.trim())
+    setWizardSlug(matched.slug || matched.id)
   }
 
   const defaultHeroTitle = 'The Contemporary Method Of Locating The Professional Service You Need'
@@ -114,7 +128,7 @@ export default function Home() {
 
             <form
               onSubmit={onSearch}
-              className="animate-fade-up-delay-2 relative z-10 mx-auto mt-10 max-w-xl overflow-hidden rounded-[1.75rem] bg-white/10 shadow-[0_32px_70px_-20px_rgba(0,0,0,0.55)] ring-1 ring-white/40 backdrop-blur-md sm:rounded-full lg:mx-0"
+              className="animate-fade-up-delay-2 relative z-10 mx-auto mt-10 max-w-2xl overflow-hidden rounded-[1.75rem] bg-white/10 shadow-[0_32px_70px_-20px_rgba(0,0,0,0.55)] ring-1 ring-white/40 backdrop-blur-md sm:rounded-full lg:mx-0"
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0">
                 <label className="relative min-w-0 flex-1 text-left">
@@ -134,13 +148,13 @@ export default function Home() {
 
                 <span className="mx-1 hidden h-8 w-px shrink-0 bg-white/25 sm:block" aria-hidden />
 
-                <label className="relative w-full text-left sm:max-w-[190px]">
+                <label className="relative w-full min-w-0 text-left sm:w-[min(100%,18rem)] sm:max-w-[18rem] sm:shrink-0">
                   <span className="sr-only">Postcode</span>
                   <PostcodeInput
                     value={postcode}
                     onChange={setPostcode}
-                    placeholder="Postcode"
-                    className="flex w-full items-center gap-2 rounded-full bg-transparent px-4 py-3 text-sm text-white outline-none transition focus-within:ring-2 focus-within:ring-white/40 [&_input::placeholder]:text-white/60 [&_svg]:text-white/70"
+                    placeholder="Postcode or town"
+                    className="flex w-full items-center gap-1.5 rounded-full bg-transparent px-3 py-3 text-sm text-white outline-none transition focus-within:ring-2 focus-within:ring-white/40 [&_input]:min-w-0 [&_input]:flex-1 [&_input]:normal-case [&_input::placeholder]:text-white/60 [&_svg]:shrink-0 [&_svg]:text-white/70"
                   />
                 </label>
 
@@ -159,6 +173,11 @@ export default function Home() {
                 ))}
               </datalist>
             </form>
+            {searchError ? (
+              <p className="mt-3 text-center text-sm font-semibold text-rose-200 lg:text-left">
+                {searchError}
+              </p>
+            ) : null}
           </div>
 
           <div className="relative hidden lg:col-span-4 lg:block" aria-hidden>
@@ -191,7 +210,10 @@ export default function Home() {
                     <button
                       key={`${half}-${s.id}`}
                       type="button"
-                      onClick={() => setWizardSlug(s.slug || s.id)}
+                      onClick={() => {
+                        setWizardPostcode('')
+                        setWizardSlug(s.slug || s.id)
+                      }}
                       tabIndex={half === 1 ? -1 : 0}
                       className="flex shrink-0 items-center rounded-2xl bg-canvas px-4 py-3 transition hover:bg-panel"
                     >
@@ -376,7 +398,14 @@ export default function Home() {
       </section>
 
       {wizardSlug ? (
-        <NewRequest embeddedService={wizardSlug} onEmbeddedClose={() => setWizardSlug('')} />
+        <NewRequest
+          embeddedService={wizardSlug}
+          initialPostcode={wizardPostcode}
+          onEmbeddedClose={() => {
+            setWizardSlug('')
+            setWizardPostcode('')
+          }}
+        />
       ) : null}
     </div>
   )

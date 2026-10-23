@@ -129,11 +129,9 @@ export default function Services() {
         {!loading && filtered.length ? (
           <ul ref={gridTopRef} className="mt-10 grid scroll-mt-24 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paged.map((s, index) => {
-              // Many services repeat the same text as category + name + blurb.
-              // Show each only when it adds something new.
+              // Cards show the service name only — no category eyebrow.
+              // Hide description when it just repeats the service name.
               const nameKey = (s.name || '').trim().toLowerCase()
-              const showCategory =
-                s.category?.name && s.category.name.trim().toLowerCase() !== nameKey
               const desc = (s.shortDesc || s.description || '').trim()
               const showDesc = desc && desc.toLowerCase() !== nameKey
               return (
@@ -147,12 +145,7 @@ export default function Services() {
                     animationDelay: `${Math.min(index, 8) * 0.05}s`,
                   }}
                 >
-                  {showCategory ? (
-                    <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                      {s.category.name}
-                    </p>
-                  ) : null}
-                  <h2 className="mt-1 font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
+                  <h2 className="font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
                     {s.name}
                   </h2>
                   {showDesc ? (

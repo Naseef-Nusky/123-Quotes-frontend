@@ -127,8 +127,6 @@ export default function Categories() {
           <ul ref={gridTopRef} className="mt-10 grid scroll-mt-24 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paged.map((c, index) => {
               const count = c.services?.length ?? 0
-              const desc = (c.description || '').trim()
-              const showDesc = desc && desc.toLowerCase() !== (c.name || '').trim().toLowerCase()
               return (
                 <li key={c.id} className="h-full">
                   <Link
@@ -139,12 +137,9 @@ export default function Categories() {
                       animationDelay: `${Math.min(index, 8) * 0.05}s`,
                     }}
                   >
-                    <h2 className="mt-1 font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
+                    <h2 className="font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
                       {c.name}
                     </h2>
-                    {showDesc ? (
-                      <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate">{desc}</p>
-                    ) : null}
                     <span className="mt-auto flex items-center justify-between gap-2 pt-3">
                       <span className="text-xs font-semibold text-muted">
                         {count} service{count === 1 ? '' : 's'}
