@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { api } from '../../api/client'
 import PhoneInput from '../../components/PhoneInput'
 import { useAuth } from '../../context/AuthContext'
@@ -25,6 +26,9 @@ export default function CustomerSettings() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrent, setShowCurrent] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const [profileMsg, setProfileMsg] = useState('')
   const [profileErr, setProfileErr] = useState('')
@@ -190,40 +194,70 @@ export default function CustomerSettings() {
           <h2 className="text-lg font-bold text-navy">Change password</h2>
           <div>
             <label className="label" htmlFor="cs-current">Current password</label>
-            <input
-              id="cs-current"
-              className="input-field"
-              type="password"
-              autoComplete="current-password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                id="cs-current"
+                className="input-field pr-11"
+                type={showCurrent ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-navy"
+                aria-label={showCurrent ? 'Hide current password' : 'Show current password'}
+              >
+                {showCurrent ? <EyeOff className="size-4" strokeWidth={2} /> : <Eye className="size-4" strokeWidth={2} />}
+              </button>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="cs-new">New password</label>
-              <input
-                id="cs-new"
-                className="input-field"
-                type="password"
-                autoComplete="new-password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <input
+                  id="cs-new"
+                  className="input-field pr-11"
+                  type={showNew ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-navy"
+                  aria-label={showNew ? 'Hide new password' : 'Show new password'}
+                >
+                  {showNew ? <EyeOff className="size-4" strokeWidth={2} /> : <Eye className="size-4" strokeWidth={2} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="label" htmlFor="cs-confirm">Confirm new password</label>
-              <input
-                id="cs-confirm"
-                className="input-field"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <input
+                  id="cs-confirm"
+                  className="input-field pr-11"
+                  type={showConfirm ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-navy"
+                  aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirm ? <EyeOff className="size-4" strokeWidth={2} /> : <Eye className="size-4" strokeWidth={2} />}
+                </button>
+              </div>
             </div>
           </div>
           {pwMsg ? <p className="text-sm text-success">{pwMsg}</p> : null}
