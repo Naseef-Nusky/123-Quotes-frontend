@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
 import PostcodeInput from '../components/PostcodeInput'
 import NewRequest from './customer/NewRequest'
+import { mediaUrl } from '../utils/mediaUrl'
 
 function pickByIds(list, ids, fallbackCount = 6) {
   if (!Array.isArray(list) || !list.length) return []
@@ -245,7 +246,7 @@ export default function Home() {
                       style={
                         s.imageUrl
                           ? {
-                              backgroundImage: `linear-gradient(to top, rgba(7,28,58,0.88) 0%, rgba(7,28,58,0.35) 55%, rgba(7,28,58,0.15) 100%), url(${s.imageUrl})`,
+                              backgroundImage: `linear-gradient(to top, rgba(7,28,58,0.88) 0%, rgba(7,28,58,0.35) 55%, rgba(7,28,58,0.15) 100%), url(${mediaUrl(s.imageUrl)})`,
                               backgroundSize: 'cover',
                               backgroundPosition: 'center',
                             }
@@ -314,7 +315,7 @@ export default function Home() {
                       <div className="relative aspect-[16/10] overflow-hidden bg-panel">
                         {s.imageUrl ? (
                           <img
-                            src={s.imageUrl}
+                            src={mediaUrl(s.imageUrl)}
                             alt=""
                             className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                             loading="lazy"
@@ -473,7 +474,7 @@ export default function Home() {
                       <div className="relative aspect-[16/10] overflow-hidden bg-panel">
                         {c.imageUrl ? (
                           <img
-                            src={c.imageUrl}
+                            src={mediaUrl(c.imageUrl)}
                             alt=""
                             className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                             loading="lazy"

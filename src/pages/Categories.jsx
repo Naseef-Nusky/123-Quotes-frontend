@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
+import { mediaUrl } from '../utils/mediaUrl'
 
 const PAGE_SIZE = 12
 
@@ -140,7 +141,7 @@ export default function Categories() {
                     <div className="relative aspect-[16/10] overflow-hidden bg-panel">
                       {c.imageUrl ? (
                         <img
-                          src={c.imageUrl}
+                          src={mediaUrl(c.imageUrl)}
                           alt=""
                           className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                           loading="lazy"

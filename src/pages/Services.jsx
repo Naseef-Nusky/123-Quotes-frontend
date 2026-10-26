@@ -4,6 +4,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
 import NewRequest from './customer/NewRequest'
+import { mediaUrl } from '../utils/mediaUrl'
 
 const PAGE_SIZE = 12
 
@@ -148,7 +149,7 @@ export default function Services() {
                   <div className="relative aspect-[16/10] overflow-hidden bg-panel">
                     {s.imageUrl ? (
                       <img
-                        src={s.imageUrl}
+                        src={mediaUrl(s.imageUrl)}
                         alt=""
                         className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                         loading="lazy"

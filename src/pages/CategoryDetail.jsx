@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import Loading from '../components/Loading'
 import { BANNERS } from '../data/banners'
 import NewRequest from './customer/NewRequest'
+import { mediaUrl } from '../utils/mediaUrl'
 
 export default function CategoryDetail() {
   const { slug } = useParams()
@@ -98,7 +99,7 @@ export default function CategoryDetail() {
                   <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-panel sm:size-16">
                     {s.imageUrl ? (
                       <img
-                        src={s.imageUrl}
+                        src={mediaUrl(s.imageUrl)}
                         alt=""
                         className="absolute inset-0 h-full w-full object-cover"
                         loading="lazy"
