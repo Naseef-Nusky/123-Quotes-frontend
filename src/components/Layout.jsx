@@ -5,19 +5,9 @@ import Logo from './Logo'
 import UserAvatarMenu from './UserAvatarMenu'
 import { useAuth } from '../context/AuthContext'
 
-const publicLinks = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/services', label: 'Services' },
-  { to: '/categories', label: 'Categories' },
-  { to: '/how-it-works', label: 'How It Works' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/contact', label: 'Contact' },
-]
+const publicLinks = []
 
 const customerLinks = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/services', label: 'Services' },
-  { to: '/categories', label: 'Categories' },
   { to: '/app', label: 'Dashboard', end: true },
   { to: '/app/requests', label: 'My Requests', end: true },
 ]
@@ -66,13 +56,15 @@ export default function Layout({ variant = 'public', children }) {
           </div>
 
           <div className="hidden items-center gap-4 lg:flex xl:gap-5">
-            <nav className="flex items-center gap-1 xl:gap-1.5">
-              {navItems.map((l) => (
-                <NavLink key={`${l.to}-${l.label}`} to={l.to} end={l.end} className={linkClass}>
-                  {l.label}
-                </NavLink>
-              ))}
-            </nav>
+            {navItems.length ? (
+              <nav className="flex items-center gap-1 xl:gap-1.5">
+                {navItems.map((l) => (
+                  <NavLink key={`${l.to}-${l.label}`} to={l.to} end={l.end} className={linkClass}>
+                    {l.label}
+                  </NavLink>
+                ))}
+              </nav>
+            ) : null}
 
             {isCustomerPortal || isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -117,19 +109,37 @@ export default function Layout({ variant = 'public', children }) {
           <div className="flex items-center gap-2 lg:hidden">
             {isCustomerPortal || isAuthenticated ? (
               <UserAvatarMenu settingsTo={isProfessional ? '/pro/settings' : '/app'} />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap px-2 text-sm font-medium text-slate"
+                >
+                  <LogIn className="size-4" strokeWidth={2} />
+                  Login
+                </Link>
+                <Link
+                  to="/business/login"
+                  className="whitespace-nowrap rounded-full border border-primary/40 px-3 py-1.5 text-sm font-semibold text-primary-dark"
+                >
+                  Business
+                </Link>
+              </div>
+            )}
+            {navItems.length ? (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-lg border border-line p-2 text-navy"
+                aria-label={open ? 'Close menu' : 'Open menu'}
+                onClick={() => setOpen((v) => !v)}
+              >
+                {open ? <X className="size-5" strokeWidth={2} /> : <Menu className="size-5" strokeWidth={2} />}
+              </button>
             ) : null}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-lg border border-line p-2 text-navy"
-              aria-label={open ? 'Close menu' : 'Open menu'}
-              onClick={() => setOpen((v) => !v)}
-            >
-              {open ? <X className="size-5" strokeWidth={2} /> : <Menu className="size-5" strokeWidth={2} />}
-            </button>
           </div>
         </div>
 
-        {open ? (
+        {open && navItems.length ? (
           <div className="border-t border-line bg-white px-4 py-4 lg:hidden">
             <nav className="flex flex-col gap-1.5">
               {navItems.map((l) => (
@@ -143,26 +153,6 @@ export default function Layout({ variant = 'public', children }) {
                   {l.label}
                 </NavLink>
               ))}
-              {!isCustomerPortal && !isAuthenticated ? (
-                <>
-                  <hr className="my-2 border-line" />
-                  <Link
-                    to="/login"
-                    onClick={() => setOpen(false)}
-                    className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate"
-                  >
-                    <LogIn className="size-4" strokeWidth={2} />
-                    Login
-                  </Link>
-                  <Link
-                    to="/business/login"
-                    onClick={() => setOpen(false)}
-                    className="rounded-full border border-primary/40 px-4 py-2 text-center text-sm font-semibold text-primary-dark"
-                  >
-                    Business Login
-                  </Link>
-                </>
-              ) : null}
             </nav>
           </div>
         ) : null}

@@ -4,7 +4,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { api } from '../api/client'
 import Loading from '../components/Loading'
 
-const PAGE_SIZE = 16
+const PAGE_SIZE = 12
 
 export default function Categories() {
   const [categories, setCategories] = useState([])
@@ -131,27 +131,41 @@ export default function Categories() {
                 <li key={c.id} className="h-full">
                   <Link
                     to={`/categories/${encodeURIComponent(c.slug)}`}
-                    className="group flex h-full flex-col rounded-2xl border border-line bg-white p-4 shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
                     style={{
                       animation: 'fade-up 0.5s ease-out both',
                       animationDelay: `${Math.min(index, 8) * 0.05}s`,
                     }}
                   >
-                    <h2 className="font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
-                      {c.name}
-                    </h2>
-                    <span className="mt-auto flex items-center justify-between gap-2 pt-3">
-                      <span className="text-xs font-semibold text-muted">
-                        {count} service{count === 1 ? '' : 's'}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold text-primary transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-[#3baee8] group-hover:via-[#1e8fd5] group-hover:to-[#0a3a7a] group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25">
-                        Explore
-                        <ArrowRight
-                          className="animate-arrow-nudge size-4 transition-transform duration-300 group-hover:translate-x-0.5"
-                          strokeWidth={2.5}
+                    <div className="relative aspect-[16/10] overflow-hidden bg-panel">
+                      {c.imageUrl ? (
+                        <img
+                          src={c.imageUrl}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          loading="lazy"
                         />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-panel to-navy/10" />
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col p-4">
+                      <h2 className="font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
+                        {c.name}
+                      </h2>
+                      <span className="mt-auto flex items-center justify-between gap-2 pt-3">
+                        <span className="text-xs font-semibold text-muted">
+                          {count} service{count === 1 ? '' : 's'}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold text-primary transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-[#3baee8] group-hover:via-[#1e8fd5] group-hover:to-[#0a3a7a] group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25">
+                          Explore
+                          <ArrowRight
+                            className="animate-arrow-nudge size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                            strokeWidth={2.5}
+                          />
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </Link>
                 </li>
               )

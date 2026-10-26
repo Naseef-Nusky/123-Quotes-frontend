@@ -10,6 +10,7 @@ import PhoneInput from '../../components/PhoneInput'
 import {
   COMMON_STEPS,
   FREQUENCY_OPTIONS,
+  FREQUENCY_STEP_SERVICE_SLUGS,
   CheckboxOptionList,
   RadioOptionList,
   WizardFooter,
@@ -328,14 +329,23 @@ export default function NewRequest({
     if (seededPostcode) setPostcode(seededPostcode)
   }, [seededPostcode])
 
+  const selectedService = useMemo(
+    () => services.find((s) => s.id === serviceId) || null,
+    [services, serviceId],
+  )
+
   // Logged-in customers already have email / name / phone on their profile —
   // skip those wizard steps so submit uses the authenticated customer API.
+  // Frequency is NOT default for all services — only for allowlisted slugs
+  // (Cleaning Services already asks this in its own questionnaire).
   const activeCommonSteps = useMemo(() => {
-    let steps = COMMON_STEPS
+    const slug = String(selectedService?.slug || '').toLowerCase()
+    const wantsFrequency = FREQUENCY_STEP_SERVICE_SLUGS.includes(slug)
+    let steps = wantsFrequency ? ['frequency', ...COMMON_STEPS] : COMMON_STEPS
     if (seededPostcode) steps = steps.filter((s) => s !== 'postcode')
     if (isCustomer) steps = steps.filter((s) => !['email', 'name', 'phone'].includes(s))
     return steps
-  }, [seededPostcode, isCustomer])
+  }, [seededPostcode, isCustomer, selectedService])
 
   useEffect(() => {
     if (!isCustomer || !user) return
@@ -352,7 +362,7 @@ export default function NewRequest({
   const visible = useMemo(() => getVisibleQuestions(questions, answers), [questions, answers])
   const currentQuestion = commonIndex < 0 ? visible[qIndex] : null
   const commonStep = commonIndex >= 0 ? activeCommonSteps[commonIndex] : null
-  const serviceName = services.find((s) => s.id === serviceId)?.name || 'Service'
+  const serviceName = selectedService?.name || 'Service'
 
   function close() {
     if (embedded) {

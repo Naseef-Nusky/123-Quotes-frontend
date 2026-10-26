@@ -5,7 +5,7 @@ import { api } from '../api/client'
 import Loading from '../components/Loading'
 import NewRequest from './customer/NewRequest'
 
-const PAGE_SIZE = 16
+const PAGE_SIZE = 12
 
 export default function Services() {
   const [services, setServices] = useState([])
@@ -139,27 +139,41 @@ export default function Services() {
                 <button
                   type="button"
                   onClick={() => setWizardSlug(s.slug || s.id)}
-                  className="group flex h-full w-full flex-col rounded-2xl border border-line bg-white p-4 text-left shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
+                  className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-line bg-white text-left shadow-[0_14px_36px_-22px_rgba(10,47,92,0.4)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_24px_45px_-22px_rgba(10,47,92,0.45)]"
                   style={{
                     animation: 'fade-up 0.5s ease-out both',
                     animationDelay: `${Math.min(index, 8) * 0.05}s`,
                   }}
                 >
-                  <h2 className="font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
-                    {s.name}
-                  </h2>
-                  {showDesc ? (
-                    <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate">{desc}</p>
-                  ) : null}
-                  <span className="mt-auto block pt-3 text-right">
-                    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold text-primary transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-[#3baee8] group-hover:via-[#1e8fd5] group-hover:to-[#0a3a7a] group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25">
-                      Get quotes
-                      <ArrowRight
-                        className="animate-arrow-nudge size-4 transition-transform duration-300 group-hover:translate-x-0.5"
-                        strokeWidth={2.5}
+                  <div className="relative aspect-[16/10] overflow-hidden bg-panel">
+                    {s.imageUrl ? (
+                      <img
+                        src={s.imageUrl}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        loading="lazy"
                       />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-panel to-navy/10" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    <h2 className="font-display text-base font-bold leading-snug text-navy transition group-hover:text-primary">
+                      {s.name}
+                    </h2>
+                    {showDesc ? (
+                      <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-slate">{desc}</p>
+                    ) : null}
+                    <span className="mt-auto block pt-3 text-right">
+                      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-bold text-primary transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-[#3baee8] group-hover:via-[#1e8fd5] group-hover:to-[#0a3a7a] group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25">
+                        Get quotes
+                        <ArrowRight
+                          className="animate-arrow-nudge size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                          strokeWidth={2.5}
+                        />
+                      </span>
                     </span>
-                  </span>
+                  </div>
                 </button>
               </li>
               )

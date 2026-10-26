@@ -95,6 +95,18 @@ export default function CategoryDetail() {
                     animationDelay: `${Math.min(index, 8) * 0.05}s`,
                   }}
                 >
+                  <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-panel sm:size-16">
+                    {s.imageUrl ? (
+                      <img
+                        src={s.imageUrl}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-navy/10" />
+                    )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     {showCategory ? (
                       <p className="text-xs font-bold uppercase tracking-wider text-primary">

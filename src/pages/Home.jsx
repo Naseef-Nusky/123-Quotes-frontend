@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, User } from 'lucide-react'
 import { api } from '../api/client'
@@ -6,11 +6,23 @@ import { defaultHomeContent, fetchHomeContent } from '../data/homeContent'
 import PostcodeInput from '../components/PostcodeInput'
 import NewRequest from './customer/NewRequest'
 
+function pickByIds(list, ids, fallbackCount = 6) {
+  if (!Array.isArray(list) || !list.length) return []
+  if (Array.isArray(ids) && ids.length) {
+    const byId = new Map(list.map((item) => [item.id, item]))
+    const ordered = ids.map((id) => byId.get(id)).filter(Boolean)
+    if (ordered.length) return ordered.slice(0, fallbackCount)
+  }
+  return list.slice(0, fallbackCount)
+}
+
 export default function Home() {
   const [content, setContent] = useState(defaultHomeContent)
   const [need, setNeed] = useState('')
   const [postcode, setPostcode] = useState('')
   const [services, setServices] = useState([])
+  const [categories, setCategories] = useState([])
+  const [servicesReady, setServicesReady] = useState(false)
   const [searchError, setSearchError] = useState('')
   // Clicking a service / hero search opens the question wizard directly
   // (no separate page). Hero search also passes the postcode so the wizard
@@ -22,8 +34,22 @@ export default function Home() {
     fetchHomeContent().then((data) => {
       setContent(data)
     })
-    api.getServices().then((d) => setServices(d.services || [])).catch(() => setServices([]))
+    api
+      .getServices()
+      .then((d) => setServices(d.services || []))
+      .catch(() => setServices([]))
+      .finally(() => setServicesReady(true))
+    api.getCategories().then((d) => setCategories(d.categories || [])).catch(() => setCategories([]))
   }, [])
+
+  const popularServicesLive = useMemo(
+    () => pickByIds(services, content.popularServiceIds, 6),
+    [services, content.popularServiceIds],
+  )
+  const popularCategoriesLive = useMemo(
+    () => pickByIds(categories, content.popularCategoryIds, 6),
+    [categories, content.popularCategoryIds],
+  )
 
   function onSearch(e) {
     e.preventDefault()
@@ -215,9 +241,20 @@ export default function Home() {
                         setWizardSlug(s.slug || s.id)
                       }}
                       tabIndex={half === 1 ? -1 : 0}
-                      className="flex shrink-0 items-center rounded-2xl bg-canvas px-4 py-3 transition hover:bg-panel"
+                      className="relative flex h-24 w-52 shrink-0 items-end overflow-hidden rounded-2xl bg-navy px-4 py-3 text-left shadow-sm ring-1 ring-line/60 transition hover:-translate-y-0.5 hover:shadow-md sm:h-28 sm:w-60"
+                      style={
+                        s.imageUrl
+                          ? {
+                              backgroundImage: `linear-gradient(to top, rgba(7,28,58,0.88) 0%, rgba(7,28,58,0.35) 55%, rgba(7,28,58,0.15) 100%), url(${s.imageUrl})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                            }
+                          : undefined
+                      }
                     >
-                      <span className="whitespace-nowrap text-sm font-semibold text-navy">{s.name}</span>
+                      <span className="relative z-[1] line-clamp-2 text-sm font-semibold leading-snug text-white drop-shadow">
+                        {s.name}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -229,36 +266,94 @@ export default function Home() {
 
       <section className="border-t border-line bg-canvas">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <h2 className="text-center text-3xl font-bold text-navy">{content.popularTitle || 'Popular Services'}</h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            {(content.popularServices || []).map((item) => (
-              <article
-                key={item.id}
-                className="group overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(10,47,92,0.14)]"
-              >
-                {item.image ? (
-                  <div className="relative aspect-[16/9] overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt=""
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy/35 via-transparent to-transparent" />
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-center text-3xl font-bold text-navy sm:text-left">
+              {content.popularTitle || 'Popular Services'}
+            </h2>
+            <Link
+              to="/services"
+              className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-bold text-primary transition hover:border-primary hover:bg-panel"
+            >
+              See all
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+
+          {/* CRM-selected live service cards (up to 6) — never flash the old CMS cards */}
+          {!servicesReady ? (
+            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <li
+                  key={`popular-skel-${i}`}
+                  className="overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.06)]"
+                >
+                  <div className="aspect-[16/10] animate-pulse bg-panel" />
+                  <div className="space-y-2 p-4 sm:p-5">
+                    <div className="h-5 w-2/3 animate-pulse rounded bg-panel" />
+                    <div className="h-4 w-full animate-pulse rounded bg-panel" />
                   </div>
-                ) : null}
-                <div className="p-5 sm:p-6">
-                  <h3 className="text-lg font-bold text-navy sm:text-xl">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate">{item.description}</p>
-                  <Link
-                    to={item.link || '/services'}
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary transition group-hover:gap-2.5"
-                  >
-                    {item.buttonText || 'Find More'}
-                    <span aria-hidden>→</span>
-                  </Link>
-                </div>
-              </article>
-            ))}
+                </li>
+              ))}
+            </ul>
+          ) : popularServicesLive.length ? (
+            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {popularServicesLive.map((s) => {
+                const desc = (s.shortDesc || s.description || '').trim()
+                const showDesc =
+                  desc && desc.toLowerCase() !== (s.name || '').trim().toLowerCase()
+                return (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWizardPostcode('')
+                        setWizardSlug(s.slug || s.id)
+                      }}
+                      className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-line/80 bg-white text-left shadow-[0_8px_28px_rgba(10,47,92,0.08)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_16px_40px_rgba(10,47,92,0.14)]"
+                    >
+                      <div className="relative aspect-[16/10] overflow-hidden bg-panel">
+                        {s.imageUrl ? (
+                          <img
+                            src={s.imageUrl}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-panel to-navy/10" />
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col p-4 sm:p-5">
+                        <h3 className="font-display text-base font-bold text-navy transition group-hover:text-primary sm:text-lg">
+                          {s.name}
+                        </h3>
+                        {showDesc ? (
+                          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate">
+                            {desc}
+                          </p>
+                        ) : null}
+                        <span className="mt-auto pt-3 text-sm font-bold text-primary">
+                          Get quotes →
+                        </span>
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="mt-10 text-center text-sm text-slate">
+              Popular services will appear here once they are selected in the CRM.
+            </p>
+          )}
+
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/services"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-6 text-sm font-bold text-white shadow-md shadow-[#0a3a7a]/25 transition hover:brightness-105"
+            >
+              See all services
+            </Link>
           </div>
         </div>
       </section>
@@ -348,6 +443,73 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Popular categories — CRM-managed, after Hire A Professional */}
+      {popularCategoriesLive.length ? (
+        <section className="border-t border-line bg-canvas">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <h2 className="text-center text-3xl font-bold text-navy sm:text-left">
+                {content.popularCategoriesTitle || 'Popular Categories'}
+              </h2>
+              <Link
+                to="/categories"
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-bold text-primary transition hover:border-primary hover:bg-panel"
+              >
+                See all
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+
+            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {popularCategoriesLive.map((c) => {
+                const count = c.services?.length ?? 0
+                return (
+                  <li key={c.id}>
+                    <Link
+                      to={`/categories/${encodeURIComponent(c.slug)}`}
+                      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line/80 bg-white shadow-[0_8px_28px_rgba(10,47,92,0.08)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_16px_40px_rgba(10,47,92,0.14)]"
+                    >
+                      <div className="relative aspect-[16/10] overflow-hidden bg-panel">
+                        {c.imageUrl ? (
+                          <img
+                            src={c.imageUrl}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-panel to-navy/10" />
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col p-4 sm:p-5">
+                        <h3 className="font-display text-base font-bold text-navy transition group-hover:text-primary sm:text-lg">
+                          {c.name}
+                        </h3>
+                        <span className="mt-auto flex items-center justify-between gap-2 pt-3">
+                          <span className="text-xs font-semibold text-muted">
+                            {count} service{count === 1 ? '' : 's'}
+                          </span>
+                          <span className="text-sm font-bold text-primary">Explore →</span>
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+
+            <div className="mt-8 flex justify-center">
+              <Link
+                to="/categories"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-b from-[#3baee8] via-[#1e8fd5] to-[#0a3a7a] px-6 text-sm font-bold text-white shadow-md shadow-[#0a3a7a]/25 transition hover:brightness-105"
+              >
+                See all categories
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="relative overflow-hidden border-t border-line bg-gradient-to-b from-[#eef6fc] via-white to-[#f4f8fc]">
         <div

@@ -199,5 +199,8 @@ export const FREQUENCY_OPTIONS = [
   { value: 'One time clean', label: 'One time clean' },
 ]
 
+/** Services that still use the shared frequency step (most cleaning flows already ask this in their own questionnaire). */
+export const FREQUENCY_STEP_SERVICE_SLUGS = []
+
 /** Shared closing steps shown for every service after service-specific questions. */
-export const COMMON_STEPS = ['frequency', 'postcode', 'email', 'name', 'phone', 'details']
+export const COMMON_STEPS = ['postcode', 'email', 'name', 'phone', 'details']

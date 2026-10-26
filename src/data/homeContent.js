@@ -8,6 +8,9 @@ export const defaultHomeContent = {
     searchPlaceholder: 'Web Development',
   },
   popularTitle: 'Popular Services',
+  popularServiceIds: [],
+  popularCategoriesTitle: 'Popular Categories',
+  popularCategoryIds: [],
   popularServices: [
     {
       id: 'ps-1',
@@ -135,6 +138,15 @@ export async function fetchHomeContent() {
             ? data.content.join.cards
             : defaultHomeContent.join.cards,
         },
+        popularTitle: data.content.popularTitle || defaultHomeContent.popularTitle,
+        popularCategoriesTitle:
+          data.content.popularCategoriesTitle || defaultHomeContent.popularCategoriesTitle,
+        popularServiceIds: Array.isArray(data.content.popularServiceIds)
+          ? data.content.popularServiceIds
+          : [],
+        popularCategoryIds: Array.isArray(data.content.popularCategoryIds)
+          ? data.content.popularCategoryIds
+          : [],
         // Prefer local popular landing pages so Find More always works
         popularServices: defaultHomeContent.popularServices.map((local, i) => {
           const apiItem = popularFromApi?.[i]
