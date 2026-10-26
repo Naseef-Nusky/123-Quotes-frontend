@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Search } from 'lucide-react'
 import { api } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import Loading from '../../components/Loading'
@@ -114,57 +115,95 @@ function PublicServicesPicker({ services, onSelect }) {
 
 /** Logged-in seeker portal: full-width, matches My Requests / Dashboard title sizes */
 function PortalServicesPicker({ services, onSelect }) {
-  const list = services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]
+  const [query, setQuery] = useState('')
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return services
+    return services.filter((s) => {
+      const hay = [s.name, s.shortDesc, s.description, s.category?.name, s.slug]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return hay.includes(q)
+    })
+  }, [services, query])
+
+  const list = filtered.length || query.trim() ? filtered : services.length ? services : [{ id: '1' }, { id: '2' }, { id: '3' }]
+  const showEmptySearch = Boolean(query.trim()) && !filtered.length && services.length > 0
 
   return (
     <section className="w-full px-4 py-8 text-left sm:px-6 sm:py-10">
-      <h1 className="text-lg font-bold text-navy">Services</h1>
-      <p className="mt-1 text-sm text-muted">Choose a service to start a quote request.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-lg font-bold text-navy">Services</h1>
+          <p className="mt-1 text-sm text-muted">Choose a service to start a quote request.</p>
+        </div>
+        <label className="relative block w-full max-w-sm shrink-0">
+          <span className="sr-only">Search services</span>
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
+            strokeWidth={2}
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search services…"
+            className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+        </label>
+      </div>
 
-      <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
-        {list.map((s) => {
-          const content = (
-            <>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                  {s.category?.name || 'Service'}
-                </p>
-                <h2 className="mt-1 text-lg font-bold text-navy">{s.name || '…'}</h2>
-                {s.shortDesc || s.description ? (
-                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate">
-                    {s.shortDesc || s.description}
+      {showEmptySearch ? (
+        <p className="mt-6 rounded-2xl border border-line bg-white px-5 py-8 text-center text-sm text-muted shadow-sm">
+          No services match “{query.trim()}”.
+        </p>
+      ) : (
+        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+          {list.map((s) => {
+            const content = (
+              <>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                    {s.category?.name || 'Service'}
                   </p>
+                  <h2 className="mt-1 text-lg font-bold text-navy">{s.name || '…'}</h2>
+                  {s.shortDesc || s.description ? (
+                    <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-slate">
+                      {s.shortDesc || s.description}
+                    </p>
+                  ) : null}
+                </div>
+                {s.name ? (
+                  <span className="shrink-0 self-center text-sm font-bold text-primary">
+                    Get quotes →
+                  </span>
                 ) : null}
-              </div>
-              {s.name ? (
-                <span className="shrink-0 self-center text-sm font-bold text-primary">
-                  Get quotes →
-                </span>
-              ) : null}
-            </>
-          )
+              </>
+            )
 
-          if (onSelect && s.name) {
+            if (onSelect && s.name) {
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(s.id)}
+                    className="flex w-full items-stretch gap-4 px-4 py-5 text-left transition hover:bg-[#eef7fc]/90 sm:gap-6 sm:px-5"
+                  >
+                    {content}
+                  </button>
+                </li>
+              )
+            }
+
             return (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(s.id)}
-                  className="flex w-full items-stretch gap-4 px-4 py-5 text-left transition hover:bg-[#eef7fc]/90 sm:gap-6 sm:px-5"
-                >
-                  {content}
-                </button>
+              <li key={s.id} className="flex items-stretch gap-4 px-4 py-5 sm:gap-6 sm:px-5">
+                {content}
               </li>
             )
-          }
-
-          return (
-            <li key={s.id} className="flex items-stretch gap-4 px-4 py-5 sm:gap-6 sm:px-5">
-              {content}
-            </li>
-          )
-        })}
-      </ul>
+          })}
+        </ul>
+      )}
     </section>
   )
 }
@@ -190,7 +229,7 @@ export default function NewRequest({
 } = {}) {
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { isCustomer, user } = useAuth()
+  const { isCustomer, user, refreshMe } = useAuth()
   // Embedded mode: render only the wizard modal (opened directly from a
   // service card), with no services-list page behind it.
   const embedded = typeof onEmbeddedClose === 'function'
@@ -289,10 +328,26 @@ export default function NewRequest({
     if (seededPostcode) setPostcode(seededPostcode)
   }, [seededPostcode])
 
-  const activeCommonSteps = useMemo(
-    () => (seededPostcode ? COMMON_STEPS.filter((s) => s !== 'postcode') : COMMON_STEPS),
-    [seededPostcode],
-  )
+  // Logged-in customers already have email / name / phone on their profile —
+  // skip those wizard steps so submit uses the authenticated customer API.
+  const activeCommonSteps = useMemo(() => {
+    let steps = COMMON_STEPS
+    if (seededPostcode) steps = steps.filter((s) => s !== 'postcode')
+    if (isCustomer) steps = steps.filter((s) => !['email', 'name', 'phone'].includes(s))
+    return steps
+  }, [seededPostcode, isCustomer])
+
+  useEffect(() => {
+    if (!isCustomer || !user) return
+    if (user.email) setEmail(user.email)
+    const name = [user.customer?.firstName, user.customer?.lastName].filter(Boolean).join(' ')
+    if (name) setFullName(name)
+    if (user.customer?.phone) {
+      const parsed = parseIntlPhone(user.customer.phone)
+      if (parsed.localNumber) setPhone(parsed.localNumber)
+      if (parsed.countryCode) setCountryCode(parsed.countryCode)
+    }
+  }, [isCustomer, user])
 
   const visible = useMemo(() => getVisibleQuestions(questions, answers), [questions, answers])
   const currentQuestion = commonIndex < 0 ? visible[qIndex] : null
@@ -427,24 +482,38 @@ export default function NewRequest({
       .join('\n')
 
     try {
-      if (isCustomer) {
-        const created = await api.createRequest({
-          serviceId,
-          postcode: postcode.trim(),
-          description,
-          title: `${serviceName} request`,
-        })
-        const id = created.request.id
-        if (selectedFiles.length) {
-          await api.uploadRequestAttachments(id, selectedFiles)
+      // Only the customer API accepts createRequest — business tokens get Forbidden.
+      const submitAsCustomer = user?.role === 'CUSTOMER'
+
+      if (submitAsCustomer) {
+        try {
+          const created = await api.createRequest({
+            serviceId,
+            postcode: postcode.trim(),
+            description,
+            title: `${serviceName} request`,
+          })
+          const id = created.request.id
+          if (selectedFiles.length) {
+            await api.uploadRequestAttachments(id, selectedFiles)
+          }
+          await api.saveAnswers(id, answersToPayload(answers, visible))
+          const data = await api.submitRequest(id, {
+            postcode: postcode.trim(),
+            description,
+          })
+          navigate(`/app/requests/${data.request.id}`)
+          return
+        } catch (err) {
+          if (err.status === 403 || /forbidden/i.test(String(err.message || ''))) {
+            await refreshMe?.()
+            setError(
+              'Your session is not a customer account. Please log out and sign in via Customer Login, then try again.',
+            )
+            return
+          }
+          throw err
         }
-        await api.saveAnswers(id, answersToPayload(answers, visible))
-        const data = await api.submitRequest(id, {
-          postcode: postcode.trim(),
-          description,
-        })
-        navigate(`/app/requests/${data.request.id}`)
-        return
       }
 
       const dial = dialForCountry(countryCode)
