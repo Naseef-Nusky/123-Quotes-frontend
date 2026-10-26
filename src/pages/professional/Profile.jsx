@@ -37,6 +37,7 @@ export default function ProProfile() {
         setForm({
           companyName: prof.profile.companyName || '',
           contactName: prof.profile.contactName || '',
+          email: prof.profile.email || '',
           phone: parsed.localNumber,
           countryCode: parsed.countryCode || DEFAULT_COUNTRY_CODE,
           website: prof.profile.website || '',
@@ -89,7 +90,7 @@ export default function ProProfile() {
     setError('')
     setMessage('')
     try {
-      const { countryCode: _countryCode, ...profileFields } = form
+      const { countryCode: _countryCode, email: _email, ...profileFields } = form
       await api.updateMyProfile({
         ...profileFields,
         phone: form.phone
@@ -129,6 +130,18 @@ export default function ProProfile() {
                 />
               </div>
             ))}
+            <div className="min-w-0 sm:col-span-2">
+              <label className="label">Email</label>
+              <input
+                className="input-field bg-canvas text-slate"
+                type="email"
+                value={form.email || ''}
+                readOnly
+                disabled
+                title="Login email cannot be changed here"
+              />
+              <p className="mt-1 text-xs text-muted">This is your business login email.</p>
+            </div>
             <div className="min-w-0 sm:col-span-2">
               <label className="label">Address</label>
               <input
