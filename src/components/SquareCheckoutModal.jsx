@@ -119,6 +119,8 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
     () => ({
       countryCode: 'GB',
       currencyCode,
+      // Helps Apple Pay / Google Pay + SCA collect billing details
+      requestBillingContact: true,
       total: {
         amount: amountForVerify,
         label: pkg?.name || '123 Quotes tokens',
@@ -150,11 +152,11 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
     config?.paymentsEnabled && config?.applicationId && config?.locationId && !error
   const showPaymentMethods = liveReady && sdkReady && !loadingConfig
 
-  async function completePurchase(sourceId) {
+  async function completePurchase(sourceId, verificationToken) {
     setPaying(true)
     setError('')
     try {
-      const data = await api.buyTokens(pkg.id, sourceId || undefined)
+      const data = await api.buyTokens(pkg.id, sourceId || undefined, verificationToken || undefined)
       onSuccess?.(data)
       onClose?.()
     } catch (err) {
@@ -164,14 +166,14 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
     }
   }
 
-  async function onTokenize(tokenResult) {
+  async function onTokenize(tokenResult, verifiedBuyer) {
     if (tokenResult.status !== 'OK' || !tokenResult.token) {
       const detail =
         tokenResult.errors?.[0]?.message || tokenResult.status || 'Payment tokenization failed'
       setError(detail)
       return
     }
-    await completePurchase(tokenResult.token)
+    await completePurchase(tokenResult.token, verifiedBuyer?.token)
   }
 
   return (
@@ -231,10 +233,15 @@ export default function SquareCheckoutModal({ open, pkg, onClose, onSuccess }) {
             {config.environment === 'sandbox' ? (
               <p className="text-xs text-muted">
                 Sandbox card: 4111 1111 1111 1111 · any future expiry · any CVV · any postal
-                code. Google Pay works in Chrome when enabled; Apple Pay needs Safari + domain
-                verification in Square.
+                code. Google Pay works in Chrome when enabled; Apple Pay needs Safari + HTTPS +
+                domain verification in Square.
               </p>
-            ) : null}
+            ) : (
+              <p className="text-xs text-muted">
+                Apple Pay appears in Safari on Apple devices when the domain is registered in
+                Square and Wallet is set up. Otherwise use card or Google Pay.
+              </p>
+            )}
 
             {paying ? (
               <p className="text-sm font-semibold text-primary">Processing payment…</p>

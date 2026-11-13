@@ -146,10 +146,14 @@ export const api = {
     }),
   setMyAreas: (areas) =>
     request('/professionals/me/areas', { method: 'PUT', body: JSON.stringify({ areas }) }),
-  buyTokens: (packageId, sourceId) =>
+  buyTokens: (packageId, sourceId, verificationToken) =>
     request('/professionals/me/tokens/purchase', {
       method: 'POST',
-      body: JSON.stringify({ packageId, ...(sourceId ? { sourceId } : {}) }),
+      body: JSON.stringify({
+        packageId,
+        ...(sourceId ? { sourceId } : {}),
+        ...(verificationToken ? { verificationToken } : {}),
+      }),
     }),
   tokenHistory: () => request('/professionals/me/tokens'),
 
